@@ -1,11 +1,12 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
-  Compass, Quote, ChevronRight, ChevronLeft,
+  Compass, ChevronRight, ChevronLeft,
   CheckCircle, Award, ArrowRight,
   Plus, Trash2, Search, Upload, FileText,
   Phone, TrendingUp, Target, Cpu,
   ExternalLink, X, Activity, Flag, Info,
-  Home, CheckSquare, Save, User, Mail, ShieldAlert
+  Home, CheckSquare, Save, User, Mail, ShieldAlert,
+  Sparkles, Quote
 } from 'lucide-react';
 
 // -----------------------------------------------------------------------
@@ -258,7 +259,79 @@ const PLANNER_GOALS = [
 ];
 
 // -----------------------------------------------------------------------
-// 5. PERSONALIZED DYNAMIC ACTION STEPS REPOSITORY
+// 5. SPECIAL MONTHLY COMPENSATION (SMC) & SPECIAL PERKS DATA
+// -----------------------------------------------------------------------
+const SMC_DATA = [
+  {
+    level: 'SMC-K',
+    rate2026: '$139.87 / mo (Per Condition Add-on)',
+    title: 'Loss of a Creative Organ or Specific Anatomical Loss',
+    desc: 'Paid IN ADDITION to your regular disability check. Very common for Erectile Dysfunction (ED) secondary to PTSD, medications, or lumbar spine injury, or for loss of breast tissue/reproductive organs. Multiple SMC-K awards can be stacked.',
+    criteria: 'Loss of use of creative organ, one hand, one foot, severe blindness, or permanent vocal impairment.'
+  },
+  {
+    level: 'SMC-S',
+    rate2026: '$4,408.53 / mo (Replaces standard 100% rate)',
+    title: 'Statutory Housebound / 100% + 60% Rule',
+    desc: 'Awarded when a veteran has ONE single service-connected condition rated at 100% PLUS another completely separate service-connected condition (or combined group) rated at 60% or more. Adds an extra ~$470/mo tax-free on top of standard 100% pay.',
+    criteria: 'Single 100% condition + separate 60% condition, OR substantially permanently confined to home.'
+  },
+  {
+    level: 'SMC-L',
+    rate2026: '$4,846.52 / mo',
+    title: 'Aid & Attendance / Severe Loss of Function',
+    desc: 'For veterans requiring regular aid and attendance of another person for daily activities (dressing, bathing, eating, managing medication) or severe bilateral extremity loss.',
+    criteria: 'Need for regular personal care or severe anatomical impairment.'
+  },
+  {
+    level: 'SMC-R.1 / R.2',
+    rate2026: 'Up to $10,879.46 / mo',
+    title: 'High-Level Daily Skilled Care',
+    desc: 'Maximum compensation tier for veterans who require daily authorized skilled health care assistance in their home.',
+    criteria: 'Highest level of ongoing medical and physical assistance.'
+  }
+];
+
+const SPECIAL_PERKS = [
+  {
+    id: 'space_a',
+    title: 'Space-A (Space Available) Free Military Flights (Category VI)',
+    badge: '100% P&T Exclusive',
+    desc: '100% P&T disabled veterans have Category VI eligibility to fly for FREE on military cargo and transport flights (C-17, C-130, KC-135, Patriot Express) across the US and US Territories (Alaska, Hawaii, Puerto Rico, Guam).',
+    action: 'Show up at any Air Mobility Command (AMC) passenger terminal with your Next Gen Uniformed Services ID card.'
+  },
+  {
+    id: 'parks_pass',
+    title: 'America the Beautiful Lifetime Military Pass (Free National Parks)',
+    badge: 'All Veterans & Gold Star',
+    desc: 'Free lifetime pass granting 100% free access to over 2,000 federal recreation sites, national parks (Yellowstone, Yosemite, Grand Canyon), BLM land, and wildlife refuges nationwide.',
+    action: 'Present your Veteran ID Card (VIC), driver\'s license with veteran designation, or DD-214 at any park entrance.'
+  },
+  {
+    id: 'sah_grant',
+    title: 'Specially Adapted Housing (SAH) & SHA Grants (Up to $117,014 Free)',
+    badge: 'Severe Service-Connected',
+    desc: 'Tax-free grants to build, remodel, or adapt a permanent home to accommodate service-connected disabilities (wheelchair ramps, widened doorways, roll-in showers). SAH: up to $117,014. SHA: up to $23,444.',
+    action: 'Apply online via VA Form 26-4555 on eBenefits / VA.gov.'
+  },
+  {
+    id: 'auto_grant',
+    title: 'Automobile Adaptive Equipment (AAE) Grant ($25,600 One-Time Grant)',
+    badge: 'Mobility Impaired',
+    desc: 'A one-time payment of up to $25,600 paid directly to the vehicle dealer toward the purchase of a new or used automobile for qualifying service-connected mobility disabilities.',
+    action: 'File VA Form 21-4502.'
+  },
+  {
+    id: 'dental_matrix',
+    title: '100% Free VA Comprehensive Dental Care Matrix',
+    badge: 'Class I - VI Breakdown',
+    desc: 'VA dental care is not just for 100% veterans. You qualify for 100% free dental if: (1) 100% P&T (Class IV), (2) Service-connected dental condition rated 10%+ (Class I), (3) Former POW, (4) Enrolled in VR&E Chapter 31 (Class V), or (5) Recently separated within 180 days with no exit exam (Class II).',
+    action: 'Contact your local VAMC dental clinic to register under your specific Class eligibility.'
+  }
+];
+
+// -----------------------------------------------------------------------
+// 6. PERSONALIZED DYNAMIC ACTION STEPS REPOSITORY
 // -----------------------------------------------------------------------
 const ALL_DYNAMIC_STEPS = [
   // --- 100% P&T Specific High-Value Actions (Show ONLY when rated 100%) ---
@@ -269,7 +342,7 @@ const ALL_DYNAMIC_STEPS = [
     category: 'State Tax Shield',
     title: 'Claim Your 100% P&T State Property Tax Exemption ($0 Taxes)',
     timeline: 'Immediate post-rating action',
-    action: 'Take your VA rating summary letter to your county tax assessor. In Texas, Florida, Nevada, Washington and many states, 100% P&T veterans pay ZERO in real estate property taxes on their primary residence.',
+    action: 'Take your VA rating summary letter to your county tax assessor. In Texas, Florida, Nevada, Washington, Ohio and many states, 100% P&T veterans pay ZERO in real estate property taxes on their primary residence.',
     why: 'On a $450,000 home, this immediately saves $8,000 to $14,000 every single year for life. Over 20 years, that is $160,000-$280,000 in tax-free saved capital.',
     value: '$8,000 - $14,000/yr savings',
     link: 'https://www.benefits.va.gov/homeloans/',
@@ -497,7 +570,7 @@ const ALL_DYNAMIC_STEPS = [
 ];
 
 // -----------------------------------------------------------------------
-// 6. MASTER CHECKLIST MILESTONES
+// 7. MASTER CHECKLIST MILESTONES
 // -----------------------------------------------------------------------
 const ALL_MILESTONES = [
   { id:'str_download', stage:'Pre-Separation', label:'Request and download full digital copies of your Service Treatment Records (STR) and dental files', hideWhen: (p)=>p.alreadyOut },
@@ -519,19 +592,19 @@ const ALL_MILESTONES = [
 // -----------------------------------------------------------------------
 const VeteranBenefitsCompass = () => {
 
-  // ---- Inspirational Splash Screen State ----
+  // ---- Inspirational Splash Screen State (12s Display Timer) ----
   const [showSplash, setShowSplash] = useState(true);
   const [splashFading, setSplashFading] = useState(false);
 
   useEffect(() => {
-    // Auto-advance after 4.5 seconds with smooth 500ms fade
+    // 12-second total duration before smooth fade
     const fadeTimer = setTimeout(() => {
       setSplashFading(true);
-    }, 8400);
+    }, 12000);
 
     const removeTimer = setTimeout(() => {
       setShowSplash(false);
-    }, 9000);
+    }, 12500);
 
     return () => {
       clearTimeout(fadeTimer);
@@ -539,8 +612,7 @@ const VeteranBenefitsCompass = () => {
     };
   }, []);
 
-
-  // ---- Routing ----
+  // ---- Page Routing ----
   const [currentPage, setCurrentPage] = useState('landing');
   const [wizardStep, setWizardStep] = useState(0);
 
@@ -574,7 +646,6 @@ const VeteranBenefitsCompass = () => {
 
   // ---- Planner Sub-Modes ----
   const [plannerMode, setPlannerMode] = useState('goals'); // 'goals' | 'protocol'
-  const [planStage] = useState(0);
   const [lifeGoals, setLifeGoals] = useState(['freedom', 'home']);
   const [planGenerated, setPlanGenerated] = useState(true);
   const [activeFreedomStage, setActiveFreedomStage] = useState('stage1');
@@ -679,7 +750,7 @@ const VeteranBenefitsCompass = () => {
   const bd = branchData[branch] || branchData.usmc;
 
   // -----------------------------------------------------------------------
-  // VA MATH
+  // VA MATH WITH BILATERAL FACTOR OPTIMIZATION
   // -----------------------------------------------------------------------
   const calcCombined = (ratings) => {
     let remaining = 100;
@@ -723,7 +794,7 @@ const VeteranBenefitsCompass = () => {
     const nPayments = 360;
     const monthlyMortgagePI = (homePrice * (monthlyRate * Math.pow(1 + monthlyRate, nPayments))) / (Math.pow(1 + monthlyRate, nPayments) - 1);
     const estimatedInsurance = (homePrice * 0.005) / 12;
-    const isTaxExempt = (currentRating === 100 && (selectedState === 'tx' || selectedState === 'fl' || selectedState === 'nv'));
+    const isTaxExempt = (currentRating === 100 && (selectedState === 'tx' || selectedState === 'fl' || selectedState === 'nv' || selectedState === 'oh'));
     const estimatedTaxes = isTaxExempt ? 0 : (homePrice * 0.015) / 12;
     const totalPITI = monthlyMortgagePI + estimatedInsurance + estimatedTaxes;
     const tenantUnits = Math.max(0, propertyUnits - 1);
@@ -769,7 +840,6 @@ const VeteranBenefitsCompass = () => {
 
     return ALL_DYNAMIC_STEPS
       .filter(step => {
-        // Strict filter: check showWhen condition if present
         if (step.showWhen && !step.showWhen(profile)) {
           return false;
         }
@@ -819,15 +889,18 @@ const VeteranBenefitsCompass = () => {
   };
 
   // -----------------------------------------------------------------------
-  // STATE BENEFITS MATRIX
+  // STATE BENEFITS MATRIX (EXPANDED)
   // -----------------------------------------------------------------------
   const stateBenefits = {
-    tx: { name:'Texas',      highlights:['100% P&T = 100% property tax exemption ($4K-$12K+/yr)','No state income tax on any income','Hazlewood Act: 150 credit hours free tuition at TX public colleges (transferable to dependents)','Free DV license plates and hunting/fishing licenses','VLB land and home loan program (low-rate second lien loans)'] },
-    fl: { name:'Florida',    highlights:['No state income tax','100% P&T = full property tax exemption','Free college tuition for dependents of 100% P&T vets at FL state schools','Free hunting and fishing license for any rating','Florida Resident Access Grant for private colleges'] },
-    nv: { name:'Nevada',     highlights:['No state income tax on any income','Property tax exemption: $22,500 base; 100% P&T = full exemption','Free Nevada State Parks annual pass','Free NDOW hunting and fishing licenses at 100% P&T','DMV waives registration fees for disabled veterans'] },
-    ca: { name:'California', highlights:['No state tax on VA disability pay (military retirement partially taxed)','CalVet Farm and Home Loan at below-market rates','Property tax exemption up to $271K assessed value reduction','College Fee Waiver for veteran dependents at all CA public colleges','Free fishing and hunting license at 100% P&T'] },
-    wa: { name:'Washington', highlights:['No state income tax','Property tax exemption at 100% P&T','Free hunting and fishing licenses','Reduced tuition at WA state colleges','State veterans cemetery at no cost'] },
-    az: { name:'Arizona',    highlights:['Military retirement fully exempt from state income tax','Property tax exemption for disabled veterans','AZ Veteran Supportive Campus priority admissions','Free AZ hunting and fishing licenses at 100% P&T','Disabled veteran home loan program'] },
+    tx: { name:'Texas',          highlights:['100% P&T = 100% property tax exemption ($4K-$12K+/yr)','No state income tax on any income','Hazlewood Act: 150 credit hours free tuition at TX public colleges (transferable to dependents)','Free DV license plates and hunting/fishing licenses','VLB land and home loan program (low-rate second lien loans)'] },
+    fl: { name:'Florida',        highlights:['No state income tax','100% P&T = full property tax exemption','Free college tuition for dependents of 100% P&T vets at FL state schools','Free hunting and fishing license for any rating','Florida Resident Access Grant for private colleges'] },
+    nv: { name:'Nevada',         highlights:['No state income tax on any income','Property tax exemption: $22,500 base; 100% P&T = full exemption','Free Nevada State Parks annual pass','Free NDOW hunting and fishing licenses at 100% P&T','DMV waives registration fees for disabled veterans'] },
+    ca: { name:'California',     highlights:['No state tax on VA disability pay (military retirement partially taxed)','CalVet Farm and Home Loan at below-market rates','Property tax exemption up to $271K assessed value reduction','College Fee Waiver for veteran dependents at all CA public colleges','Free fishing and hunting license at 100% P&T'] },
+    nc: { name:'North Carolina', highlights:['No state tax on military retirement pay (Harper v. Virginia tax relief)','Property tax: $45,000 assessed value reduction for disabled veterans','NC Scholarship for Children of Wartime Veterans (Full tuition at UNC system schools)','Free hunting and inland fishing licenses at 50%+ disability'] },
+    oh: { name:'Ohio',           highlights:['100% homestead property tax exemption for 100% P&T veterans','Ohio Veterans Bonus Program (tax-free cash bonus for wartime deployments)','Ohio War Orphans & Severely Disabled Veterans Scholarship (80%+ tuition waiver)','Military retirement pay 100% exempt from state income tax'] },
+    ga: { name:'Georgia',        highlights:['100% P&T disabled veteran homestead exemption (up to $109,986 exemption)','Free Georgia drivers license and disabled veteran license plates','State income tax exemption on first $35,000 of military retirement pay','Free lifetime hunting and fishing license'] },
+    wa: { name:'Washington',     highlights:['No state income tax on any income','Property tax exemption at 100% P&T on primary residence','Free state park passes and discounted hunting/fishing licenses','Tuition waivers at WA state public colleges'] },
+    az: { name:'Arizona',        highlights:['Military retirement pay 100% exempt from state income tax','Property tax exemption for disabled veterans','AZ Veteran Supportive Campus priority college admissions','Free AZ hunting and fishing licenses at 100% P&T'] },
   };
   const stateInfo = stateBenefits[selectedState] || stateBenefits.tx;
 
@@ -989,14 +1062,15 @@ const VeteranBenefitsCompass = () => {
   };
 
   // -----------------------------------------------------------------------
-  // LANDING PAGE
+  // LANDING PAGE WITH 12-SECOND INSPIRATIONAL OVERLAY
   // -----------------------------------------------------------------------
   if (currentPage === 'landing') return (
     <div className="min-h-screen bg-steel-dark text-sand flex flex-col relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-20 pointer-events-none"/>
       <CrisisBanner/>
       <EmailSyncModal/>
-      {/* Inspirational Opening Quote Overlay */}
+
+      {/* Inspirational Opening Quote Overlay (12s Display) */}
       {showSplash && (
         <div
           className={`fixed inset-0 z-50 bg-gray-950/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center transition-opacity duration-500 ${
@@ -1031,15 +1105,14 @@ const VeteranBenefitsCompass = () => {
                 Enter Portal <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </button>
 
-              {/* Visual countdown progress line */}
+              {/* Visual 12-second countdown progress line */}
               <div className="w-48 h-1 bg-steel/40 rounded-full overflow-hidden border border-steel/60">
-                <div className="h-full bg-gold animate-[width_8.4s_linear]" style={{ width: '100%', animation: 'shrink 8.4s linear forwards' }} />
+                <div className="h-full bg-gold" style={{ width: '100%', animation: 'shrink 12s linear forwards' }} />
               </div>
             </div>
           </div>
         </div>
       )}
-
 
       <header className="border-b border-steel/50 bg-steel-dark/90 backdrop-blur-md py-4 px-6 relative z-10">
         <div className="max-w-7xl mx-auto flex justify-between items-center font-mono">
@@ -1098,13 +1171,17 @@ const VeteranBenefitsCompass = () => {
           <div className="grid grid-cols-3 gap-2 mb-6">
             {Object.entries(branchData).map(([key,b])=>(
               <button key={key} onClick={()=>setBranch(key)}
-                className={"p-3 rounded-xl border transition-all text-center " + (branch===key ? "border-gold bg-gold/10 text-gold shadow-lg" : "border-steel/60 text-sand/50 hover:text-sand hover:border-steel")}>
+                className={"p-3 rounded-xl border transition-all text-center " + (branch===key ? "border-gold bg-gold/10 text-gold shadow-lg scale-105" : "border-steel/60 text-sand/50 hover:text-sand hover:border-steel")}>
                 <div className="font-black text-xs uppercase">{b.badge}</div>
                 <div className="text-xs opacity-60 mt-0.5">{b.name}</div>
               </button>
             ))}
           </div>
-          <button onClick={()=>{ setCurrentPage('wizard'); setWizardStep(0); }}
+          <button onClick={()=>{
+            // Directly jump to Wizard Phase 1 (Status) without redundant branch confirmation
+            setCurrentPage('wizard');
+            setWizardStep(0);
+          }}
             className="w-full py-4 bg-scarlet hover:bg-red-800 text-sand font-black text-base uppercase tracking-wider rounded-xl shadow-lg flex items-center justify-center gap-2 group transition-all">
             Step Through the Portal <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform"/>
           </button>
@@ -1121,10 +1198,10 @@ const VeteranBenefitsCompass = () => {
   );
 
   // -----------------------------------------------------------------------
-  // WIZARD
+  // STREAMLINED WIZARD (3 FOCUSED PHASES -- NO REDUNDANT BRANCH CONFIRMATION)
   // -----------------------------------------------------------------------
   if (currentPage === 'wizard') {
-    const steps = ['Branch', 'Status', 'Health', 'Path'];
+    const steps = ['Status', 'Health & Exposure', 'Mission & Location'];
 
     return (
       <div className="min-h-screen bg-steel-dark text-sand flex flex-col relative overflow-hidden">
@@ -1137,7 +1214,10 @@ const VeteranBenefitsCompass = () => {
             <button onClick={()=>setCurrentPage('landing')} className="flex items-center gap-1 text-xs uppercase hover:text-gold transition-colors">
               <ChevronLeft size={14}/> Abort
             </button>
-            <span className="text-xs text-gold uppercase tracking-wider">Phase {wizardStep+1} of {steps.length}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs bg-gold/10 border border-gold/30 text-gold px-2 py-0.5 rounded font-bold">{bd.badge}</span>
+              <span className="text-xs text-gold uppercase tracking-wider">Phase {wizardStep+1} of {steps.length}</span>
+            </div>
           </div>
         </header>
 
@@ -1156,31 +1236,12 @@ const VeteranBenefitsCompass = () => {
           <div className="max-w-2xl mx-auto p-6 md:p-10">
             <div className="bg-steel/20 border border-steel/50 rounded-2xl p-6 md:p-8 backdrop-blur-md shadow-2xl">
 
-              {/* Step 0: Branch */}
+              {/* Step 0: Separation Status & Discharge Characterization */}
               {wizardStep === 0 && (
                 <div className="space-y-5">
                   <div>
-                    <h2 className="text-2xl font-black uppercase tracking-tight mb-1">Confirm Branch Identity</h2>
-                    <p className="text-sand/60 text-sm">We adapt vocabulary, timelines, and culture to your branch.</p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    {Object.entries(branchData).map(([key,b])=>(
-                      <button key={key} onClick={()=>setBranch(key)}
-                        className={"p-4 border rounded-xl text-left transition-all " + (branch===key ? "border-gold bg-gold/10 text-sand" : "border-steel/60 bg-steel-dark/30 text-sand/50 hover:text-sand hover:border-steel")}>
-                        <div className="font-black text-sm uppercase tracking-wider">{b.name}</div>
-                        <div className="text-xs opacity-60 mt-0.5">Sep. term: {b.sep}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Step 1: Status */}
-              {wizardStep === 1 && (
-                <div className="space-y-5">
-                  <div>
-                    <h2 className="text-2xl font-black uppercase tracking-tight mb-1">Separation Status</h2>
-                    <p className="text-sand/60 text-sm">This shapes your entire action plan and timeline.</p>
+                    <h2 className="text-2xl font-black uppercase tracking-tight mb-1">Separation Status & Service Record</h2>
+                    <p className="text-sand/60 text-sm">Tailors your timeline milestones specifically for {bd.name} ({bd.sep}).</p>
                   </div>
 
                   <div className="bg-steel-dark/50 border border-steel/50 rounded-xl p-4 space-y-4">
@@ -1248,8 +1309,8 @@ const VeteranBenefitsCompass = () => {
                 </div>
               )}
 
-              {/* Step 2: Health */}
-              {wizardStep === 2 && (
+              {/* Step 1: Health & Disability */}
+              {wizardStep === 1 && (
                 <div className="space-y-5">
                   <div>
                     <h2 className="text-2xl font-black uppercase tracking-tight mb-1">Health and Disability Profile</h2>
@@ -1309,8 +1370,8 @@ const VeteranBenefitsCompass = () => {
                 </div>
               )}
 
-              {/* Step 3: Path */}
-              {wizardStep === 3 && (
+              {/* Step 2: Mission & Location */}
+              {wizardStep === 2 && (
                 <div className="space-y-5">
                   <div>
                     <h2 className="text-2xl font-black uppercase tracking-tight mb-1">Your Future Mission & Location</h2>
@@ -1333,7 +1394,7 @@ const VeteranBenefitsCompass = () => {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-steel-dark/50 border border-steel/50 rounded-xl p-4 space-y-3">
                       <div className="font-mono text-xs uppercase tracking-widest text-gold font-bold">Target State</div>
-                      <div className="grid grid-cols-2 gap-1.5">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                         {Object.entries(stateBenefits).map(([key,s])=>(
                           <button key={key} onClick={()=>setSelectedState(key)}
                             className={"p-2 rounded-lg border text-xs text-center transition-all " + (selectedState===key ? "border-gold bg-gold/10 text-gold font-bold" : "border-steel/50 text-sand/40 hover:text-sand hover:border-steel")}>
@@ -1399,7 +1460,8 @@ const VeteranBenefitsCompass = () => {
   const tabs = [
     { id:'planner',   icon:<Target size={13}/>,       label:'Life & Wealth Planner',  tooltip:'Interactive goal-driven roadmap tailored to your rating + the 5-Stage Golden Stacking Protocol.' },
     { id:'househack', icon:<Home size={13}/>,         label:'VA House Hacker',        tooltip:'Interactive multi-family (2-4 units) real estate calculator with $0-down mortgage, rent offsets, and state tax shields.' },
-    { id:'claims',    icon:<Activity size={13}/>,     label:'Claims & C&P Sim',       tooltip:'Practice C&P exam DBQ scenarios, calculate whole-person math, explore secondary claims, and review the Diagnostic Lexicon.' },
+    { id:'claims',    icon:<Activity size={13}/>,     label:'Claims & C&P Sim',       tooltip:'Practice C&P exam DBQ scenarios, calculate whole-person math, explore secondary claims, SMC tiers, and Diagnostic Lexicon.' },
+    { id:'perks',     icon:<Sparkles size={13}/>,     label:'High-Value Perks',       tooltip:'Space-A free military flights (Category VI), America the Beautiful lifetime parks pass, Adaptive Housing Grants ($117k), and Free VA Dental Classes.' },
     { id:'scanner',   icon:<Cpu size={13}/>,          label:'Med Scanner',            tooltip:'Upload or paste medical records to scan for 25+ service-connected conditions, DC codes, and PACT Act presumptives. 100% private.' },
     { id:'avenues',   icon:<Compass size={13}/>,      label:'Avenues',                tooltip:'5 proven life pathways: Expat living, FIRE, Education stacking, high-paying civilian career, and SDVOSB entrepreneurship.' },
     { id:'benefits',  icon:<Award size={13}/>,        label:'State Matrix',           tooltip:'Comprehensive state-by-state veteran benefits: full property tax exemptions, free college tuition, vehicle registration waivers.' },
@@ -1458,7 +1520,7 @@ const VeteranBenefitsCompass = () => {
             <span className="text-gold font-bold">TAILORED SITREP:</span>
             <span className="text-sand/80">
               {currentRating === 100 ? (
-                <span>100% P&T Active • {stateInfo.name} Tax Shield Unlocked • Priority 1 VA Care</span>
+                <span>100% P&T Active • {stateInfo.name} Tax Shield Unlocked • Priority 1 VA Care • Space-A Cat VI Eligible</span>
               ) : alreadyOut ? (
                 <span>Separated Veteran • Current Rating: {currentRating}% • Target: 100% P&T Stacking</span>
               ) : (
@@ -1541,31 +1603,29 @@ const VeteranBenefitsCompass = () => {
               {/* SUB-MODE A: GOAL-DRIVEN BLUEPRINT */}
               {plannerMode === 'goals' && (<>
                 {!planGenerated ? (<>
-                  {planStage === 0 && (<>
-                    <div className="bg-gold/5 border border-gold/20 rounded-xl p-4 text-sm text-sand/70">
-                      Select your goals below. The planner dynamically filters out redundant actions and highlights high-leverage steps for your situation.
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {PLANNER_GOALS.map(g=>(
-                        <button key={g.id} onClick={()=>toggleGoal(g.id)}
-                          className={"p-4 rounded-xl border text-left transition-all flex items-start gap-3 " + (lifeGoals.includes(g.id) ? "border-gold bg-gold/10 shadow-lg" : "border-steel/60 hover:border-steel bg-steel/10")}>
-                          <span className="text-2xl flex-shrink-0">{g.icon}</span>
-                          <div>
-                            <div className={"font-bold text-sm " + (lifeGoals.includes(g.id) ? "text-sand" : "text-sand/70")}>{g.label}</div>
-                            <div className="text-xs text-sand/50 mt-0.5">{g.desc}</div>
-                          </div>
-                          {lifeGoals.includes(g.id) && <CheckCircle size={16} className="text-gold ml-auto flex-shrink-0 mt-0.5"/>}
-                        </button>
-                      ))}
-                    </div>
-
-                    {lifeGoals.length > 0 && (
-                      <button onClick={()=>setPlanGenerated(true)}
-                        className="w-full py-3 bg-scarlet hover:bg-red-800 text-sand font-black uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2">
-                        Generate Tailored Blueprint ({lifeGoals.length} goal{lifeGoals.length!==1?'s':''} selected) <ChevronRight size={16}/>
+                  <div className="bg-gold/5 border border-gold/20 rounded-xl p-4 text-sm text-sand/70">
+                    Select your goals below. The planner dynamically filters out redundant actions and highlights high-leverage steps for your situation.
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {PLANNER_GOALS.map(g=>(
+                      <button key={g.id} onClick={()=>toggleGoal(g.id)}
+                        className={"p-4 rounded-xl border text-left transition-all flex items-start gap-3 " + (lifeGoals.includes(g.id) ? "border-gold bg-gold/10 shadow-lg" : "border-steel/60 hover:border-steel bg-steel/10")}>
+                        <span className="text-2xl flex-shrink-0">{g.icon}</span>
+                        <div>
+                          <div className={"font-bold text-sm " + (lifeGoals.includes(g.id) ? "text-sand" : "text-sand/70")}>{g.label}</div>
+                          <div className="text-xs text-sand/50 mt-0.5">{g.desc}</div>
+                        </div>
+                        {lifeGoals.includes(g.id) && <CheckCircle size={16} className="text-gold ml-auto flex-shrink-0 mt-0.5"/>}
                       </button>
-                    )}
-                  </>)}
+                    ))}
+                  </div>
+
+                  {lifeGoals.length > 0 && (
+                    <button onClick={()=>setPlanGenerated(true)}
+                      className="w-full py-3 bg-scarlet hover:bg-red-800 text-sand font-black uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2">
+                      Generate Tailored Blueprint ({lifeGoals.length} goal{lifeGoals.length!==1?'s':''} selected) <ChevronRight size={16}/>
+                    </button>
+                  )}
                 </>) : (<>
                   {/* Generated Dynamic Personalized Roadmap */}
                   <div className="bg-gold/5 border border-gold/20 rounded-xl p-4 flex items-center justify-between">
@@ -1814,19 +1874,20 @@ const VeteranBenefitsCompass = () => {
           )}
 
           {/* ============================================================ */}
-          {/* TAB 3: CLAIMS & C&P EXAM PRACTICE SIMULATOR                  */}
+          {/* TAB 3: CLAIMS & C&P EXAM PRACTICE SIMULATOR + SMC MATRIX     */}
           {/* ============================================================ */}
           {activeTab === 'claims' && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-black uppercase tracking-tight mb-1">Claims, C&P Exam Sim & Stacking</h2>
-                <p className="text-sand/50 text-sm">Practice DBQ exam scenarios, master VA math, and explore secondary chains.</p>
+                <h2 className="text-2xl font-black uppercase tracking-tight mb-1">Claims, C&P Exam Sim & SMC Matrix</h2>
+                <p className="text-sand/50 text-sm">Practice DBQ exam scenarios, master VA math, explore secondary chains, and learn Special Monthly Compensation.</p>
               </div>
 
               {/* Sub-nav */}
               <div className="flex flex-wrap gap-2">
                 {[
                   {id:'math',       label:'VA Math Simulator'},
+                  {id:'smc',        label:'Special Monthly Comp (SMC)'},
                   {id:'exam_sim',   label:'C&P Exam Simulator'},
                   {id:'secondaries',label:'Secondary Stacking'},
                   {id:'terms',      label:'Diagnostic Lexicon'},
@@ -1840,7 +1901,7 @@ const VeteranBenefitsCompass = () => {
                 ))}
               </div>
 
-              {/* SUB-TAB 1: VA MATH */}
+              {/* SUB-TAB 1: VA MATH WITH BILATERAL FACTOR */}
               {claimsSubTab === 'math' && (
                 <div className="bg-steel/20 border border-steel/50 rounded-2xl p-5 space-y-4">
                   <div>
@@ -1864,7 +1925,7 @@ const VeteranBenefitsCompass = () => {
                   <div className="flex gap-2">
                     <select value={newClaimVal} onChange={e=>setNewClaimVal(Number(e.target.value))}
                       className="bg-steel-dark border border-steel/60 rounded-lg px-3 py-1.5 text-sm flex-1 text-sand focus:outline-none focus:border-gold">
-                      {[10,20,30,40,50,60,70,80,90].map(v=><option key={v} value={v}>{v}%</option>)}
+                          {[10,20,30,40,50,60,70,80,90].map(v=><option key={v} value={v}>{v}%</option>)}
                     </select>
                     <button onClick={()=>setClaimsList([...claimsList,newClaimVal])}
                       className="flex items-center gap-1 bg-scarlet hover:bg-red-800 px-3 py-1.5 rounded-lg text-sm font-bold transition-all">
@@ -1879,10 +1940,50 @@ const VeteranBenefitsCompass = () => {
                       ${(vaPayTable[roundedRating] || vaPayTable[0])[depKey]?.toLocaleString() || '0'}/month tax-free
                     </div>
                   </div>
+
+                  <div className="p-4 bg-gold/5 border border-gold/20 rounded-xl text-xs text-sand/70 leading-relaxed">
+                    <span className="font-bold text-gold font-mono uppercase">The Bilateral Factor Secret: </span>
+                    If you have service-connected disabilities affecting paired extremities (e.g. left knee + right knee, or left arm + right arm), the VA combines them first and adds a <span className="text-gold font-bold">10% bilateral bonus</span> to that subtotal before combining with other body systems. This often pushes 84% to 90% or 94% to 100%!
+                  </div>
                 </div>
               )}
 
-              {/* SUB-TAB 2: C&P EXAM PRACTICE SIMULATOR */}
+              {/* SUB-TAB 2: SPECIAL MONTHLY COMPENSATION (SMC) */}
+              {claimsSubTab === 'smc' && (
+                <div className="space-y-4">
+                  <div className="bg-steel/20 border border-steel/50 rounded-2xl p-5">
+                    <div className="flex items-center gap-2 text-gold font-mono text-xs uppercase tracking-widest font-bold mb-1">
+                      <Sparkles size={14}/> Advanced VA Benefit Tier
+                    </div>
+                    <h3 className="text-xl font-black text-sand uppercase tracking-tight">Special Monthly Compensation (SMC) Matrix</h3>
+                    <p className="text-sand/60 text-xs mt-1">
+                      SMC provides tax-free payments above standard 100% rates for specific anatomical losses, Aid & Attendance, or having multiple severe disabilities.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-3">
+                    {SMC_DATA.map((smc, i)=>(
+                      <div key={i} className="bg-steel/20 border border-steel/50 rounded-xl p-4 space-y-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-steel/40 pb-2">
+                          <div className="font-black text-base text-gold flex items-center gap-2">
+                            <span className="bg-steel-dark border border-gold/30 px-2 py-0.5 rounded text-xs font-mono">{smc.level}</span>
+                            <span>{smc.title}</span>
+                          </div>
+                          <span className="text-xs font-mono font-bold text-sand bg-scarlet/20 border border-scarlet/40 px-2 py-1 rounded">
+                            {smc.rate2026}
+                          </span>
+                        </div>
+                        <p className="text-xs text-sand/80 leading-relaxed">{smc.desc}</p>
+                        <div className="p-2 bg-steel-dark/60 rounded-lg text-[11px] text-sand/50 font-mono">
+                          <span className="text-gold font-bold">Criteria: </span>{smc.criteria}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* SUB-TAB 3: C&P EXAM PRACTICE SIMULATOR */}
               {claimsSubTab === 'exam_sim' && (
                 <div className="bg-steel/20 border border-steel/50 rounded-2xl p-6 space-y-6">
                   <div>
@@ -1937,12 +2038,12 @@ const VeteranBenefitsCompass = () => {
                 </div>
               )}
 
-              {/* SUB-TAB 3: SECONDARY STACKING */}
+              {/* SUB-TAB 4: SECONDARY STACKING */}
               {claimsSubTab === 'secondaries' && (
                 <div className="space-y-3">
                   <p className="text-sand/60 text-sm">Secondary claims are conditions caused or aggravated by an already-rated condition. You only prove the link to your rated condition, not to military service.</p>
                   {[
-                    {primary:'PTSD / Anxiety / Depression',  secondaries:['Sleep Apnea (50% auto with CPAP)','GERD','Hypertension','Erectile Dysfunction (10% if medication needed)','Migraines','Chronic Fatigue']},
+                    {primary:'PTSD / Anxiety / Depression',  secondaries:['Sleep Apnea (50% auto with CPAP)','GERD','Hypertension','Erectile Dysfunction (SMC-K +$139/mo)','Migraines','Chronic Fatigue']},
                     {primary:'Lower Back (Lumbar)',           secondaries:['Radiculopathy lower extremity (legs)','Hip Condition','Knee Condition','Bladder or Bowel Dysfunction','Sleep Apnea (pain prevents sleep)']},
                     {primary:'Cervical Spine (Neck)',         secondaries:['Radiculopathy upper extremity (arms/hands)','Carpal Tunnel Syndrome','Migraine Headaches']},
                     {primary:'Sleep Apnea',                  secondaries:['Hypertension','Cardiovascular Disease','Depression','Erectile Dysfunction','Cognitive Impairment']},
@@ -1959,7 +2060,7 @@ const VeteranBenefitsCompass = () => {
                 </div>
               )}
 
-              {/* SUB-TAB 4: DIAGNOSTIC LEXICON */}
+              {/* SUB-TAB 5: DIAGNOSTIC LEXICON */}
               {claimsSubTab === 'terms' && (
                 <div className="space-y-3">
                   <div className="bg-scarlet/10 border border-scarlet/30 rounded-xl p-3 text-xs text-scarlet/90">
@@ -1995,7 +2096,7 @@ const VeteranBenefitsCompass = () => {
                 </div>
               )}
 
-              {/* SUB-TAB 5: PACT ACT */}
+              {/* SUB-TAB 6: PACT ACT */}
               {claimsSubTab === 'pact' && (
                 <div className="space-y-4">
                   <div className="bg-gold/5 border border-gold/20 rounded-xl p-4">
@@ -2015,7 +2116,7 @@ const VeteranBenefitsCompass = () => {
                 </div>
               )}
 
-              {/* SUB-TAB 6: TDIU */}
+              {/* SUB-TAB 7: TDIU */}
               {claimsSubTab === 'tdiu' && (
                 <div className="space-y-4">
                   <div className="bg-steel/20 border border-steel/50 rounded-xl p-4">
@@ -2038,7 +2139,42 @@ const VeteranBenefitsCompass = () => {
           )}
 
           {/* ============================================================ */}
-          {/* TAB 4: MEDICAL FILE SCANNER                                  */}
+          {/* TAB 4: HIGH-VALUE PERKS (SPACE-A, DENTAL, ADAPTIVE GRANTS)    */}
+          {/* ============================================================ */}
+          {activeTab === 'perks' && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-2xl font-black uppercase tracking-tight mb-1">High-Value Hidden Veteran Perks</h2>
+                <p className="text-sand/50 text-sm">Free international flights, national park passes, $117k adaptive housing grants, and free dental matrices.</p>
+              </div>
+
+              <div className="grid gap-4">
+                {SPECIAL_PERKS.map((perk)=>(
+                  <div key={perk.id} className="bg-steel/20 border border-steel/50 rounded-2xl p-6 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-steel/40 pb-3">
+                      <h3 className="font-black text-lg text-sand flex items-center gap-2">
+                        <Sparkles size={18} className="text-gold" />
+                        {perk.title}
+                      </h3>
+                      <span className="text-xs font-mono px-2.5 py-1 rounded-full bg-gold/10 border border-gold/30 text-gold font-bold self-start sm:self-center">
+                        {perk.badge}
+                      </span>
+                    </div>
+
+                    <p className="text-sm text-sand/80 leading-relaxed">{perk.desc}</p>
+
+                    <div className="p-3 bg-steel-dark/60 rounded-xl text-xs text-sand/60 font-mono border border-steel/40">
+                      <span className="text-gold font-bold uppercase">How to Access: </span>
+                      {perk.action}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ============================================================ */}
+          {/* TAB 5: MEDICAL FILE SCANNER                                  */}
           {/* ============================================================ */}
           {activeTab === 'scanner' && (
             <div className="space-y-5">
@@ -2114,7 +2250,7 @@ const VeteranBenefitsCompass = () => {
           )}
 
           {/* ============================================================ */}
-          {/* TAB 5: UNEXPLORED AVENUES                                    */}
+          {/* TAB 6: UNEXPLORED AVENUES                                    */}
           {/* ============================================================ */}
           {activeTab === 'avenues' && (
             <div className="space-y-5">
@@ -2157,7 +2293,7 @@ const VeteranBenefitsCompass = () => {
           )}
 
           {/* ============================================================ */}
-          {/* TAB 6: STATE MATRIX                                          */}
+          {/* TAB 7: STATE MATRIX (EXPANDED)                               */}
           {/* ============================================================ */}
           {activeTab === 'benefits' && (
             <div className="space-y-5">
@@ -2191,7 +2327,7 @@ const VeteranBenefitsCompass = () => {
           )}
 
           {/* ============================================================ */}
-          {/* TAB 7: MILESTONE TRACKER (FILTERED TO VETERAN STATUS)        */}
+          {/* TAB 8: MILESTONE TRACKER (FILTERED TO VETERAN STATUS)        */}
           {/* ============================================================ */}
           {activeTab === 'tracker' && (
             <div className="space-y-6">
@@ -2245,7 +2381,7 @@ const VeteranBenefitsCompass = () => {
           )}
 
           {/* ============================================================ */}
-          {/* TAB 8: DISCHARGE UPGRADE GUIDE                               */}
+          {/* TAB 9: DISCHARGE UPGRADE GUIDE                               */}
           {/* ============================================================ */}
           {activeTab === 'upgrade' && (
             <div className="space-y-5">
@@ -2309,7 +2445,7 @@ const VeteranBenefitsCompass = () => {
           )}
 
           {/* ============================================================ */}
-          {/* TAB 9: RESOURCES & HOTLINE DIRECTORY                         */}
+          {/* TAB 10: RESOURCES & HOTLINE DIRECTORY                        */}
           {/* ============================================================ */}
           {activeTab === 'resources' && (
             <div className="space-y-5">
