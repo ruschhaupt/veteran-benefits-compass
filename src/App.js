@@ -1010,17 +1010,13 @@ const VeteranBenefitsCompass = () => {
               <Quote size={28} className="text-gold animate-pulse" />
             </div>
 
-            <div className="space-y-4">
-              <span className="text-xs font-mono tracking-widest text-gold uppercase px-3 py-1 rounded-full bg-gold/5 border border-gold/20 font-bold inline-block">
-                A Message From The Founder
-              </span>
-              
+            <div className="space-y-5">
               <blockquote className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-sand leading-snug">
-                "Many of our U.S. service members don't know the amount of <span className="text-gold">financial freedom</span> that can be acquired after leaving the military. This free website will give you the <span className="text-scarlet">ultimate guide</span> and foundation in which you should take as a veteran or soon to be."
+                "Too many of our U.S. service members have no idea the immense level of <span className="text-gold">financial freedom</span> waiting on the other side of military service. This free portal was built to give you the <span className="text-scarlet">ultimate blueprint</span> and foundation to claim everything you have earned, build real wealth, and take full control of your future."
               </blockquote>
 
-              <div className="pt-2 text-xs font-mono text-sand/60">
-                <span className="text-gold font-bold">FOUNDER & MARINE VETERAN</span> • VET-COMPASS
+              <div className="pt-3 text-sm font-mono tracking-wider text-gold font-black uppercase">
+                -- Sgt Rusch
               </div>
             </div>
 
