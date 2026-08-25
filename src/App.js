@@ -1,11 +1,11 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   Compass, ChevronRight, ChevronLeft,
   CheckCircle, Award, ArrowRight,
   Plus, Trash2, Search, Upload, FileText,
   Phone, TrendingUp, Target, Cpu,
   ExternalLink, X, Activity, Flag, Info,
-  Home, CheckSquare
+  Home, CheckSquare, Save, User, Mail, ShieldAlert
 } from 'lucide-react';
 
 // -----------------------------------------------------------------------
@@ -243,276 +243,275 @@ const FREEDOM_STAGES = [
 ];
 
 // -----------------------------------------------------------------------
-// 4. LIFE PLANNER GOALS & STEPS
+// 4. LIFE PLANNER GOALS
 // -----------------------------------------------------------------------
 const PLANNER_GOALS = [
-  { id: 'freedom',   icon: '⚡', label: 'Financial Freedom',        desc: 'Never need to work again -- live completely on benefits' },
-  { id: 'travel',    icon: '✈', label: 'Travel / Expat Life',       desc: 'Live or travel abroad with full VA benefits intact' },
-  { id: 'home',      icon: '🏠', label: 'Home Ownership',            desc: 'Buy a home or start building equity in real estate' },
-  { id: 'family',    icon: '👨‍👩‍👧', label: 'Secure My Family',          desc: 'Healthcare, education, and insurance for dependents' },
-  { id: 'business',  icon: '💼', label: 'Start a Business',          desc: 'Leverage SDVOSB set-asides and SBA programs' },
-  { id: 'education', icon: '🎓', label: 'Get a Degree / Certification',desc: 'Maximize GI Bill and VR&E for free education' },
-  { id: 'career',    icon: '🎯', label: 'Land a High-Paying Career', desc: 'Federal preference, clearance premium, and SkillBridge' },
-  { id: 'debt',      icon: '📉', label: 'Eliminate Debt',            desc: 'Use veteran benefits to destroy debt and build credit' },
-  { id: 'wealth',    icon: '📈', label: 'Generational Wealth',       desc: 'Real estate, Roth IRA, TSP -- build a legacy' },
+  { id: 'freedom',   icon: '⚡', label: 'Financial Freedom (FIRE)', desc: 'Live comfortably on tax-free benefits & passive cash flow' },
+  { id: 'travel',    icon: '✈', label: 'Travel / Expat Living',     desc: 'Live or travel abroad with full VA compensation & FMP healthcare' },
+  { id: 'home',      icon: '🏠', label: 'Real Estate & House Hacking', desc: '$0 down multi-family real estate with VA loan' },
+  { id: 'family',    icon: '👨‍👩‍👧', label: 'Family Security',           desc: 'CHAMPVA healthcare, Chapter 35 DEA tuition, survivor legacy' },
+  { id: 'business',  icon: '💼', label: 'Veteran Business & SDVOSB', desc: 'SBA programs & $25B+ federal set-aside contracts' },
+  { id: 'education', icon: '🎓', label: 'Degree & Certifications',  desc: 'VR&E Ch. 31 + Post-9/11 GI Bill stacking & Yellow Ribbon' },
+  { id: 'career',    icon: '🎯', label: 'High-Paying Civilian Career', desc: 'SkillBridge, clearance premium, 10-point federal hiring preference' },
+  { id: 'debt',      icon: '📉', label: 'Eliminate Debt',            desc: 'Destroy high interest debt using veteran housing and benefit shields' },
+  { id: 'wealth',    icon: '📈', label: 'Generational Wealth',       desc: 'Automated Roth IRA index investing & real estate compounding' },
 ];
 
-const ALL_STEPS = [
+// -----------------------------------------------------------------------
+// 5. PERSONALIZED DYNAMIC ACTION STEPS REPOSITORY
+// -----------------------------------------------------------------------
+const ALL_DYNAMIC_STEPS = [
+  // --- 100% P&T Specific High-Value Actions (Show ONLY when rated 100%) ---
   {
-    id: 'disability_claim',
-    goals: ['universal'],
+    id: 'tax_exemption_100',
+    goals: ['universal', 'freedom', 'home', 'wealth'],
     priority: 1,
-    category: 'Foundation',
-    title: 'File or Maximize Your VA Disability Claim',
-    timeline: 'Immediately',
-    action: 'File VA Form 21-526EZ at VA.gov. Every 10% rating increase = $150-400+/month MORE tax-free for life. Getting to 100% P&T is your single highest ROI action as a veteran.',
-    why: 'At 100% P&T a single veteran receives $3,737+/month ($44,844/year) completely tax-free -- equivalent to a $60,000+ pre-tax salary. This income has zero earned-income limit and cannot be garnished.',
+    category: 'State Tax Shield',
+    title: 'Claim Your 100% P&T State Property Tax Exemption ($0 Taxes)',
+    timeline: 'Immediate post-rating action',
+    action: 'Take your VA rating summary letter to your county tax assessor. In Texas, Florida, Nevada, Washington and many states, 100% P&T veterans pay ZERO in real estate property taxes on their primary residence.',
+    why: 'On a $450,000 home, this immediately saves $8,000 to $14,000 every single year for life. Over 20 years, that is $160,000-$280,000 in tax-free saved capital.',
+    value: '$8,000 - $14,000/yr savings',
+    link: 'https://www.benefits.va.gov/homeloans/',
+    form: 'File with County Tax Assessor',
+    showWhen: (p) => p.currentRating >= 100,
+  },
+  {
+    id: 'champva_family_100',
+    goals: ['universal', 'family', 'freedom'],
+    priority: 1,
+    category: 'Family Healthcare',
+    title: 'Enroll Spouse & Children in CHAMPVA (100% Free Health Insurance)',
+    timeline: 'Immediate post-100% rating action',
+    action: 'Submit VA Form 10-10d. CHAMPVA covers spouses and dependent children of 100% P&T veterans with near-zero copays and a $3,000 maximum family annual cap.',
+    why: 'Replaces civilian health insurance plans that cost $600-$1,500/month. Eliminates private insurance premiums for your entire household.',
+    value: '$7,200 - $18,000/yr saved',
+    link: 'https://www.va.gov/health-care/family-caregiver-benefits/champva/',
+    form: 'VA Form 10-10d',
+    showWhen: (p) => p.currentRating >= 100 && p.hasDependents !== 'single',
+  },
+  {
+    id: 'chapter35_dea_100',
+    goals: ['family', 'wealth', 'education'],
+    priority: 2,
+    category: 'Dependent Tuition',
+    title: 'Activate Chapter 35 DEA College Stipend for Dependents',
+    timeline: 'When spouse or children attend college/trade school',
+    action: 'Apply with VA Form 22-5490. Pays $1,574/month CASH directly to your spouse and each child enrolled in college, vocational training, or apprenticeships for up to 45 months per student.',
+    why: 'A spouse and two college students will receive $4,722/month ($56,664/year) in tax-free cash for attending school, preserving your family savings.',
+    value: '$1,574/mo per student cash',
+    link: 'https://www.va.gov/education/survivor-dependent-benefits/dependents-education-assistance/',
+    form: 'VA Form 22-5490',
+    showWhen: (p) => p.currentRating >= 100 && p.hasDependents !== 'single',
+  },
+  {
+    id: 'dental_priority_1_100',
+    goals: ['universal', 'freedom'],
+    priority: 2,
+    category: 'Healthcare',
+    title: 'Unlock Comprehensive VA Dental Care (Priority Group 1)',
+    timeline: 'Immediate post-100% rating action',
+    action: 'Call your local VA Medical Center dental clinic. 100% P&T status automatically unlocks full comprehensive dental coverage: cleanings, crowns, implants, root canals, and surgery at $0 cost.',
+    why: 'Civilian dental work regularly costs $3,000-$10,000+ for major procedures. VA Priority 1 eliminates all dental expenses for life.',
+    value: '$2,000 - $5,000/yr value',
+    link: 'https://www.va.gov/health-care/about-va-health-benefits/dental-care/',
+    form: 'Call Local VAMC Dental Clinic',
+    showWhen: (p) => p.currentRating >= 100,
+  },
+
+  // --- Actions for unrated or partially rated veterans (<100%) ---
+  {
+    id: 'initial_disability_claim',
+    goals: ['universal', 'freedom'],
+    priority: 1,
+    category: 'Claims Strategy',
+    title: 'File Initial VA Disability Claim or Submit Intent to File',
+    timeline: 'Immediately (Locks your effective back-pay date)',
+    action: 'Submit an Intent to File online at VA.gov immediately to lock your back-pay effective date. Then file VA Form 21-526EZ with all supporting Service Treatment Records and diagnosis letters.',
+    why: 'Every month delayed is a month of tax-free back-pay permanently lost. An established rating provides monthly cash, free VA healthcare, and loan waivers.',
     value: 'Up to $44,844/yr tax-free',
     link: 'https://www.va.gov/disability/file-disability-claim/',
     form: 'VA Form 21-526EZ',
-    hideWhen: (p) => p.currentRating >= 100,
+    showWhen: (p) => p.currentRating === 0,
   },
   {
-    id: 'vso',
-    goals: ['universal'],
+    id: 'rating_increase_secondaries',
+    goals: ['universal', 'freedom'],
     priority: 1,
-    category: 'Foundation',
-    title: 'Get a Free VSO (Veterans Service Officer)',
-    timeline: 'This week',
-    action: 'Contact DAV, VFW, or American Legion. A good VSO can identify conditions you missed, write nexus arguments, and prep your C&P exam strategy. This service is 100% FREE.',
-    why: 'Veterans with VSO representation win claims at significantly higher rates. VSOs know the exact VA rating schedule language and can identify secondary claims you never knew you had.',
-    value: 'Thousands in additional claims',
-    link: 'https://www.va.gov/ogc/apps/accreditation/index.asp',
-    form: null,
-    hideWhen: null,
+    category: 'Claims Increase',
+    title: 'File for Rating Increases & Secondary Stacking (Path to 100%)',
+    timeline: 'Within 90 days of rating decision',
+    action: 'Use the Med Scanner and Secondary Stacking Matrix to file secondaries (e.g. Sleep Apnea secondary to PTSD; Radiculopathy secondary to Lumbar Strain). Request medical increase exams for worsening conditions.',
+    why: 'A veteran at 70% ($1,759/mo) who stacks secondary conditions to reach 100% jumps to $3,737+/month -- an extra $23,736/year tax-free for life.',
+    value: '+$1,000 to +$2,000/mo increase',
+    link: 'https://www.va.gov/disability/file-disability-claim/',
+    form: 'VA Form 21-526EZ',
+    showWhen: (p) => p.currentRating > 0 && p.currentRating < 100,
   },
   {
-    id: 'va_healthcare',
-    goals: ['universal'],
-    priority: 1,
-    category: 'Foundation',
-    title: 'Enroll in VA Healthcare NOW',
-    timeline: 'This week',
-    action: 'Apply online at VA.gov with VA Form 10-10EZ. Enrollment is free and your priority group is based on your disability rating. Do this even if you feel healthy -- it documents your baseline for future claims.',
-    why: 'Priority Group 1 (100% P&T) = zero copays for all care including prescriptions, mental health, and emergency visits. Value: $12,000-$20,000/year in healthcare costs eliminated.',
-    value: '$0-$20,000/yr in healthcare costs',
-    link: 'https://www.va.gov/health-care/apply-for-health-care-form-10-10ez/',
-    form: 'VA Form 10-10EZ',
-    hideWhen: null,
-  },
-  {
-    id: 'tdiu',
+    id: 'tdiu_70_plus',
     goals: ['freedom'],
     priority: 2,
-    category: 'Income Maximization',
-    title: 'File for TDIU (Total Disability Individual Unemployability)',
-    timeline: 'If 70%+ rated and cannot maintain employment',
-    action: 'File VA Form 21-8940. If your service-connected disabilities prevent substantial gainful employment, TDIU pays at the 100% rate ($3,737+/mo) even if your combined rating is only 60-70%.',
-    why: 'TDIU is a critical bridge to 100% pay. Eligibility: one condition at 60%+ OR multiple conditions combined at 70%+ with one at 40%+. An employment limitation letter from your doctor + buddy statements from former employers = strong application.',
+    category: 'Income Bridge',
+    title: 'Apply for TDIU: Get 100% Pay ($3,737/mo) at Your Current Rating',
+    timeline: 'If service-connected conditions prevent gainful work',
+    action: 'Submit VA Form 21-8940. Because you are rated 70%+, you meet the schedular threshold to be paid at the full 100% rate ($3,737+/mo) if your conditions prevent sustained employment.',
+    why: 'Instantly elevates your monthly pay to the maximum rate without needing to fight for individual 100% schedular ratings.',
     value: '$3,737+/mo (100% rate)',
     link: 'https://www.va.gov/disability/eligibility/special-claims/unemployability/',
     form: 'VA Form 21-8940',
-    hideWhen: null,
+    showWhen: (p) => p.currentRating >= 70 && p.currentRating < 100,
   },
+
+  // --- Active Duty vs Already Separated Logic ---
   {
-    id: 'property_tax',
-    goals: ['freedom','home','wealth'],
-    priority: 2,
-    category: 'Expense Elimination',
-    title: 'Claim Your State Property Tax Exemption',
-    timeline: 'After establishing residency in target state',
-    action: 'File with your county assessor. TX and FL: 100% exemption at 100% P&T = $0 property tax. NV: $22,500 exemption base. CA: up to $271K assessed value reduction. This is automatic annual savings every year.',
-    why: 'On a $400,000 home in Texas, the property tax exemption saves approximately $8,000-$12,000 per year -- every year -- for the rest of your life. Over 20 years that is $160,000-$240,000 in tax-free savings.',
-    value: '$4,000-$12,000/yr saved',
-    link: 'https://www.benefits.va.gov/homeloans/documents/docs/va_policy_regarding_natural_disasters.pdf',
-    form: 'File with county assessor',
-    hideWhen: null,
-  },
-  {
-    id: 'fmp',
-    goals: ['travel'],
+    id: 'bdd_speedrun_active',
+    goals: ['universal', 'career'],
     priority: 1,
-    category: 'Healthcare Abroad',
-    title: 'Register for the Foreign Medical Program (FMP)',
-    timeline: 'Before leaving the US',
-    action: 'Complete VA FMP registration. The VA will pay 100% of all medical care, prescriptions, and treatments related to your service-connected conditions in 150+ countries. Doctors bill VA directly or you get reimbursed.',
-    why: 'Healthcare is the #1 concern for expat veterans. FMP eliminates that concern entirely. You visit a local doctor, pay the bill, submit the claim to the VA, and get fully reimbursed within 4-6 weeks.',
-    value: 'Full coverage worldwide',
-    link: 'https://www.va.gov/health-care/foreign-medical-program/',
-    form: 'VA Form 10-7959f-2',
-    hideWhen: null,
+    category: 'Transition Speedrun',
+    title: 'File BDD (Benefits Delivery at Discharge) Claim (180-90 Day Window)',
+    timeline: 'Between 180 and 90 days before separation date',
+    action: 'Submit your claim via VA.gov BDD program. Complete all C&P exams while still in uniform. Your rating and monthly cash start on Day 1 of civilian life.',
+    why: 'Avoids the 6-12 month standard post-separation claim backlog. All conditions documented while in uniform carry direct presumption of service connection.',
+    value: 'Zero income gap on separation',
+    link: 'https://www.va.gov/disability/how-to-file-claim/when-to-file/pre-discharge-claim/',
+    form: 'VA Form 21-526EZ (BDD)',
+    showWhen: (p) => !p.alreadyOut && p.separationMonths >= 3,
   },
   {
-    id: 'expat_banking',
-    goals: ['travel'],
+    id: 'skillbridge_active',
+    goals: ['career', 'freedom'],
     priority: 1,
-    category: 'Financial Setup',
-    title: 'Open a Fee-Free Global Bank Account',
-    timeline: 'Before leaving the US',
-    action: 'Open a Charles Schwab High Yield Investor Checking account. It refunds ALL ATM fees worldwide with no foreign transaction fees. Keep USAA or Navy Federal as your primary account for wire receives.',
-    why: 'International ATM fees and foreign transaction fees can cost $50-$150/month. Schwab eliminates these entirely. VA disability pays into your US account and you withdraw in local currency anywhere with zero fees.',
-    value: '$600-$1,800/yr in fees saved',
-    link: 'https://www.schwab.com/checking',
-    form: null,
-    hideWhen: null,
-  },
-  {
-    id: 'va_loan',
-    goals: ['home','wealth','debt'],
-    priority: 1,
-    category: 'Real Estate',
-    title: 'Use Your VA Home Loan Benefit ($0 Down, $0 PMI)',
-    timeline: 'When ready to buy',
-    action: 'VA loan: 0% down payment, no PMI (private mortgage insurance), competitive interest rates, and the funding fee is WAIVED entirely if you have a 10%+ disability rating.',
-    why: 'No PMI alone saves $200-$500/month vs a conventional loan. Zero down payment preserves your cash for investing. The funding fee waiver saves $8,000-$15,000 upfront on a $400K home.',
-    value: '$8,000-$15,000 upfront + $200-500/mo PMI savings',
-    link: 'https://www.va.gov/housing-assistance/home-loans/',
-    form: 'VA Form 26-1880',
-    hideWhen: null,
-  },
-  {
-    id: 'house_hack',
-    goals: ['home','wealth','freedom'],
-    priority: 2,
-    category: 'Real Estate Strategy',
-    title: 'House Hack with a VA Multifamily Loan (2-4 Units)',
-    timeline: 'When buying your first home',
-    action: 'Buy a 2-4 unit property (duplex, triplex, or fourplex) with your VA loan. Live in one unit. Rent out the remaining units. The rental income often covers your entire mortgage payment.',
-    why: 'Example: Buy a $450K fourplex with $0 down. Rent 3 units at $1,200 each = $3,600/month rental income. Mortgage is $2,800/month. You live FOR FREE with $800/month profit.',
-    value: 'Potentially $0 housing cost + positive cash flow',
-    link: 'https://www.va.gov/housing-assistance/home-loans/loan-types/purchase-loan/',
-    form: 'VA Form 26-1880',
-    hideWhen: null,
-  },
-  {
-    id: 'champva',
-    goals: ['family'],
-    priority: 1,
-    category: 'Family Healthcare',
-    title: 'Enroll Dependents in CHAMPVA',
-    timeline: 'After reaching 100% P&T',
-    action: 'At 100% P&T, your spouse and children under 23 qualify for CHAMPVA -- comprehensive health insurance at near-zero cost. Apply with VA Form 10-10d.',
-    why: 'Family health insurance typically costs $500-$1,500/month on the civilian market. CHAMPVA eliminates most of that cost. For a family of 4, this saves $6,000-$18,000/year in health insurance premiums alone.',
-    value: '$6,000-$18,000/yr in insurance savings',
-    link: 'https://www.va.gov/health-care/family-caregiver-benefits/champva/',
-    form: 'VA Form 10-10d',
-    hideWhen: null,
-  },
-  {
-    id: 'chapter35',
-    goals: ['family','wealth'],
-    priority: 2,
-    category: 'Dependent Education',
-    title: 'Enroll Dependents in Chapter 35 DEA',
-    timeline: 'When dependents are college-age',
-    action: 'Chapter 35 Dependent Education Assistance pays $1,574/month directly to your spouse or each child enrolled in college, trade school, or an apprenticeship -- for up to 45 months per student.',
-    why: 'If you have a spouse and two college-age children, the government pays $4,722/month ($56,664/year) in cash for them to attend school.',
-    value: '$1,574/mo per student (up to 45 months)',
-    link: 'https://www.va.gov/education/survivor-dependent-benefits/dependents-education-assistance/',
-    form: 'VA Form 22-5490',
-    hideWhen: null,
-  },
-  {
-    id: 'sdvosb',
-    goals: ['business'],
-    priority: 1,
-    category: 'Business',
-    title: 'Get SDVOSB Certification for Federal Contracting',
-    timeline: 'When starting or growing a business',
-    action: 'Register your business at SAM.gov and apply for Service-Disabled Veteran-Owned Small Business (SDVOSB) certification through the SBA VetCert program.',
-    why: 'The federal government is REQUIRED by law to award at least 5% of all federal contracting dollars to SDVOSBs. As an SDVOSB, you can receive sole-source contracts up to $4M without competitive bidding.',
-    value: 'Access to $25B+ in set-aside contracts',
-    link: 'https://www.sba.gov/federal-contracting/contracting-assistance-programs/service-disabled-veteran-owned-small-business-program',
-    form: 'SBA VetCert at MySBA.gov',
-    hideWhen: null,
-  },
-  {
-    id: 'vre_business',
-    goals: ['business','education'],
-    priority: 2,
-    category: 'Business + Education',
-    title: 'Use VR&E Chapter 31 for Self-Employment or Degree',
-    timeline: 'Apply immediately if 10%+ rated',
-    action: 'VR&E (Chapter 31 Vocational Rehabilitation) is available to veterans with 10%+ disability rating and an employment handicap. It pays 100% of tuition at any school + all books, tools, and a laptop.',
-    why: 'VR&E is often BETTER than the GI Bill: it provides up to 48 months of benefits (vs 36 for GI Bill), pays tuition directly, and does NOT use up your GI Bill entitlement -- saving it for later.',
-    value: 'Up to 48 months of full tuition + $1,500-$2,800/mo stipend',
-    link: 'https://www.va.gov/careers-employment/vocational-rehabilitation/',
-    form: 'VA Form 28-1900',
-    hideWhen: null,
-  },
-  {
-    id: 'skillbridge',
-    goals: ['career'],
-    priority: 1,
-    category: 'Career',
-    title: 'Use DoD SkillBridge in Your Final 180 Days',
-    timeline: 'While still on active duty (last 180 days)',
-    action: 'SkillBridge allows you to intern at a civilian company (Microsoft, Amazon, Boeing, Lockheed) during your final 6 months of service while DoD continues paying your full military salary and benefits.',
-    why: 'SkillBridge participants report a job offer rate of over 85% from their host companies. You transition directly into a civilian career with zero income gap.',
-    value: 'Full military pay + civilian career launch',
+    category: 'Career Velocity',
+    title: 'Secure a DoD SkillBridge Corporate Internship (Last 180 Days)',
+    timeline: '6-9 months before separation date',
+    action: 'Apply to SkillBridge opportunities at defense contractors, tech firms (Amazon, Microsoft), or financial institutions. Work as a civilian intern while receiving 100% full active military pay & BAH.',
+    why: 'Over 85% of SkillBridge participants receive high-paying full-time job offers before their separation date, guaranteeing zero transition downtime.',
+    value: 'Full military pay + civilian salary offer',
     link: 'https://skillbridge.osd.mil/',
-    form: 'Coordinate with your command',
-    hideWhen: null,
+    form: 'Command Approval Package',
+    showWhen: (p) => !p.alreadyOut,
   },
   {
-    id: 'usajobs',
-    goals: ['career'],
-    priority: 1,
-    category: 'Career',
-    title: 'Apply for Federal Jobs with 10-Point Veterans Preference',
-    timeline: 'After separation',
-    action: 'Register at USAJOBS.gov. With a 10%+ disability rating, you receive 10-point preference. 30%+ rating qualifies you for Schedule A direct hire without competing with other applicants.',
-    why: 'GS-12 to GS-13 federal positions pay $90,000-$130,000+/year with excellent benefits, pension (FERS), and 401K matching. Stacked with VA disability pay, this creates a strong dual-income foundation.',
-    value: '$90K-$130K+ federal salary + dual VA income',
-    link: 'https://www.usajobs.gov/',
-    form: null,
-    hideWhen: null,
-  },
-  {
-    id: 'roth_ira',
-    goals: ['wealth','freedom'],
-    priority: 2,
-    category: 'Investing',
-    title: 'Open and Max a Roth IRA Every Year',
-    timeline: 'As soon as you have any W-2 or self-employment income',
-    action: 'Open a Roth IRA at Fidelity, Vanguard, or Schwab. Invest in a total market index fund (VTSAX, VTI, FSKAX). Contribute up to the annual limit ($7,000/yr).',
-    why: 'A 25-year-old veteran contributing $7,000/year for 35 years at 10% average annual return will have approximately $1.9 million in a TAX-FREE Roth IRA at 60. Combined with VA disability pay, this is a completely tax-free retirement.',
-    value: 'Potentially $1M-$2M+ tax-free at retirement',
-    link: 'https://www.irs.gov/retirement-plans/roth-iras',
-    form: null,
-    hideWhen: null,
-  },
-  {
-    id: 'pact_act',
+    id: 'post_sep_smr_request',
     goals: ['universal'],
     priority: 1,
-    category: 'Foundation',
-    title: 'Check PACT Act Eligibility -- No Nexus Letter Needed',
-    timeline: 'If deployed post-8/2/1990 to qualifying locations',
-    action: 'If you served in Iraq, Afghanistan, Kuwait, Qatar, Bahrain, Saudi Arabia, or other SW Asia locations, listed conditions are presumed service-connected -- no proof required. File VA Form 21-10210.',
-    why: 'PACT Act is the largest expansion of VA benefits in decades. Respiratory conditions, cancers, hypertension, and more qualify. If you were denied before 2022, file a Supplemental Claim immediately.',
-    value: 'Presumptive claims without nexus letter',
-    link: 'https://www.va.gov/resources/the-pact-act-and-your-va-benefits/',
-    form: 'VA Form 21-526EZ or 20-0995',
-    hideWhen: null,
+    category: 'Records Recovery',
+    title: 'Request Complete Service Treatment Records (STR) from NPRC',
+    timeline: 'Immediate post-separation step',
+    action: 'Submit an online request via eVetRecs / National Archives (NPRC) or milConnect for your complete military medical, dental, and personnel jacket (OOM/OMPF).',
+    why: 'Having complete official records is mandatory for winning claims increases, secondary connections, and PACT Act presumptive awards.',
+    value: 'Foundation for all future claims',
+    link: 'https://www.archives.gov/veterans/military-service-records',
+    form: 'Standard Form 180 / eVetRecs',
+    showWhen: (p) => p.alreadyOut && p.currentRating < 100,
   },
+
+  // --- Discharge Upgrade (Elevated when non-honorable) ---
+  {
+    id: 'discharge_upgrade_priority',
+    goals: ['universal', 'career', 'education'],
+    priority: 1,
+    category: 'Service Characterization',
+    title: 'Initiate Discharge Upgrade under PTSD/MST Liberal Consideration',
+    timeline: 'Immediate priority action',
+    action: 'File DD Form 293 (DRB for <15 years) or DD Form 149 (BCMR). Leverage DoD Liberal Consideration memos (Kurta, Hagel, Carson) linking mental health or service trauma to discharge characterization.',
+    why: 'An upgraded Honorable discharge unlocks the Post-9/11 GI Bill, state veterans hiring preference, and full VA healthcare coverage.',
+    value: 'Restores full GI Bill & VA benefit rights',
+    link: 'https://www.va.gov/discharge-upgrade-instructions/',
+    form: 'DD Form 293 or DD Form 149',
+    showWhen: (p) => p.dischargeType !== 'honorable',
+  },
+
+  // --- Universal High-ROI Wealth & Housing Actions ---
+  {
+    id: 'va_loan_house_hack',
+    goals: ['home', 'wealth', 'freedom'],
+    priority: 2,
+    category: 'Real Estate',
+    title: 'Execute the $0-Down VA Loan Multi-Family House Hack (2-4 Units)',
+    timeline: 'When purchasing primary residence',
+    action: 'Use your VA Loan to purchase a duplex, triplex, or fourplex. Live in unit 1; rent units 2, 3, and 4. Tenant rents cover your entire mortgage + generate monthly cash flow.',
+    why: 'Zero down payment, zero PMI, and if rated 10%+, the $15,000+ VA Funding Fee is 100% WAIVED.',
+    value: '$0 housing cost + equity growth',
+    link: 'https://www.va.gov/housing-assistance/home-loans/',
+    form: 'VA Form 26-1880 (COE)',
+    showWhen: null,
+  },
+  {
+    id: 'vre_ch31_education',
+    goals: ['education', 'business', 'career'],
+    priority: 2,
+    category: 'Education Stacking',
+    title: 'Apply for VR&E (Chapter 31) BEFORE Touching Your GI Bill',
+    timeline: 'When planning education, trade school, or entrepreneurship',
+    action: 'If you have a 10%+ rating, apply for VR&E on VA.gov. It pays 100% tuition, all books/laptops, and a monthly housing subsistence stipend for up to 48 months WITHOUT consuming your Post-9/11 GI Bill.',
+    why: 'Using VR&E first preserves your 36 months of Post-9/11 GI Bill for a second master\'s degree, flight school, or transfer to your dependents.',
+    value: 'Up to 48 months full tuition + stipend',
+    link: 'https://www.va.gov/careers-employment/vocational-rehabilitation/',
+    form: 'VA Form 28-1900',
+    showWhen: (p) => p.currentRating >= 10,
+  },
+  {
+    id: 'sdvosb_business_setasides',
+    goals: ['business', 'wealth'],
+    priority: 2,
+    category: 'Federal Contracting',
+    title: 'Register as a Service-Disabled Veteran-Owned Small Business (SDVOSB)',
+    timeline: 'When launching or scaling a business',
+    action: 'Certify your entity on SAM.gov via the SBA VetCert portal. Unlocks sole-source federal contracts up to $5,000,000 with zero public bidding competition.',
+    why: 'Federal agencies are legally mandated to award 5%+ of all federal procurement (billions annually) to SDVOSB entities.',
+    value: 'Access to $25B+ in set-aside contracts',
+    link: 'https://www.sba.gov/federal-contracting/contracting-assistance-programs/service-disabled-veteran-owned-small-business-program',
+    form: 'SBA VetCert (MySBA)',
+    showWhen: (p) => p.currentRating >= 10,
+  },
+  {
+    id: 'fmp_worldwide_care',
+    goals: ['travel', 'freedom'],
+    priority: 2,
+    category: 'Expat Freedom',
+    title: 'Enroll in the Foreign Medical Program (FMP) for Worldwide Coverage',
+    timeline: 'Before traveling or moving overseas',
+    action: 'Submit VA Form 10-7959f-2. The VA covers 100% of all medical visits, prescription drugs, and surgeries for your service-connected conditions in 150+ countries.',
+    why: 'Enables complete sovereign geographic freedom. Live in Portugal, Costa Rica, Thailand, or Mexico while retaining full US medical backing.',
+    value: '100% global healthcare coverage',
+    link: 'https://www.va.gov/health-care/foreign-medical-program/',
+    form: 'VA Form 10-7959f-2',
+    showWhen: (p) => p.currentRating >= 10,
+  },
+  {
+    id: 'pact_act_presumptive_fasttrack',
+    goals: ['universal'],
+    priority: 1,
+    category: 'Toxic Exposure',
+    title: 'Submit PACT Act Presumptive Claim (No Nexus Letter Required)',
+    timeline: 'Immediate claim submission',
+    action: 'File VA Form 21-526EZ for respiratory conditions, sinusitis, rhinitis, or cancers. Because you served post-9/11 in qualifying locations, service connection is legally presumed.',
+    why: 'Zero burden of proof for causation. If you have a diagnosed condition on the PACT list, VA must approve service connection.',
+    value: 'Fast-track claim approval',
+    link: 'https://www.va.gov/resources/the-pact-act-and-your-va-benefits/',
+    form: 'VA Form 21-526EZ',
+    showWhen: (p) => (p.exposedBurnPit || p.servedPost911) && p.currentRating < 100,
+  }
 ];
 
 // -----------------------------------------------------------------------
-// 5. MASTER CHECKLIST MILESTONES (TRACKER)
+// 6. MASTER CHECKLIST MILESTONES
 // -----------------------------------------------------------------------
-const MILESTONES_DATA = [
-  { id:'str_download', stage:'Pre-Separation', label:'Request and download full digital copies of your Service Treatment Records (STR) and dental files' },
-  { id:'sick_call_log', stage:'Pre-Separation', label:'Go to medical/sick call to document every physical and mental symptom before terminal leave' },
-  { id:'cool_cert', stage:'Pre-Separation', label:'Complete free civilian certifications (PMP, Sec+, AWS) via DoD COOL / Marine Corps Credentialing' },
-  { id:'bdd_filed', stage:'BDD Window', label:'File Benefits Delivery at Discharge (BDD) claim at the exact 180-90 day pre-separation mark' },
-  { id:'skillbridge_app', stage:'BDD Window', label:'Secure a DoD SkillBridge / CSP civilian corporate internship for your final 6 months' },
-  { id:'va_account_set', stage:'Transition', label:'Set up Login.gov / ID.me authentication on VA.gov and check claim tracker status' },
+const ALL_MILESTONES = [
+  { id:'str_download', stage:'Pre-Separation', label:'Request and download full digital copies of your Service Treatment Records (STR) and dental files', hideWhen: (p)=>p.alreadyOut },
+  { id:'sick_call_log', stage:'Pre-Separation', label:'Go to medical/sick call to document every physical and mental symptom before terminal leave', hideWhen: (p)=>p.alreadyOut },
+  { id:'cool_cert', stage:'Pre-Separation', label:'Complete free civilian certifications (PMP, Sec+, AWS) via DoD COOL / Branch Credentialing', hideWhen: (p)=>p.alreadyOut },
+  { id:'bdd_filed', stage:'BDD Window', label:'File Benefits Delivery at Discharge (BDD) claim at the exact 180-90 day pre-separation mark', hideWhen: (p)=>p.alreadyOut || p.currentRating >= 100 },
+  { id:'skillbridge_app', stage:'BDD Window', label:'Secure a DoD SkillBridge / CSP civilian corporate internship for your final 6 months', hideWhen: (p)=>p.alreadyOut },
+  { id:'va_account_set', stage:'Transition', label:'Set up Login.gov / ID.me authentication on VA.gov and verify claim tracker status' },
   { id:'va_healthcare', stage:'Transition', label:'Enroll in VA Healthcare at your local VA Medical Center (Form 10-10EZ)' },
-  { id:'buddy_letters', stage:'Transition', label:'Collect Lay / Buddy statements (VA Form 21-4138) from fellow service members' },
+  { id:'buddy_letters', stage:'Transition', label:'Collect Lay / Buddy statements (VA Form 21-4138) from fellow service members for claims', hideWhen: (p)=>p.currentRating >= 100 },
   { id:'va_loan_coe', stage:'Post-Separation', label:'Download your VA Loan Certificate of Eligibility (COE) on eBenefits / VA.gov' },
   { id:'roth_ira_opened', stage:'Post-Separation', label:'Open a Roth IRA and automate $583/mo ($7,000/yr) indexing into VOO/VTI' },
-  { id:'state_tax_exempt', stage:'Post-Separation', label:'Submit your VA rating letter to your county tax assessor for full property tax exemption' },
+  { id:'state_tax_exempt', stage:'Post-Separation', label:'Submit your VA rating letter to your county tax assessor for full property tax exemption', hideWhen: (p)=>p.currentRating < 100 },
+  { id:'champva_enrolled', stage:'Post-Separation', label:'Submit VA Form 10-10d to enroll spouse and children in CHAMPVA healthcare', hideWhen: (p)=>p.currentRating < 100 || p.hasDependents === 'single' },
 ];
 
 // -----------------------------------------------------------------------
@@ -520,11 +519,16 @@ const MILESTONES_DATA = [
 // -----------------------------------------------------------------------
 const VeteranBenefitsCompass = () => {
 
-  // ---- Page Routing ----
+  // ---- Routing ----
   const [currentPage, setCurrentPage] = useState('landing');
   const [wizardStep, setWizardStep] = useState(0);
 
-  // ---- Profile State ----
+  // ---- Profile State (Persisted in localStorage) ----
+  const [userEmail, setUserEmail] = useState('');
+  const [userName, setUserName] = useState('');
+  const [isProfileSaved, setIsProfileSaved] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+
   const [branch, setBranch] = useState('usmc');
   const [separationMonths, setSeparationMonths] = useState(6);
   const [alreadyOut, setAlreadyOut] = useState(false);
@@ -539,7 +543,7 @@ const VeteranBenefitsCompass = () => {
   const [exposedBurnPit, setExposedBurnPit] = useState(false);
   const [mstFlag, setMstFlag] = useState(false);
 
-  // ---- Dashboard Navigation ----
+  // ---- Navigation ----
   const [activeTab, setActiveTab] = useState('planner');
   const [activeAvenue, setActiveAvenue] = useState('expat');
   const [claimsSubTab, setClaimsSubTab] = useState('math');
@@ -549,9 +553,9 @@ const VeteranBenefitsCompass = () => {
 
   // ---- Planner Sub-Modes ----
   const [plannerMode, setPlannerMode] = useState('goals'); // 'goals' | 'protocol'
-  const [planStage, setPlanStage] = useState(0);
-  const [lifeGoals, setLifeGoals] = useState([]);
-  const [planGenerated, setPlanGenerated] = useState(false);
+  const [planStage] = useState(0);
+  const [lifeGoals, setLifeGoals] = useState(['freedom', 'home']);
+  const [planGenerated, setPlanGenerated] = useState(true);
   const [activeFreedomStage, setActiveFreedomStage] = useState('stage1');
 
   // ---- C&P Exam Simulator State ----
@@ -566,9 +570,8 @@ const VeteranBenefitsCompass = () => {
 
   // ---- Milestone Tracker State ----
   const [completedMilestones, setCompletedMilestones] = useState({
-    str_download: true,
-    sick_call_log: true,
-    va_account_set: true
+    va_account_set: true,
+    va_healthcare: true
   });
 
   // ---- Medical Scanner State ----
@@ -578,15 +581,79 @@ const VeteranBenefitsCompass = () => {
   const fileInputRef = useRef(null);
 
   // -----------------------------------------------------------------------
+  // LOCALSTORAGE PROFILE PERSISTENCE
+  // -----------------------------------------------------------------------
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('vbc_veteran_profile');
+      if (saved) {
+        const p = JSON.parse(saved);
+        if (p.userEmail) setUserEmail(p.userEmail);
+        if (p.userName) setUserName(p.userName);
+        if (p.branch) setBranch(p.branch);
+        if (p.separationMonths !== undefined) setSeparationMonths(p.separationMonths);
+        if (p.alreadyOut !== undefined) setAlreadyOut(p.alreadyOut);
+        if (p.dischargeType) setDischargeType(p.dischargeType);
+        if (p.disabilityStatus) setDisabilityStatus(p.disabilityStatus);
+        if (p.currentRating !== undefined) setCurrentRating(p.currentRating);
+        if (p.futurePath) setFuturePath(p.futurePath);
+        if (p.selectedState) setSelectedState(p.selectedState);
+        if (p.hasDependents) setHasDependents(p.hasDependents);
+        if (p.yearsOfService !== undefined) setYearsOfService(p.yearsOfService);
+        if (p.servedPost911 !== undefined) setServedPost911(p.servedPost911);
+        if (p.exposedBurnPit !== undefined) setExposedBurnPit(p.exposedBurnPit);
+        if (p.mstFlag !== undefined) setMstFlag(p.mstFlag);
+        if (p.lifeGoals) setLifeGoals(p.lifeGoals);
+        if (p.completedMilestones) setCompletedMilestones(p.completedMilestones);
+        if (p.homePrice) setHomePrice(p.homePrice);
+        setIsProfileSaved(true);
+      }
+    } catch (e) {
+      console.warn('Could not load profile from localStorage', e);
+    }
+  }, []);
+
+  const saveProfileToStorage = (emailToSave = userEmail, nameToSave = userName) => {
+    const profile = {
+      userEmail: emailToSave,
+      userName: nameToSave,
+      branch,
+      separationMonths,
+      alreadyOut,
+      dischargeType,
+      disabilityStatus,
+      currentRating,
+      futurePath,
+      selectedState,
+      hasDependents,
+      yearsOfService,
+      servedPost911,
+      exposedBurnPit,
+      mstFlag,
+      lifeGoals,
+      completedMilestones,
+      homePrice,
+      savedAt: new Date().toISOString()
+    };
+    try {
+      localStorage.setItem('vbc_veteran_profile', JSON.stringify(profile));
+      setIsProfileSaved(true);
+      setShowEmailModal(false);
+    } catch (e) {
+      console.error('Failed to save profile to localStorage', e);
+    }
+  };
+
+  // -----------------------------------------------------------------------
   // BRANCH DATA
   // -----------------------------------------------------------------------
   const branchData = {
-    usmc:  { name: 'Marine Corps', badge: 'USMC', sep: 'EAS' },
-    army:  { name: 'Army',         badge: 'ARMY', sep: 'ETS' },
-    navy:  { name: 'Navy',         badge: 'NAVY', sep: 'EAOS' },
-    usaf:  { name: 'Air Force',    badge: 'USAF', sep: 'DOS' },
-    uscg:  { name: 'Coast Guard',  badge: 'USCG', sep: 'DOS' },
-    ussf:  { name: 'Space Force',  badge: 'USSF', sep: 'ETS' },
+    usmc:  { name: 'Marine Corps', badge: 'USMC', sep: 'EAS', slang: 'Marine / Devil Dog' },
+    army:  { name: 'Army',         badge: 'ARMY', sep: 'ETS', slang: 'Soldier' },
+    navy:  { name: 'Navy',         badge: 'NAVY', sep: 'EAOS', slang: 'Sailor / Shipmate' },
+    usaf:  { name: 'Air Force',    badge: 'USAF', sep: 'DOS', slang: 'Airman' },
+    uscg:  { name: 'Coast Guard',  badge: 'USCG', sep: 'DOS', slang: 'Coastie / Guard' },
+    ussf:  { name: 'Space Force',  badge: 'USSF', sep: 'ETS', slang: 'Guardian' },
   };
   const bd = branchData[branch] || branchData.usmc;
 
@@ -623,7 +690,8 @@ const VeteranBenefitsCompass = () => {
     : hasDependents === 'single_kids' ? 'single_kids'
     : hasDependents === 'spouse' ? 'spouse'
     : 'family';
-  const monthlyPay = (vaPayTable[roundedRating] || vaPayTable[0])[depKey] || 0;
+  const effectiveRatingForPay = currentRating > 0 ? currentRating : roundedRating;
+  const monthlyPay = (vaPayTable[effectiveRatingForPay] || vaPayTable[0])[depKey] || 0;
   const annualPay = monthlyPay * 12;
 
   // -----------------------------------------------------------------------
@@ -634,7 +702,8 @@ const VeteranBenefitsCompass = () => {
     const nPayments = 360;
     const monthlyMortgagePI = (homePrice * (monthlyRate * Math.pow(1 + monthlyRate, nPayments))) / (Math.pow(1 + monthlyRate, nPayments) - 1);
     const estimatedInsurance = (homePrice * 0.005) / 12;
-    const estimatedTaxes = (currentRating === 100 && (selectedState === 'tx' || selectedState === 'fl')) ? 0 : (homePrice * 0.015) / 12;
+    const isTaxExempt = (currentRating === 100 && (selectedState === 'tx' || selectedState === 'fl' || selectedState === 'nv'));
+    const estimatedTaxes = isTaxExempt ? 0 : (homePrice * 0.015) / 12;
     const totalPITI = monthlyMortgagePI + estimatedInsurance + estimatedTaxes;
     const tenantUnits = Math.max(0, propertyUnits - 1);
     const grossRentalIncome = tenantUnits * rentPerUnit;
@@ -652,29 +721,49 @@ const VeteranBenefitsCompass = () => {
       netMonthlyProfit: Math.round(netMonthlyProfit),
       annualSavingsVsRenting: Math.round(annualSavingsVsRenting),
       fiveYearEquityGrowth: Math.round(fiveYearEquityGrowth),
-      propertyTaxWaived: (currentRating === 100 && (selectedState === 'tx' || selectedState === 'fl'))
+      propertyTaxWaived: isTaxExempt
     };
   };
   const hh = calcHouseHack();
 
   // -----------------------------------------------------------------------
-  // LIFE PLANNER ROADMAP GENERATOR
+  // DYNAMIC PERSONALIZED ROADMAP GENERATOR
   // -----------------------------------------------------------------------
   const toggleGoal = (id) => {
     setLifeGoals(prev => prev.includes(id) ? prev.filter(g => g !== id) : [...prev, id]);
   };
 
-  const generateRoadmap = () => {
-    const profile = { currentRating, dischargeType, yearsOfService, servedPost911, exposedBurnPit };
-    return ALL_STEPS
+  const getPersonalizedRoadmap = () => {
+    const profile = {
+      currentRating,
+      dischargeType,
+      yearsOfService,
+      servedPost911,
+      exposedBurnPit,
+      alreadyOut,
+      hasDependents,
+      separationMonths,
+      selectedState
+    };
+
+    return ALL_DYNAMIC_STEPS
       .filter(step => {
-        if (step.hideWhen && step.hideWhen(profile)) return false;
+        // Strict filter: check showWhen condition if present
+        if (step.showWhen && !step.showWhen(profile)) {
+          return false;
+        }
         if (step.goals.includes('universal')) return true;
         return step.goals.some(g => lifeGoals.includes(g));
       })
       .sort((a, b) => a.priority - b.priority);
   };
-  const roadmap = planGenerated ? generateRoadmap() : [];
+  const dynamicRoadmap = getPersonalizedRoadmap();
+
+  // -----------------------------------------------------------------------
+  // FILTERED MILESTONES (TRACKER)
+  // -----------------------------------------------------------------------
+  const profileForMilestones = { alreadyOut, currentRating, hasDependents };
+  const filteredMilestones = ALL_MILESTONES.filter(m => !m.hideWhen || !m.hideWhen(profileForMilestones));
 
   // -----------------------------------------------------------------------
   // MEDICAL SCANNER ENGINE
@@ -816,12 +905,76 @@ const VeteranBenefitsCompass = () => {
   );
 
   // -----------------------------------------------------------------------
+  // EMAIL / PROFILE SYNC MODAL
+  // -----------------------------------------------------------------------
+  const EmailSyncModal = () => {
+    const [tempEmail, setTempEmail] = useState(userEmail);
+    const [tempName, setTempName] = useState(userName);
+
+    if (!showEmailModal) return null;
+
+    return (
+      <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="bg-steel-dark border border-gold/40 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+          <div className="flex items-center justify-between border-b border-steel/50 pb-3">
+            <div className="flex items-center gap-2">
+              <User className="text-gold" size={18}/>
+              <h3 className="font-black uppercase tracking-tight text-lg">Save Your Personalized Dashboard</h3>
+            </div>
+            <button onClick={()=>setShowEmailModal(false)} className="text-sand/40 hover:text-sand"><X size={16}/></button>
+          </div>
+
+          <p className="text-sand/70 text-xs leading-relaxed">
+            Enter your email to save your personalized military roadmap, house hacking numbers, and milestone progress. The portal will automatically recognize you when you return.
+          </p>
+
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-mono uppercase text-gold mb-1">Your Name / Callsign</label>
+              <input
+                type="text"
+                placeholder="e.g. Sgt. Miller / Devil Dog"
+                value={tempName}
+                onChange={e=>setTempName(e.target.value)}
+                className="w-full bg-steel/30 border border-steel/60 rounded-xl px-3 py-2 text-sm text-sand focus:outline-none focus:border-gold"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-mono uppercase text-gold mb-1">Email Address</label>
+              <input
+                type="email"
+                placeholder="veteran@example.com"
+                value={tempEmail}
+                onChange={e=>setTempEmail(e.target.value)}
+                className="w-full bg-steel/30 border border-steel/60 rounded-xl px-3 py-2 text-sm text-sand focus:outline-none focus:border-gold"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-2">
+            <button
+              onClick={()=>{
+                setUserEmail(tempEmail);
+                setUserName(tempName);
+                saveProfileToStorage(tempEmail, tempName);
+              }}
+              className="flex-1 py-2.5 bg-gold hover:bg-yellow-600 text-steel-dark font-black text-sm uppercase rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
+              <Save size={15}/> Save & Remember Me
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // -----------------------------------------------------------------------
   // LANDING PAGE
   // -----------------------------------------------------------------------
   if (currentPage === 'landing') return (
     <div className="min-h-screen bg-steel-dark text-sand flex flex-col relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-20 pointer-events-none"/>
       <CrisisBanner/>
+      <EmailSyncModal/>
 
       <header className="border-b border-steel/50 bg-steel-dark/90 backdrop-blur-md py-4 px-6 relative z-10">
         <div className="max-w-7xl mx-auto flex justify-between items-center font-mono">
@@ -829,7 +982,14 @@ const VeteranBenefitsCompass = () => {
             <div className="w-2.5 h-2.5 rounded-full bg-scarlet animate-ping"/>
             <span className="text-xs tracking-widest uppercase opacity-70 font-bold">SITREP: ACTIVE TRANSITION PORTAL</span>
           </div>
-          <span className="text-xs border border-gold/30 px-3 py-1 rounded bg-gold/5 text-gold font-bold">UNCLASSIFIED</span>
+          <div className="flex items-center gap-3">
+            {isProfileSaved && userEmail && (
+              <span className="text-xs border border-gold/40 px-2.5 py-1 rounded-full bg-gold/10 text-gold font-bold">
+                ✓ Synced: {userName || userEmail}
+              </span>
+            )}
+            <span className="text-xs border border-gold/30 px-3 py-1 rounded bg-gold/5 text-gold font-bold">UNCLASSIFIED</span>
+          </div>
         </div>
       </header>
 
@@ -847,18 +1007,18 @@ const VeteranBenefitsCompass = () => {
           Stepping Through <span className="text-scarlet">the Portal</span>
         </h1>
         <p className="text-xl text-sand/70 max-w-2xl mb-4 font-light">
-          The all-inclusive military transition portal. Every benefit, real estate house hack, C&P exam simulator, and wealth strategy -- in one unified system.
+          The all-inclusive military transition portal. Every benefit, real estate house hack, C&P exam simulator, and wealth strategy -- fully tailored to your exact profile.
         </p>
-        <p className="text-sm text-sand/40 mb-10">All branches. All paths. Crayon-reader friendly.</p>
+        <p className="text-sm text-sand/40 mb-10">All branches. All paths. Zero fluff. Crayon-reader friendly.</p>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-w-2xl w-full mb-10 text-left">
           {[
-            { icon:<Target size={16}/>,      title:'Life & Wealth Planner',    desc:'Goal-based action blueprint & 5-stage stacking' },
+            { icon:<Target size={16}/>,      title:'Tailored Wealth Planner',  desc:'Custom dynamic roadmap filtered to your exact rating' },
             { icon:<Home size={16}/>,        title:'VA House Hacker Engine',   desc:'2-4 unit multi-family real estate calculator' },
             { icon:<Activity size={16}/>,    title:'C&P Exam Simulator',       desc:'Practice DBQ scenarios & avoid trap answers' },
             { icon:<FileText size={16}/>,     title:'Medical File Scanner',     desc:'Upload records, discover missed DC claims' },
             { icon:<TrendingUp size={16}/>,   title:'VA Math Simulator',        desc:'Live combined whole-person calculation' },
-            { icon:<CheckSquare size={16}/>,  title:'Milestone Tracker',        desc:'Interactive transition milestone checklist' },
+            { icon:<CheckSquare size={16}/>,  title:'Milestone Tracker',        desc:'Interactive transition checklist tailored to your status' },
           ].map((f,i)=>(
             <div key={i} className="bg-steel/30 border border-steel/60 hover:border-gold/40 rounded-xl p-3 transition-all">
               <div className="text-gold mb-1">{f.icon}</div>
@@ -905,6 +1065,7 @@ const VeteranBenefitsCompass = () => {
       <div className="min-h-screen bg-steel-dark text-sand flex flex-col relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-20 pointer-events-none"/>
         <CrisisBanner/>
+        <EmailSyncModal/>
 
         <header className="border-b border-steel/50 bg-steel-dark/90 backdrop-blur-md py-4 px-6 relative z-10 font-mono">
           <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -960,7 +1121,7 @@ const VeteranBenefitsCompass = () => {
                   <div className="bg-steel-dark/50 border border-steel/50 rounded-xl p-4 space-y-4">
                     <div className="font-mono text-xs uppercase tracking-widest text-gold font-bold">Separation Timing</div>
                     <div className="grid grid-cols-2 gap-2">
-                      {[{val:false, label:'Active / Upcoming '+bd.sep},{val:true, label:'Already Separated'}].map(opt=>(
+                      {[{val:false, label:'Active / Upcoming '+bd.sep},{val:true, label:'Already Separated (Veteran)'}].map(opt=>(
                         <button key={String(opt.val)} onClick={()=>setAlreadyOut(opt.val)}
                           className={"p-3 rounded-lg border text-sm text-center transition-all " + (alreadyOut===opt.val ? "border-gold bg-gold/10 text-sand font-medium" : "border-steel/60 text-sand/50 hover:text-sand hover:border-steel")}>
                           {opt.label}
@@ -1003,7 +1164,7 @@ const VeteranBenefitsCompass = () => {
                     </div>
                     {dischargeType !== 'honorable' && (
                       <div className="p-2 bg-scarlet/10 border border-scarlet/30 rounded-lg text-xs text-scarlet/90">
-                        Discharge upgrade may be possible. Your dashboard includes a full step-by-step guide.
+                        Discharge upgrade priority activated. Your entire dashboard and planner will surface the DRB/BCMR upgrade process first.
                       </div>
                     )}
                   </div>
@@ -1027,7 +1188,7 @@ const VeteranBenefitsCompass = () => {
                 <div className="space-y-5">
                   <div>
                     <h2 className="text-2xl font-black uppercase tracking-tight mb-1">Health and Disability Profile</h2>
-                    <p className="text-sand/60 text-sm">Honest answers unlock the most accurate benefit plan.</p>
+                    <p className="text-sand/60 text-sm">Honest answers immediately eliminate redundant questions and tune your dashboard.</p>
                   </div>
 
                   <div className="bg-steel-dark/50 border border-steel/50 rounded-xl p-4 space-y-4">
@@ -1037,7 +1198,7 @@ const VeteranBenefitsCompass = () => {
                         {val:'none',    label:'No Rating Yet',              sub:'Have not filed a claim'},
                         {val:'pending', label:'Filed -- Pending',           sub:'Waiting on decision'},
                         {val:'filed',   label:'Rated -- Seeking Increase',  sub:'Have rating, want more'},
-                        {val:'rated',   label:'Have Established Rating',    sub:'Know current number'},
+                        {val:'rated',   label:'Established Rating',         sub:'Know current number'},
                       ].map(s=>(
                         <button key={s.val} onClick={()=>setDisabilityStatus(s.val)}
                           className={"p-3 rounded-lg border text-left text-xs transition-all " + (disabilityStatus===s.val ? "border-gold bg-gold/10" : "border-steel/60 hover:border-steel")}>
@@ -1076,7 +1237,7 @@ const VeteranBenefitsCompass = () => {
                     ))}
                     {exposedBurnPit && (
                       <div className="p-2 bg-gold/5 border border-gold/20 rounded-lg text-xs text-gold/80">
-                        PACT Act Alert: Presumptive claims available -- no nexus letter required. Your roadmap will include this.
+                        PACT Act Presumptive Protocol active: No nexus letter needed for qualifying respiratory/cancer claims.
                       </div>
                     )}
                   </div>
@@ -1087,8 +1248,8 @@ const VeteranBenefitsCompass = () => {
               {wizardStep === 3 && (
                 <div className="space-y-5">
                   <div>
-                    <h2 className="text-2xl font-black uppercase tracking-tight mb-1">Your Future Mission</h2>
-                    <p className="text-sand/60 text-sm">We will build your personalized action plan around your goals.</p>
+                    <h2 className="text-2xl font-black uppercase tracking-tight mb-1">Your Future Mission & Location</h2>
+                    <p className="text-sand/60 text-sm">We will build your personalized action plan around your exact selections.</p>
                   </div>
 
                   <div className="bg-steel-dark/50 border border-steel/50 rounded-xl p-4 space-y-3">
@@ -1120,9 +1281,9 @@ const VeteranBenefitsCompass = () => {
                       <div className="font-mono text-xs uppercase tracking-widest text-gold font-bold">Dependents</div>
                       <div className="space-y-1.5">
                         {[
-                          {val:'single',      label:'Single -- No Dependents'},
-                          {val:'single_kids', label:'Single Parent (kids, not married)'},
-                          {val:'spouse',      label:'Married, No Children'},
+                          {val:'single',      label:'Single (No Dependents)'},
+                          {val:'single_kids', label:'Single Parent (with children)'},
+                          {val:'spouse',      label:'Married (Spouse only)'},
                           {val:'family',      label:'Married with Children'},
                         ].map(d=>(
                           <button key={d.val} onClick={()=>setHasDependents(d.val)}
@@ -1150,9 +1311,13 @@ const VeteranBenefitsCompass = () => {
                     Continue <ChevronRight size={16}/>
                   </button>
                 ) : (
-                  <button onClick={()=>{ setCurrentPage('dashboard'); setActiveTab('planner'); }}
+                  <button onClick={()=>{
+                    saveProfileToStorage();
+                    setCurrentPage('dashboard');
+                    setActiveTab('planner');
+                  }}
                     className="flex-1 py-3 bg-gold hover:bg-yellow-600 text-steel-dark font-black text-base rounded-xl transition-all flex items-center justify-center gap-2 uppercase tracking-wider shadow-lg">
-                    Launch Dashboard <ArrowRight size={18}/>
+                    Launch Tailored Dashboard <ArrowRight size={18}/>
                   </button>
                 )}
               </div>
@@ -1167,13 +1332,13 @@ const VeteranBenefitsCompass = () => {
   // DASHBOARD NAV TABS CONFIGURATION WITH TOOLTIPS
   // -----------------------------------------------------------------------
   const tabs = [
-    { id:'planner',   icon:<Target size={13}/>,       label:'Life & Wealth Planner',  tooltip:'Interactive goal-driven roadmap + the 5-Stage Golden Stacking Protocol for retiring early on benefits and real estate.' },
-    { id:'househack', icon:<Home size={13}/>,         label:'VA House Hacker',        tooltip:'Interactive multi-family (2-4 units) real estate calculator. Calculate $0-down mortgage, rental cash flow, and equity growth.' },
-    { id:'claims',    icon:<Activity size={13}/>,     label:'Claims & C&P Sim',       tooltip:'Practice C&P exam DBQ scenarios, calculate VA whole-person math, explore secondary claims, and review the Diagnostic Lexicon.' },
+    { id:'planner',   icon:<Target size={13}/>,       label:'Life & Wealth Planner',  tooltip:'Interactive goal-driven roadmap tailored to your rating + the 5-Stage Golden Stacking Protocol.' },
+    { id:'househack', icon:<Home size={13}/>,         label:'VA House Hacker',        tooltip:'Interactive multi-family (2-4 units) real estate calculator with $0-down mortgage, rent offsets, and state tax shields.' },
+    { id:'claims',    icon:<Activity size={13}/>,     label:'Claims & C&P Sim',       tooltip:'Practice C&P exam DBQ scenarios, calculate whole-person math, explore secondary claims, and review the Diagnostic Lexicon.' },
     { id:'scanner',   icon:<Cpu size={13}/>,          label:'Med Scanner',            tooltip:'Upload or paste medical records to scan for 25+ service-connected conditions, DC codes, and PACT Act presumptives. 100% private.' },
     { id:'avenues',   icon:<Compass size={13}/>,      label:'Avenues',                tooltip:'5 proven life pathways: Expat living, FIRE, Education stacking, high-paying civilian career, and SDVOSB entrepreneurship.' },
     { id:'benefits',  icon:<Award size={13}/>,        label:'State Matrix',           tooltip:'Comprehensive state-by-state veteran benefits: full property tax exemptions, free college tuition, vehicle registration waivers.' },
-    { id:'tracker',   icon:<CheckSquare size={13}/>,  label:'Milestones',             tooltip:'Interactive transition checklist across Pre-Separation, BDD Window, and Post-Separation with live progress saving.' },
+    { id:'tracker',   icon:<CheckSquare size={13}/>,  label:'Milestones',             tooltip:'Interactive transition checklist tailored to your separation status with live progress saving.' },
     { id:'upgrade',   icon:<Flag size={13}/>,         label:'Discharge Guide',        tooltip:'Step-by-step discharge upgrade guide for DRB and BCMR/BCNR boards under PTSD/MST Liberal Consideration.' },
     { id:'resources', icon:<Phone size={13}/>,        label:'Resources',              tooltip:'Veterans Crisis Line, free VSO locator (DAV/VFW), mental health (Headstrong free therapy), and official VA Form downloads.' },
   ];
@@ -1181,6 +1346,7 @@ const VeteranBenefitsCompass = () => {
   return (
     <div className="min-h-screen bg-steel-dark text-sand flex flex-col">
       <CrisisBanner/>
+      <EmailSyncModal/>
 
       {/* Top Nav */}
       <header className="border-b border-steel/50 bg-steel-dark/90 backdrop-blur-md py-3 px-6 sticky top-0 z-40">
@@ -1189,30 +1355,63 @@ const VeteranBenefitsCompass = () => {
             <Compass className="text-gold" size={18}/>
             <span className="font-black text-sm uppercase tracking-wider">VET-COMPASS</span>
             <span className="text-sand/30 font-mono text-xs border border-steel/40 px-2 py-0.5 rounded">{bd.badge}</span>
+            {userName && (
+              <span className="hidden sm:inline-block text-xs font-mono text-gold/80">
+                | Welcome, {userName}
+              </span>
+            )}
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={()=>setShowEmailModal(true)}
+              className={"text-xs font-mono px-2.5 py-1 rounded-lg border transition-all flex items-center gap-1.5 " + (isProfileSaved && userEmail ? "border-gold/40 bg-gold/10 text-gold" : "border-steel/60 hover:border-gold text-sand/60 hover:text-sand")}>
+              <Mail size={12}/>
+              {isProfileSaved && userEmail ? (
+                <span>Saved ({userEmail.split('@')[0]})</span>
+              ) : (
+                <span>Save Profile</span>
+              )}
+            </button>
+
             {currentRating > 0 && (
               <span className="text-xs text-gold font-mono font-bold border border-gold/30 px-2 py-1 rounded bg-gold/5">
                 {currentRating}% Rated
               </span>
             )}
             <button onClick={()=>setCurrentPage('wizard')} className="text-xs text-sand/40 hover:text-gold transition-colors font-mono uppercase tracking-wider">
-              Edit Profile
+              Edit Settings
             </button>
           </div>
         </div>
       </header>
 
-      {/* Income Banner (if rated) */}
-      {currentRating >= 10 && (
-        <div className="bg-steel/20 border-b border-steel/30 px-6 py-2">
-          <div className="max-w-7xl mx-auto flex items-center justify-between text-xs font-mono">
-            <span className="text-sand/50">Estimated VA Tax-Free Income:</span>
-            <span className="text-gold font-black text-base">${monthlyPay.toLocaleString()}/mo</span>
-            <span className="text-sand/40">${annualPay.toLocaleString()}/yr -- 100% tax-free</span>
+      {/* Dynamic SITREP Banner Tailored Specifically to Settings */}
+      <div className="bg-steel/25 border-b border-steel/30 px-6 py-2">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs font-mono gap-1">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-gold animate-pulse"/>
+            <span className="text-gold font-bold">TAILORED SITREP:</span>
+            <span className="text-sand/80">
+              {currentRating === 100 ? (
+                <span>100% P&T Active • {stateInfo.name} Tax Shield Unlocked • Priority 1 VA Care</span>
+              ) : alreadyOut ? (
+                <span>Separated Veteran • Current Rating: {currentRating}% • Target: 100% P&T Stacking</span>
+              ) : (
+                <span>{separationMonths} Months to {bd.sep} • BDD Window Priority Active • SkillBridge Eligible</span>
+              )}
+              {dischargeType !== 'honorable' && ' • Discharge Upgrade Priority'}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3 text-sand/60">
+            {currentRating > 0 ? (
+              <span>Monthly Comp: <strong className="text-gold">${monthlyPay.toLocaleString()}/mo</strong> (${annualPay.toLocaleString()}/yr)</span>
+            ) : (
+              <span className="text-scarlet">Unrated (Potential $3,737+/mo Available)</span>
+            )}
           </div>
         </div>
-      )}
+      </div>
 
       {/* Tab Bar */}
       <div className="bg-steel-dark/90 border-b border-steel/50 overflow-x-auto sticky top-14 z-30">
@@ -1235,15 +1434,21 @@ const VeteranBenefitsCompass = () => {
         <div className="max-w-4xl mx-auto p-4 md:p-6 space-y-6">
 
           {/* ============================================================ */}
-          {/* TAB 1: LIFE & WEALTH PLANNER                                 */}
+          {/* TAB 1: LIFE & WEALTH PLANNER (DEEPLY PERSONALIZED)           */}
           {/* ============================================================ */}
           {activeTab === 'planner' && (
             <div className="space-y-6">
               {/* Header / Mode Toggle */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-steel/40 pb-4">
                 <div>
-                  <h2 className="text-2xl font-black uppercase tracking-tight">Life & Wealth Success Planner</h2>
-                  <p className="text-sand/50 text-sm">Actionable blueprints to achieve total financial sovereignty after service.</p>
+                  <h2 className="text-2xl font-black uppercase tracking-tight">Tailored Life & Wealth Planner</h2>
+                  <p className="text-sand/50 text-sm">
+                    {currentRating === 100 ? (
+                      <span className="text-gold font-bold">Personalized for 100% P&T Veteran: Initial claim steps removed. Showing wealth maximization, tax shields, and family benefits.</span>
+                    ) : (
+                      <span>Personalized for {bd.name} ({currentRating > 0 ? `${currentRating}% rated` : 'Unrated'}, {alreadyOut ? 'Separated' : `${separationMonths}mo to ${bd.sep}`}).</span>
+                    )}
+                  </p>
                 </div>
                 <div className="flex bg-steel-dark border border-steel/50 rounded-xl p-1 font-mono text-xs">
                   <button onClick={()=>setPlannerMode('goals')}
@@ -1257,12 +1462,23 @@ const VeteranBenefitsCompass = () => {
                 </div>
               </div>
 
+              {/* Personalization Context Card */}
+              <div className="bg-steel/20 border border-steel/50 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
+                <div className="flex items-center gap-2">
+                  <span className="text-gold font-bold">Active Configuration:</span>
+                  <span className="text-sand/70">{bd.name} • {dischargeType.toUpperCase()} • {alreadyOut ? 'Veteran' : `${separationMonths}mo to ${bd.sep}`} • {selectedState.toUpperCase()} • {hasDependents.replace('_',' ')}</span>
+                </div>
+                <button onClick={()=>setCurrentPage('wizard')} className="text-gold hover:underline">
+                  Adjust Settings
+                </button>
+              </div>
+
               {/* SUB-MODE A: GOAL-DRIVEN BLUEPRINT */}
               {plannerMode === 'goals' && (<>
                 {!planGenerated ? (<>
                   {planStage === 0 && (<>
                     <div className="bg-gold/5 border border-gold/20 rounded-xl p-4 text-sm text-sand/70">
-                      Select every goal that applies to your vision for life after service. Select as many as you want and we will build a prioritized roadmap tailored to your selections.
+                      Select your goals below. The planner dynamically filters out redundant actions and highlights high-leverage steps for your situation.
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {PLANNER_GOALS.map(g=>(
@@ -1279,75 +1495,32 @@ const VeteranBenefitsCompass = () => {
                     </div>
 
                     {lifeGoals.length > 0 && (
-                      <button onClick={()=>setPlanStage(1)}
+                      <button onClick={()=>setPlanGenerated(true)}
                         className="w-full py-3 bg-scarlet hover:bg-red-800 text-sand font-black uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2">
-                        Continue to Financial Snapshot ({lifeGoals.length} goal{lifeGoals.length!==1?'s':''} selected) <ChevronRight size={16}/>
+                        Generate Tailored Blueprint ({lifeGoals.length} goal{lifeGoals.length!==1?'s':''} selected) <ChevronRight size={16}/>
                       </button>
                     )}
                   </>)}
-
-                  {planStage === 1 && (<>
-                    <div className="bg-steel/20 border border-steel/50 rounded-2xl p-5 space-y-5">
-                      <div>
-                        <h3 className="font-black uppercase tracking-tight text-lg">Quick Situation Snapshot</h3>
-                        <p className="text-sand/50 text-xs mt-1">This lets us order your steps by highest ROI first.</p>
-                      </div>
-
-                      <div className="space-y-4">
-                        <div>
-                          <div className="font-mono text-xs uppercase tracking-widest text-gold font-bold mb-2">Selected Goals:</div>
-                          <div className="flex flex-wrap gap-2">
-                            {lifeGoals.map(g=>{
-                              const goal = PLANNER_GOALS.find(pg=>pg.id===g);
-                              return goal ? (
-                                <span key={g} className="bg-steel/30 border border-gold/30 text-xs px-2 py-1 rounded-full text-gold font-mono">
-                                  {goal.icon} {goal.label}
-                                </span>
-                              ) : null;
-                            })}
-                          </div>
-                        </div>
-
-                        <div>
-                          <div className="font-mono text-xs uppercase tracking-widest text-gold font-bold mb-2">Profile Snapshot:</div>
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
-                            {[
-                              {label:'Branch',    val:bd.name},
-                              {label:'Discharge', val:dischargeType},
-                              {label:'Rating',    val:currentRating>0 ? currentRating+'%' : 'Unrated'},
-                              {label:'State',     val:stateInfo.name},
-                              {label:'Service',   val:yearsOfService+' years'},
-                              {label:'Dependents',val:hasDependents.replace('_',' ')},
-                            ].map((item,i)=>(
-                              <div key={i} className="bg-steel-dark/60 border border-steel/40 rounded-lg p-2">
-                                <div className="text-sand/40">{item.label}</div>
-                                <div className="font-bold text-sand capitalize">{item.val}</div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-3">
-                      <button onClick={()=>setPlanStage(0)} className="flex items-center gap-1 px-4 py-2.5 border border-steel/60 rounded-xl text-sm hover:border-steel transition-all font-mono uppercase">
-                        <ChevronLeft size={14}/> Back
-                      </button>
-                      <button onClick={()=>{ setPlanGenerated(true); }}
-                        className="flex-1 py-3 bg-gold hover:bg-yellow-600 text-steel-dark font-black text-base rounded-xl transition-all flex items-center justify-center gap-2 uppercase tracking-wider shadow-lg">
-                        Generate My Success Blueprint <ArrowRight size={18}/>
-                      </button>
-                    </div>
-                  </>)}
                 </>) : (<>
-                  {/* Generated Roadmap */}
-                  <div className="bg-gold/5 border border-gold/20 rounded-xl p-4">
-                    <div className="font-mono text-xs uppercase tracking-widest text-gold font-bold mb-1">Personalized Success Blueprint</div>
-                    <div className="text-sm text-sand/60">{roadmap.length} action items generated based on your goals and profile. Ordered by highest ROI.</div>
+                  {/* Generated Dynamic Personalized Roadmap */}
+                  <div className="bg-gold/5 border border-gold/20 rounded-xl p-4 flex items-center justify-between">
+                    <div>
+                      <div className="font-mono text-xs uppercase tracking-widest text-gold font-bold">
+                        {currentRating === 100 ? '100% P&T Maximization Blueprint' : 'Customized Veteran Action Blueprint'}
+                      </div>
+                      <div className="text-sm text-sand/60 mt-0.5">
+                        {dynamicRoadmap.length} tailored action items generated. Redundant steps (like basic claim filing) automatically removed.
+                      </div>
+                    </div>
+                    <button
+                      onClick={()=>setShowEmailModal(true)}
+                      className="text-xs bg-steel-dark border border-gold/40 text-gold px-3 py-1.5 rounded-lg hover:bg-gold/10 font-mono transition-all">
+                      Save / Email Plan
+                    </button>
                   </div>
 
                   <div className="space-y-3">
-                    {roadmap.map((step, i) => {
+                    {dynamicRoadmap.map((step, i) => {
                       const priorityColor = step.priority === 1 ? 'border-l-scarlet' : step.priority === 2 ? 'border-l-gold' : 'border-l-steel';
                       return (
                         <div key={step.id} className={"bg-steel/20 border border-steel/50 border-l-4 " + priorityColor + " rounded-r-xl p-5"}>
@@ -1390,17 +1563,22 @@ const VeteranBenefitsCompass = () => {
                     })}
                   </div>
 
-                  <button onClick={()=>{ setPlanGenerated(false); setPlanStage(0); setLifeGoals([]); }}
-                    className="text-xs text-sand/40 hover:text-sand/70 transition-colors flex items-center gap-1 font-mono uppercase tracking-wider">
-                    <X size={12}/> Start Over -- Change My Goals
-                  </button>
+                  <div className="flex justify-between items-center pt-2">
+                    <button onClick={()=>setPlanGenerated(false)}
+                      className="text-xs text-sand/40 hover:text-sand/70 transition-colors flex items-center gap-1 font-mono uppercase tracking-wider">
+                      <X size={12}/> Select Different Goals
+                    </button>
+                    <button onClick={()=>saveProfileToStorage()}
+                      className="text-xs text-gold hover:underline font-mono">
+                      ✓ Save Progress to Device
+                    </button>
+                  </div>
                 </>)}
               </>)}
 
               {/* SUB-MODE B: 5-STAGE GOLDEN STACKING PROTOCOL */}
               {plannerMode === 'protocol' && (
                 <div className="space-y-6">
-                  {/* Stage Selector Pills */}
                   <div>
                     <div className="text-xs font-mono uppercase tracking-widest text-gold font-bold mb-2">Select Transition Phase:</div>
                     <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
@@ -1414,7 +1592,6 @@ const VeteranBenefitsCompass = () => {
                     </div>
                   </div>
 
-                  {/* Active Stage Detail */}
                   {(() => {
                     const stage = FREEDOM_STAGES.find(s=>s.id === activeFreedomStage) || FREEDOM_STAGES[0];
                     return (
@@ -1949,27 +2126,41 @@ const VeteranBenefitsCompass = () => {
           )}
 
           {/* ============================================================ */}
-          {/* TAB 7: MILESTONE TRACKER                                     */}
+          {/* TAB 7: MILESTONE TRACKER (FILTERED TO VETERAN STATUS)        */}
           {/* ============================================================ */}
           {activeTab === 'tracker' && (
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-steel/40 pb-4">
                 <div>
-                  <h2 className="text-2xl font-black uppercase tracking-tight">Interactive Milestone Tracker</h2>
-                  <p className="text-sand/50 text-sm">Track and check off your transition steps from uniform to financial freedom.</p>
+                  <h2 className="text-2xl font-black uppercase tracking-tight">Personalized Milestone Tracker</h2>
+                  <p className="text-sand/50 text-sm">
+                    {alreadyOut ? 'Checklist filtered for separated veterans. Irrelevant pre-separation tasks hidden.' : 'Checklist tailored for active duty transition countdown.'}
+                  </p>
                 </div>
                 <div className="bg-steel-dark border border-steel/50 rounded-xl px-4 py-2 text-xs font-mono">
                   <span className="text-sand/50">Progress: </span>
                   <span className="text-gold font-black">
-                    {Object.values(completedMilestones).filter(Boolean).length} / {MILESTONES_DATA.length} Completed
+                    {filteredMilestones.filter(m=>completedMilestones[m.id]).length} / {filteredMilestones.length} Completed
                   </span>
                 </div>
               </div>
 
               <div className="bg-steel/20 border border-steel/50 rounded-2xl p-6 space-y-3">
-                {MILESTONES_DATA.map(m=>(
+                {filteredMilestones.map(m=>(
                   <button key={m.id}
-                    onClick={()=>setCompletedMilestones(prev=>({...prev, [m.id]: !prev[m.id]}))}
+                    onClick={()=>{
+                      const updated = {...completedMilestones, [m.id]: !completedMilestones[m.id]};
+                      setCompletedMilestones(updated);
+                      // Auto-save
+                      try {
+                        const saved = localStorage.getItem('vbc_veteran_profile');
+                        if (saved) {
+                          const p = JSON.parse(saved);
+                          p.completedMilestones = updated;
+                          localStorage.setItem('vbc_veteran_profile', JSON.stringify(p));
+                        }
+                      } catch (e) {}
+                    }}
                     className={"w-full p-4 rounded-xl border text-left transition-all flex items-start gap-3 " + (completedMilestones[m.id] ? "bg-steel-dark/80 border-gold/40 text-sand" : "bg-steel-dark/30 border-steel/40 text-sand/60 hover:border-steel")}>
                     <div className={"w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 mt-0.5 " + (completedMilestones[m.id] ? "bg-gold border-gold text-steel-dark" : "border-steel/60")}>
                       {completedMilestones[m.id] && <CheckSquare size={13}/>}
@@ -1997,9 +2188,16 @@ const VeteranBenefitsCompass = () => {
                 <h2 className="text-2xl font-black uppercase tracking-tight mb-1">Discharge Upgrade Guide</h2>
                 <p className="text-sand/50 text-sm">A non-honorable discharge is not the end. Many veterans successfully upgrade and unlock full benefits.</p>
               </div>
-              {dischargeType === 'honorable' && (
+              {dischargeType === 'honorable' ? (
                 <div className="bg-steel/20 border border-steel/50 rounded-xl p-4 text-sm text-sand/60">
                   You indicated an Honorable Discharge. This guide is still useful for helping fellow veterans or if any characterization issue arises.
+                </div>
+              ) : (
+                <div className="bg-scarlet/10 border border-scarlet/40 rounded-xl p-4 text-xs text-scarlet space-y-1">
+                  <div className="font-black uppercase flex items-center gap-1.5">
+                    <ShieldAlert size={14}/> Upgrade Priority Activated ({dischargeType.toUpperCase()})
+                  </div>
+                  <div>Your discharge characterization restricts GI Bill or full VA access. Follow the 4 steps below to apply to your service branch's Discharge Review Board (DRB) or Board for Correction of Military Records (BCMR/BCNR).</div>
                 </div>
               )}
               {[
