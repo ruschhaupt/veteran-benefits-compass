@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
-  Compass, ChevronRight, ChevronLeft,
+  Compass, ChevronRight, ChevronLeft, BarChart3, DollarSign,
   CheckCircle, Award, ArrowRight,
   Plus, Trash2, Search, Upload, FileText,
   Phone, TrendingUp, Target, Cpu,
@@ -295,6 +295,9 @@ const SMC_DATA = [
 const SPECIAL_PERKS = [
   {
     id: 'space_a',
+    annualValue: 2500,
+    isCash: false,
+    upfrontValue: 0,
     category: 'travel',
     title: 'Space-A (Space Available) Free Military Flights',
     value: '$0 Airfare Worldwide',
@@ -323,6 +326,9 @@ const SPECIAL_PERKS = [
   },
   {
     id: 'sah_grant',
+    annualValue: 0,
+    isCash: false,
+    upfrontValue: 117014,
     category: 'housing',
     title: 'Specially Adapted Housing (SAH) & SHA Grants',
     value: 'Up to $117,014 Tax-Free Grant',
@@ -351,6 +357,9 @@ const SPECIAL_PERKS = [
   },
   {
     id: 'auto_grant',
+    annualValue: 0,
+    isCash: false,
+    upfrontValue: 25600,
     category: 'auto',
     title: 'Automobile Allowance & Adaptive Equipment (AAE)',
     value: '$25,600 One-Time Grant + Equipment',
@@ -380,6 +389,9 @@ const SPECIAL_PERKS = [
   },
   {
     id: 'parks_pass',
+    annualValue: 80,
+    isCash: false,
+    upfrontValue: 0,
     category: 'travel',
     title: 'America the Beautiful Lifetime Military Pass',
     value: '$80/yr Free for Life (2,000+ Parks)',
@@ -408,6 +420,9 @@ const SPECIAL_PERKS = [
   },
   {
     id: 'dental_classes',
+    annualValue: 3500,
+    isCash: false,
+    upfrontValue: 0,
     category: 'health',
     title: '100% Free VA Comprehensive Dental Care Matrix',
     value: '$3,000 - $10,000+/yr Value',
@@ -438,6 +453,9 @@ const SPECIAL_PERKS = [
   },
   {
     id: 'commissary_exchange',
+    annualValue: 4200,
+    isCash: false,
+    upfrontValue: 0,
     category: 'shopping',
     title: 'Tax-Free Military Commissary, Exchange & MWR Privileges',
     value: '$3,500 - $6,000/yr in Grocery & Sales Tax Savings',
@@ -472,6 +490,9 @@ const ALL_DYNAMIC_STEPS = [
   // --- 100% P&T Specific High-Value Actions (Show ONLY when rated 100%) ---
   {
     id: 'tax_exemption_100',
+    annualValue: 10000,
+    isCash: false,
+    upfrontValue: 0,
     goals: ['universal', 'freedom', 'home', 'wealth'],
     priority: 1,
     category: 'State Tax Shield',
@@ -486,6 +507,9 @@ const ALL_DYNAMIC_STEPS = [
   },
   {
     id: 'champva_family_100',
+    annualValue: 12000,
+    isCash: false,
+    upfrontValue: 0,
     goals: ['universal', 'family', 'freedom'],
     priority: 1,
     category: 'Family Healthcare',
@@ -500,6 +524,9 @@ const ALL_DYNAMIC_STEPS = [
   },
   {
     id: 'chapter35_dea_100',
+    annualValue: 18888,
+    isCash: true,
+    upfrontValue: 0,
     goals: ['family', 'wealth', 'education'],
     priority: 2,
     category: 'Dependent Tuition',
@@ -514,6 +541,9 @@ const ALL_DYNAMIC_STEPS = [
   },
   {
     id: 'dental_priority_1_100',
+    annualValue: 3500,
+    isCash: false,
+    upfrontValue: 0,
     goals: ['universal', 'freedom'],
     priority: 2,
     category: 'Healthcare',
@@ -530,6 +560,9 @@ const ALL_DYNAMIC_STEPS = [
   // --- Actions for unrated or partially rated veterans (<100%) ---
   {
     id: 'initial_disability_claim',
+    annualValue: 44844,
+    isCash: true,
+    upfrontValue: 0,
     goals: ['universal', 'freedom'],
     priority: 1,
     category: 'Claims Strategy',
@@ -544,6 +577,9 @@ const ALL_DYNAMIC_STEPS = [
   },
   {
     id: 'rating_increase_secondaries',
+    annualValue: 23736,
+    isCash: true,
+    upfrontValue: 0,
     goals: ['universal', 'freedom'],
     priority: 1,
     category: 'Claims Increase',
@@ -558,6 +594,9 @@ const ALL_DYNAMIC_STEPS = [
   },
   {
     id: 'tdiu_70_plus',
+    annualValue: 44844,
+    isCash: true,
+    upfrontValue: 0,
     goals: ['freedom'],
     priority: 2,
     category: 'Income Bridge',
@@ -634,6 +673,9 @@ const ALL_DYNAMIC_STEPS = [
   // --- Universal High-ROI Wealth & Housing Actions ---
   {
     id: 'va_loan_house_hack',
+    annualValue: 4200,
+    isCash: false,
+    upfrontValue: 15000,
     goals: ['home', 'wealth', 'freedom'],
     priority: 2,
     category: 'Real Estate',
@@ -648,6 +690,9 @@ const ALL_DYNAMIC_STEPS = [
   },
   {
     id: 'vre_ch31_education',
+    annualValue: 32000,
+    isCash: true,
+    upfrontValue: 0,
     goals: ['education', 'business', 'career'],
     priority: 2,
     category: 'Education Stacking',
@@ -662,6 +707,9 @@ const ALL_DYNAMIC_STEPS = [
   },
   {
     id: 'sdvosb_business_setasides',
+    annualValue: 25000,
+    isCash: true,
+    upfrontValue: 0,
     goals: ['business', 'wealth'],
     priority: 2,
     category: 'Federal Contracting',
@@ -676,6 +724,9 @@ const ALL_DYNAMIC_STEPS = [
   },
   {
     id: 'fmp_worldwide_care',
+    annualValue: 4500,
+    isCash: false,
+    upfrontValue: 0,
     goals: ['travel', 'freedom'],
     priority: 2,
     category: 'Expat Freedom',
@@ -796,6 +847,31 @@ const VeteranBenefitsCompass = () => {
   const [rentPerUnit, setRentPerUnit] = useState(1400);
 
   // ---- Milestone Tracker State ----
+    // ---- Completed Benefits & Savings Tracking State ----
+  const [completedBenefits, setCompletedBenefits] = useState({
+    tax_exemption_100: false,
+    champva_family_100: false,
+    dental_priority_1_100: false,
+    parks_pass: true,
+    commissary_exchange: true,
+    va_healthcare: true,
+  });
+
+  const toggleBenefitCompleted = (id) => {
+    setCompletedBenefits(prev => {
+      const updated = { ...prev, [id]: !prev[id] };
+      try {
+        const saved = localStorage.getItem('vbc_veteran_profile');
+        if (saved) {
+          const p = JSON.parse(saved);
+          p.completedBenefits = updated;
+          localStorage.setItem('vbc_veteran_profile', JSON.stringify(p));
+        }
+      } catch (e) {}
+      return updated;
+    });
+  };
+
   const [completedMilestones, setCompletedMilestones] = useState({
     va_account_set: true,
     va_healthcare: true
@@ -832,6 +908,7 @@ const VeteranBenefitsCompass = () => {
         if (p.mstFlag !== undefined) setMstFlag(p.mstFlag);
         if (p.lifeGoals) setLifeGoals(p.lifeGoals);
         if (p.completedMilestones) setCompletedMilestones(p.completedMilestones);
+        if (p.completedBenefits) setCompletedBenefits(p.completedBenefits);
         if (p.homePrice) setHomePrice(p.homePrice);
         setIsProfileSaved(true);
       }
@@ -859,6 +936,7 @@ const VeteranBenefitsCompass = () => {
       mstFlag,
       lifeGoals,
       completedMilestones,
+      completedBenefits,
       homePrice,
       savedAt: new Date().toISOString()
     };
@@ -952,6 +1030,64 @@ const VeteranBenefitsCompass = () => {
     };
   };
   const hh = calcHouseHack();
+
+  // -----------------------------------------------------------------------
+  // FINANCIAL SUMMARY ENGINE (CASH + SAVINGS CALCULATIONS)
+  // -----------------------------------------------------------------------
+  const calcFinancialSummary = () => {
+    // 1. Base VA Disability Compensation (Monthly * 12)
+    const baseDisabilityAnnualCash = annualPay;
+
+    // 2. Completed Action Items & Perks
+    let additionalAnnualCash = 0;
+    let annualSavingsAndDiscounts = 0;
+    let upfrontGrantsUnlocked = 0;
+
+    // Check completed items from ALL_DYNAMIC_STEPS
+    ALL_DYNAMIC_STEPS.forEach(step => {
+      if (completedBenefits[step.id]) {
+        if (step.isCash) {
+          // If it's already accounted in base disability, don't double count
+          if (step.id !== 'initial_disability_claim' && step.id !== 'tdiu_70_plus') {
+            additionalAnnualCash += (step.annualValue || 0);
+          }
+        } else {
+          annualSavingsAndDiscounts += (step.annualValue || 0);
+        }
+        upfrontGrantsUnlocked += (step.upfrontValue || 0);
+      }
+    });
+
+    // Check completed items from SPECIAL_PERKS
+    SPECIAL_PERKS.forEach(perk => {
+      if (completedBenefits[perk.id]) {
+        if (perk.isCash) {
+          additionalAnnualCash += (perk.annualValue || 0);
+        } else {
+          annualSavingsAndDiscounts += (perk.annualValue || 0);
+        }
+        upfrontGrantsUnlocked += (perk.upfrontValue || 0);
+      }
+    });
+
+    const totalAnnualCashIncome = baseDisabilityAnnualCash + additionalAnnualCash;
+    const totalAnnualCombinedValue = totalAnnualCashIncome + annualSavingsAndDiscounts;
+    const tenYearWealthImpact = (totalAnnualCombinedValue * 10) + upfrontGrantsUnlocked;
+    const twentyYearWealthImpact = (totalAnnualCombinedValue * 20) + upfrontGrantsUnlocked;
+
+    return {
+      baseDisabilityAnnualCash,
+      additionalAnnualCash,
+      totalAnnualCashIncome,
+      annualSavingsAndDiscounts,
+      totalAnnualCombinedValue,
+      upfrontGrantsUnlocked,
+      tenYearWealthImpact,
+      twentyYearWealthImpact
+    };
+  };
+  const finSummary = calcFinancialSummary();
+
 
   // -----------------------------------------------------------------------
   // DYNAMIC PERSONALIZED ROADMAP GENERATOR
@@ -1593,6 +1729,7 @@ const VeteranBenefitsCompass = () => {
   // DASHBOARD NAV TABS CONFIGURATION WITH TOOLTIPS
   // -----------------------------------------------------------------------
   const tabs = [
+    { id:'summary',   icon:<BarChart3 size={13}/>,    label:'Summary & Value',        tooltip:'Real-time financial summary showing all completed benefits, tax-free annual income, and healthcare/tax savings.' },
     { id:'planner',   icon:<Target size={13}/>,       label:'Life & Wealth Planner',  tooltip:'Interactive goal-driven roadmap tailored to your rating + the 5-Stage Golden Stacking Protocol.' },
     { id:'househack', icon:<Home size={13}/>,         label:'VA House Hacker',        tooltip:'Interactive multi-family (2-4 units) real estate calculator with $0-down mortgage, rent offsets, and state tax shields.' },
     { id:'claims',    icon:<Activity size={13}/>,     label:'Claims & C&P Sim',       tooltip:'Practice C&P exam DBQ scenarios, calculate whole-person math, explore secondary claims, SMC tiers, and Diagnostic Lexicon.' },
@@ -1694,6 +1831,196 @@ const VeteranBenefitsCompass = () => {
       {/* Page Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto p-4 md:p-6 space-y-6">
+
+          {/* ============================================================ */}
+          {/* TAB 0: SUMMARY & FINANCIAL VALUE UNLOCKED                     */}
+          {/* ============================================================ */}
+          {activeTab === 'summary' && (
+            <div className="space-y-6">
+              {/* Header Hero Banner */}
+              <div className="bg-gradient-to-r from-red-950/70 via-steel-dark to-steel-dark border border-scarlet/40 rounded-3xl p-6 relative overflow-hidden shadow-2xl">
+                <div className="absolute -right-10 -top-10 w-80 h-80 bg-gold/5 rounded-full blur-3xl pointer-events-none"/>
+                <div className="relative z-10 space-y-2">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold/10 border border-gold/30 text-gold text-xs font-mono font-bold uppercase tracking-wider">
+                    <BarChart3 size={13}/> Real-Time Benefit & Savings Ledger
+                  </div>
+                  <h2 className="text-3xl font-black uppercase tracking-tight text-sand">
+                    Total Value & <span className="text-gold">Financial Freedom Summary</span>
+                  </h2>
+                  <p className="text-sand/70 text-sm max-w-2xl leading-relaxed">
+                    Here is the cumulative financial impact of your completed military benefits, tax-free compensation, state tax exemptions, and health coverage. Check off items as you complete them to watch your total grow.
+                  </p>
+                </div>
+              </div>
+
+              {/* Top 4 Financial Metric Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="bg-steel/20 border border-steel/50 rounded-2xl p-4 flex flex-col justify-between space-y-2">
+                  <div className="flex items-center justify-between text-xs font-mono text-sand/50">
+                    <span>Tax-Free Annual Cash</span>
+                    <DollarSign size={14} className="text-gold"/>
+                  </div>
+                  <div className="text-2xl font-black text-gold font-mono">
+                    ${finSummary.totalAnnualCashIncome.toLocaleString()}
+                    <span className="text-xs text-sand/40 font-normal"> /yr</span>
+                  </div>
+                  <div className="text-[11px] text-sand/50">
+                    ${(Math.round(finSummary.totalAnnualCashIncome / 12)).toLocaleString()}/mo guaranteed income
+                  </div>
+                </div>
+
+                <div className="bg-steel/20 border border-steel/50 rounded-2xl p-4 flex flex-col justify-between space-y-2">
+                  <div className="flex items-center justify-between text-xs font-mono text-sand/50">
+                    <span>Annual Savings & Shields</span>
+                    <ShieldAlert size={14} className="text-scarlet"/>
+                  </div>
+                  <div className="text-2xl font-black text-sand font-mono">
+                    ${finSummary.annualSavingsAndDiscounts.toLocaleString()}
+                    <span className="text-xs text-sand/40 font-normal"> /yr</span>
+                  </div>
+                  <div className="text-[11px] text-sand/50">
+                    Taxes, healthcare premiums & groceries saved
+                  </div>
+                </div>
+
+                <div className="bg-steel/20 border border-gold/40 rounded-2xl p-4 flex flex-col justify-between space-y-2 shadow-lg bg-gold/5">
+                  <div className="flex items-center justify-between text-xs font-mono text-gold font-bold">
+                    <span>Combined Annual Value</span>
+                    <Sparkles size={14} className="text-gold"/>
+                  </div>
+                  <div className="text-2xl font-black text-gold font-mono">
+                    ${finSummary.totalAnnualCombinedValue.toLocaleString()}
+                    <span className="text-xs text-sand/40 font-normal"> /yr</span>
+                  </div>
+                  <div className="text-[11px] text-gold/80">
+                    Cash + annual expenses eliminated
+                  </div>
+                </div>
+
+                <div className="bg-steel/20 border border-steel/50 rounded-2xl p-4 flex flex-col justify-between space-y-2">
+                  <div className="flex items-center justify-between text-xs font-mono text-sand/50">
+                    <span>20-Yr Wealth Projection</span>
+                    <TrendingUp size={14} className="text-gold"/>
+                  </div>
+                  <div className="text-2xl font-black text-sand font-mono">
+                    ${finSummary.twentyYearWealthImpact.toLocaleString()}
+                  </div>
+                  <div className="text-[11px] text-sand/50">
+                    10-Yr: ${finSummary.tenYearWealthImpact.toLocaleString()}
+                  </div>
+                </div>
+              </div>
+
+              {/* Upfront Grants & Waivers Banner if any unlocked */}
+              {finSummary.upfrontGrantsUnlocked > 0 && (
+                <div className="bg-steel/20 border border-gold/30 rounded-2xl p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Award className="text-gold" size={24}/>
+                    <div>
+                      <div className="font-black text-sm text-sand">One-Time Upfront Grants & Waivers Claimed:</div>
+                      <div className="text-xs text-sand/60">VA Loan Funding Fee Waivers, SAH Housing or Automobile Grants</div>
+                    </div>
+                  </div>
+                  <div className="text-xl font-black text-gold font-mono">
+                    +${finSummary.upfrontGrantsUnlocked.toLocaleString()}
+                  </div>
+                </div>
+              )}
+
+              {/* Active / Completed Items Breakdown List */}
+              <div className="bg-steel/20 border border-steel/50 rounded-2xl p-6 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-steel/40 pb-3">
+                  <div>
+                    <h3 className="text-lg font-black text-sand uppercase tracking-tight">
+                      Your Active Claimed Benefits & Shields
+                    </h3>
+                    <p className="text-sand/50 text-xs mt-0.5">
+                      Items marked as completed across your dashboard and planner. Click to toggle status.
+                    </p>
+                  </div>
+                  <span className="text-xs font-mono px-3 py-1 rounded-full bg-gold/10 border border-gold/30 text-gold font-bold">
+                    {Object.values(completedBenefits).filter(Boolean).length} Active Benefits
+                  </span>
+                </div>
+
+                <div className="space-y-2.5">
+                  {/* List of completed action steps & perks */}
+                  {[...ALL_DYNAMIC_STEPS, ...SPECIAL_PERKS]
+                    .filter(item => completedBenefits[item.id])
+                    .map((item, idx) => (
+                      <div key={idx} className="bg-steel-dark/70 border border-steel/40 hover:border-gold/30 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all">
+                        <div className="flex items-start gap-3">
+                          <button
+                            onClick={() => toggleBenefitCompleted(item.id)}
+                            className="w-5 h-5 rounded-md bg-gold border border-gold text-steel-dark flex items-center justify-center flex-shrink-0 mt-0.5"
+                            title="Click to unmark"
+                          >
+                            <CheckSquare size={13} />
+                          </button>
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-sm text-sand">{item.title}</span>
+                              <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-steel text-sand/60">
+                                {item.category || item.badge}
+                              </span>
+                            </div>
+                            <div className="text-xs text-sand/50 mt-0.5">
+                              {item.action || item.summary?.slice(0, 100) + '...'}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 self-end sm:self-center font-mono">
+                          <span className="text-xs font-black text-gold bg-gold/10 border border-gold/20 px-2.5 py-1 rounded-lg whitespace-nowrap">
+                            {item.value || (item.annualValue ? `$${item.annualValue.toLocaleString()}/yr` : 'Active')}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+
+                  {Object.values(completedBenefits).filter(Boolean).length === 0 && (
+                    <div className="p-8 text-center text-sand/40 font-mono text-xs border border-dashed border-steel/40 rounded-xl">
+                      No benefits marked as completed yet. Explore the Planner or Perks tab and click "Mark as Completed" on any benefit you have already claimed!
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Next Highest Value Opportunities To Unlock */}
+              <div className="bg-steel/20 border border-steel/50 rounded-2xl p-6 space-y-4">
+                <div className="border-b border-steel/40 pb-3">
+                  <h3 className="text-lg font-black text-sand uppercase tracking-tight flex items-center gap-2">
+                    <Target size={18} className="text-scarlet"/>
+                    Next Unclaimed High-Value Opportunities
+                  </h3>
+                  <p className="text-sand/50 text-xs mt-0.5">
+                    Benefits you qualify for that haven't been claimed yet. Click "Mark Completed" once you finish applying to update your numbers.
+                  </p>
+                </div>
+
+                <div className="grid gap-3">
+                  {[...ALL_DYNAMIC_STEPS, ...SPECIAL_PERKS]
+                    .filter(item => !completedBenefits[item.id] && (!item.showWhen || item.showWhen({ currentRating, dischargeType, yearsOfService, servedPost911, exposedBurnPit, alreadyOut, hasDependents, separationMonths, selectedState })))
+                    .slice(0, 5)
+                    .map((item, idx) => (
+                      <div key={idx} className="bg-steel-dark/40 border border-steel/40 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                          <div className="font-bold text-sm text-sand">{item.title}</div>
+                          <div className="text-xs text-sand/50 mt-0.5">{item.why || item.summary?.slice(0, 90) + '...'}</div>
+                          <div className="text-xs font-mono text-gold font-bold mt-1">Est. Value: {item.value}</div>
+                        </div>
+                        <button
+                          onClick={() => toggleBenefitCompleted(item.id)}
+                          className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-steel-dark border border-steel/60 hover:border-gold hover:text-gold text-sand/70 transition-all whitespace-nowrap self-start sm:self-center flex items-center gap-1.5"
+                        >
+                          <Plus size={12}/> Mark as Claimed
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* ============================================================ */}
           {/* TAB 1: LIFE & WEALTH PLANNER (DEEPLY PERSONALIZED)           */}
@@ -1805,17 +2132,30 @@ const VeteranBenefitsCompass = () => {
                               <span className="text-xs text-gold font-mono font-bold">WHY THIS MATTERS: </span>
                               <span className="text-xs text-sand/60">{step.why}</span>
                             </div>
-                            <div className="flex items-center justify-between gap-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
                               <div className="text-xs font-mono">
                                 <span className="text-sand/40">Est. Value: </span>
                                 <span className="text-gold font-bold">{step.value}</span>
                               </div>
-                              {step.link && (
-                                <a href={step.link} target="_blank" rel="noopener noreferrer"
-                                  className="flex items-center gap-1 text-xs text-scarlet hover:text-red-400 transition-colors font-mono uppercase tracking-wider">
-                                  Take Action <ExternalLink size={10}/>
-                                </a>
-                              )}
+                              <div className="flex items-center gap-3">
+                                <button
+                                  onClick={() => toggleBenefitCompleted(step.id)}
+                                  className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
+                                    completedBenefits[step.id]
+                                      ? 'bg-gold text-steel-dark border border-gold shadow-md'
+                                      : 'bg-steel-dark border border-steel/60 text-sand/60 hover:text-sand hover:border-gold/40'
+                                  }`}
+                                >
+                                  <CheckSquare size={12} />
+                                  {completedBenefits[step.id] ? '✓ Claimed / Completed' : 'Mark as Completed'}
+                                </button>
+                                {step.link && (
+                                  <a href={step.link} target="_blank" rel="noopener noreferrer"
+                                    className="flex items-center gap-1 text-xs text-scarlet hover:text-red-400 transition-colors font-mono uppercase tracking-wider">
+                                    Take Action <ExternalLink size={10}/>
+                                  </a>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -2367,8 +2707,19 @@ const VeteranBenefitsCompass = () => {
                           <div className="text-xs font-mono text-gold font-black uppercase mb-1">Insider Pro-Tip:</div>
                           <p className="text-xs text-sand/80 leading-relaxed">{perk.proTip}</p>
                         </div>
-                        {perk.officialLink && (
-                          <div className="pt-3">
+                        <div className="pt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-gold/20">
+                          <button
+                            onClick={() => toggleBenefitCompleted(perk.id)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
+                              completedBenefits[perk.id]
+                                ? 'bg-gold text-steel-dark border border-gold shadow-md'
+                                : 'bg-steel-dark border border-steel/60 text-sand/60 hover:text-sand hover:border-gold/40'
+                            }`}
+                          >
+                            <CheckSquare size={12} />
+                            {completedBenefits[perk.id] ? '✓ Claimed & Active' : 'Mark Benefit Claimed'}
+                          </button>
+                          {perk.officialLink && (
                             <a
                               href={perk.officialLink}
                               target="_blank"
@@ -2377,8 +2728,8 @@ const VeteranBenefitsCompass = () => {
                             >
                               Official Portal & Application Instructions <ExternalLink size={11} />
                             </a>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
                     </div>
 
@@ -2565,7 +2916,8 @@ const VeteranBenefitsCompass = () => {
                 {filteredMilestones.map(m=>(
                   <button key={m.id}
                     onClick={()=>{
-                      const updated = {...completedMilestones, [m.id]: !completedMilestones[m.id]};
+                      const updated = {...completedMilestones,
+      completedBenefits, [m.id]: !completedMilestones[m.id]};
                       setCompletedMilestones(updated);
                       // Auto-save
                       try {
