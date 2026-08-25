@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
-  Compass, ChevronRight, ChevronLeft,
+  Compass, Quote, ChevronRight, ChevronLeft,
   CheckCircle, Award, ArrowRight,
   Plus, Trash2, Search, Upload, FileText,
   Phone, TrendingUp, Target, Cpu,
@@ -519,6 +519,27 @@ const ALL_MILESTONES = [
 // -----------------------------------------------------------------------
 const VeteranBenefitsCompass = () => {
 
+  // ---- Inspirational Splash Screen State ----
+  const [showSplash, setShowSplash] = useState(true);
+  const [splashFading, setSplashFading] = useState(false);
+
+  useEffect(() => {
+    // Auto-advance after 4.5 seconds with smooth 500ms fade
+    const fadeTimer = setTimeout(() => {
+      setSplashFading(true);
+    }, 4200);
+
+    const removeTimer = setTimeout(() => {
+      setShowSplash(false);
+    }, 4700);
+
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(removeTimer);
+    };
+  }, []);
+
+
   // ---- Routing ----
   const [currentPage, setCurrentPage] = useState('landing');
   const [wizardStep, setWizardStep] = useState(0);
@@ -975,6 +996,54 @@ const VeteranBenefitsCompass = () => {
       <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-20 pointer-events-none"/>
       <CrisisBanner/>
       <EmailSyncModal/>
+      {/* Inspirational Opening Quote Overlay */}
+      {showSplash && (
+        <div
+          className={`fixed inset-0 z-50 bg-gray-950/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center transition-opacity duration-500 ${
+            splashFading ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          }`}
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(#990000_1px,transparent_1px)] [background-size:28px_28px] opacity-15 pointer-events-none"/>
+          
+          <div className="max-w-2xl mx-auto space-y-6 relative z-10 animate-fade-in">
+            <div className="w-14 h-14 rounded-full bg-gold/10 border border-gold/30 mx-auto flex items-center justify-center text-gold shadow-lg shadow-gold/10">
+              <Quote size={28} className="text-gold animate-pulse" />
+            </div>
+
+            <div className="space-y-4">
+              <span className="text-xs font-mono tracking-widest text-gold uppercase px-3 py-1 rounded-full bg-gold/5 border border-gold/20 font-bold inline-block">
+                A Message From The Founder
+              </span>
+              
+              <blockquote className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-sand leading-snug">
+                "Many of our U.S. service members don't know the amount of <span className="text-gold">financial freedom</span> that can be acquired after leaving the military. This free website will give you the <span className="text-scarlet">ultimate guide</span> and foundation in which you should take as a veteran or soon to be."
+              </blockquote>
+
+              <div className="pt-2 text-xs font-mono text-sand/60">
+                <span className="text-gold font-bold">FOUNDER & MARINE VETERAN</span> • VET-COMPASS
+              </div>
+            </div>
+
+            <div className="pt-4 flex flex-col items-center gap-3">
+              <button
+                onClick={() => {
+                  setSplashFading(true);
+                  setTimeout(() => setShowSplash(false), 300);
+                }}
+                className="px-6 py-2.5 bg-scarlet hover:bg-red-800 text-sand text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-lg flex items-center gap-2 group"
+              >
+                Enter Portal <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+              </button>
+
+              {/* Visual countdown progress line */}
+              <div className="w-48 h-1 bg-steel/40 rounded-full overflow-hidden border border-steel/60">
+                <div className="h-full bg-gold animate-[width_4.2s_linear]" style={{ width: '100%', animation: 'shrink 4.2s linear forwards' }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       <header className="border-b border-steel/50 bg-steel-dark/90 backdrop-blur-md py-4 px-6 relative z-10">
         <div className="max-w-7xl mx-auto flex justify-between items-center font-mono">
