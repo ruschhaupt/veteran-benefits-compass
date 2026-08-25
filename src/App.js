@@ -527,11 +527,11 @@ const VeteranBenefitsCompass = () => {
     // Auto-advance after 4.5 seconds with smooth 500ms fade
     const fadeTimer = setTimeout(() => {
       setSplashFading(true);
-    }, 4200);
+    }, 8400);
 
     const removeTimer = setTimeout(() => {
       setShowSplash(false);
-    }, 4700);
+    }, 9000);
 
     return () => {
       clearTimeout(fadeTimer);
@@ -1033,7 +1033,7 @@ const VeteranBenefitsCompass = () => {
 
               {/* Visual countdown progress line */}
               <div className="w-48 h-1 bg-steel/40 rounded-full overflow-hidden border border-steel/60">
-                <div className="h-full bg-gold animate-[width_4.2s_linear]" style={{ width: '100%', animation: 'shrink 4.2s linear forwards' }} />
+                <div className="h-full bg-gold animate-[width_8.4s_linear]" style={{ width: '100%', animation: 'shrink 8.4s linear forwards' }} />
               </div>
             </div>
           </div>
