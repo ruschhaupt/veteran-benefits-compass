@@ -1253,6 +1253,9 @@ const VeteranBenefitsCompass = () => {
   const [hhInsurance, setHhInsurance] = useState(200);
 
 
+  // ---- Perks Accordion State ----
+  const [expandedPerk, setExpandedPerk] = useState(null);
+
   // ---- Avenues Accordion State ----
   const [expandedAvenue, setExpandedAvenue] = useState(null);
   const [avenueHasDeps, setAvenueHasDeps] = useState(false);
@@ -3225,7 +3228,8 @@ const VeteranBenefitsCompass = () => {
           {/* TAB 4: HIGH-VALUE PERKS (SPACE-A, DENTAL, ADAPTIVE GRANTS)    */}
           {/* ============================================================ */}
           {activeTab === 'perks' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
+              {/* Header */}
               <div className="bg-steel/20 border border-steel/50 rounded-2xl p-6">
                 <div className="flex items-center gap-2 text-gold font-mono text-xs uppercase tracking-widest font-bold mb-1">
                   <Sparkles size={14} /> Comprehensive Veteran Entitlements
@@ -3234,115 +3238,132 @@ const VeteranBenefitsCompass = () => {
                   High-Value <span className="text-gold">Hidden Perks & Grants</span>
                 </h2>
                 <p className="text-sand/60 text-sm mt-1 max-w-2xl leading-relaxed">
-                  Most veterans only know about monthly disability compensation. Below is the ultimate deep-dive guide to free international military flights, $117k adaptive housing grants, free comprehensive dental pathways, and lifetime tax-free shopping.
+                  Most veterans only know about monthly disability compensation. Click any perk below to reveal the full step-by-step application guide, eligibility criteria, required documents, and insider tips.
                 </p>
               </div>
 
-              {/* Category Quick Filter */}
-              <div className="grid gap-6">
-                {SPECIAL_PERKS.map((perk)=>(
-                  <div key={perk.id} className="bg-steel/20 border border-steel/50 rounded-2xl p-6 space-y-5 transition-all hover:border-gold/40 shadow-xl">
-                    
-                    {/* Header Row */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-steel/40 pb-4">
-                      <div>
-                        <div className="flex items-center gap-2 flex-wrap mb-1">
-                          <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-gold/10 border border-gold/30 text-gold font-bold">
-                            {perk.badge}
-                          </span>
-                          <span className="text-xs font-mono px-2 py-0.5 rounded bg-steel-dark text-sand/60 border border-steel/40">
-                            {perk.formNumber}
-                          </span>
-                        </div>
-                        <h3 className="font-black text-xl text-sand tracking-tight">
-                          {perk.title}
-                        </h3>
-                      </div>
-                      <div className="bg-scarlet/15 border border-scarlet/40 px-3 py-1.5 rounded-xl text-right self-start md:self-auto">
-                        <div className="text-[10px] font-mono uppercase text-sand/50">Estimated Value</div>
-                        <div className="text-sm font-black text-sand">{perk.value}</div>
-                      </div>
-                    </div>
-
-                    {/* Summary */}
-                    <p className="text-sm text-sand/80 leading-relaxed font-normal">
-                      {perk.summary}
-                    </p>
-
-                    {/* Eligibility & Criteria */}
-                    <div className="bg-steel-dark/60 border border-steel/40 rounded-xl p-4 space-y-2">
-                      <div className="text-xs font-mono uppercase tracking-wider text-gold font-bold flex items-center gap-1.5">
-                        <CheckCircle size={13} /> Strict Eligibility Criteria:
-                      </div>
-                      <ul className="space-y-1.5 text-xs text-sand/70">
-                        {perk.eligibility.map((el, i)=>(
-                          <li key={i} className="flex items-start gap-2">
-                            <span className="text-gold font-black">-</span>
-                            <span>{el}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* Step by Step Walkthrough */}
-                    <div className="space-y-3">
-                      <div className="text-xs font-mono uppercase tracking-wider text-sand/50 font-bold">
-                        Step-by-Step How to Apply & Access:
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {perk.stepByStep.map((s, idx)=>(
-                          <div key={idx} className="bg-steel-dark/40 border border-steel/40 rounded-xl p-3.5 flex flex-col justify-between">
-                            <div className="font-bold text-xs text-gold mb-1">{s.step}</div>
-                            <p className="text-xs text-sand/70 leading-relaxed">{s.detail}</p>
+              {/* Accordion Perk Cards */}
+              <div className="space-y-2">
+                {SPECIAL_PERKS.map((perk) => {
+                  const isOpen = expandedPerk === perk.id;
+                  return (
+                    <div
+                      key={perk.id}
+                      className={`rounded-2xl border transition-all duration-200 ${
+                        isOpen
+                          ? 'border-gold/60 bg-steel/30 shadow-xl shadow-gold/5'
+                          : 'border-steel/50 bg-steel/20 hover:border-gold/30'
+                      }`}
+                    >
+                      {/* Accordion Header - Always Visible */}
+                      <button
+                        className="w-full text-left p-5 flex items-center justify-between gap-4"
+                        onClick={() => setExpandedPerk(isOpen ? null : perk.id)}
+                      >
+                        <div className="flex items-center gap-4 min-w-0">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                              <h3 className="font-black text-base text-sand truncate">{perk.title}</h3>
+                            </div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-gold/10 border border-gold/30 text-gold font-bold whitespace-nowrap">
+                                {perk.badge}
+                              </span>
+                              <span className="text-xs font-black text-gold">{perk.value}</span>
+                            </div>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Required Documents & Pro Tip Row */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
-                      <div className="bg-steel-dark/60 border border-steel/40 rounded-xl p-4 space-y-1.5">
-                        <div className="text-xs font-mono text-gold font-bold uppercase">Required Documentation:</div>
-                        <ul className="text-xs text-sand/60 space-y-1 font-mono">
-                          {perk.requiredDocs.map((doc, dIdx)=>(
-                            <li key={dIdx}>- {doc}</li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      <div className="bg-gold/5 border border-gold/20 rounded-xl p-4 flex flex-col justify-between">
-                        <div>
-                          <div className="text-xs font-mono text-gold font-black uppercase mb-1">Insider Pro-Tip:</div>
-                          <p className="text-xs text-sand/80 leading-relaxed">{perk.proTip}</p>
                         </div>
-                        <div className="pt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-gold/20">
-                          <button
-                            onClick={() => toggleBenefitCompleted(perk.id)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
-                              completedBenefits[perk.id]
-                                ? 'bg-gold text-steel-dark border border-gold shadow-md'
-                                : 'bg-steel-dark border border-steel/60 text-sand/60 hover:text-sand hover:border-gold/40'
-                            }`}
-                          >
-                            <CheckSquare size={12} />
-                            {completedBenefits[perk.id] ? 'Claimed & Active' : 'Mark Benefit Claimed'}
-                          </button>
-                          {perk.officialLink && (
-                            <a
-                              href={perk.officialLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 text-xs text-scarlet hover:text-red-400 font-mono font-bold uppercase tracking-wider transition-colors"
+                        <div className={`flex-shrink-0 w-8 h-8 rounded-full border flex items-center justify-center transition-all ${
+                          isOpen ? 'border-gold bg-gold text-steel-dark' : 'border-steel/60 text-sand/60'
+                        }`}>
+                          <ChevronRight size={16} className={`transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}/>
+                        </div>
+                      </button>
+
+                      {/* Expanded Content */}
+                      {isOpen && (
+                        <div className="px-5 pb-6 border-t border-steel/40 pt-5 space-y-5">
+
+                          {/* Summary */}
+                          <p className="text-sm text-sand/80 leading-relaxed">{perk.summary}</p>
+
+                          {/* Eligibility */}
+                          <div className="bg-steel-dark/60 border border-steel/40 rounded-xl p-4 space-y-2">
+                            <div className="text-xs font-mono uppercase tracking-wider text-gold font-bold flex items-center gap-1.5">
+                              <CheckCircle size={13} /> Eligibility Criteria
+                            </div>
+                            <ul className="space-y-1.5 text-xs text-sand/70">
+                              {perk.eligibility.map((el, i) => (
+                                <li key={i} className="flex items-start gap-2">
+                                  <span className="text-gold font-black mt-0.5 flex-shrink-0">-</span>
+                                  <span>{el}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          {/* Step by Step */}
+                          <div className="space-y-2">
+                            <div className="text-xs font-mono uppercase tracking-wider text-sand/50 font-bold">
+                              Step-by-Step Application Guide
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              {perk.stepByStep.map((s, idx) => (
+                                <div key={idx} className="bg-steel-dark/40 border border-steel/40 rounded-xl p-3.5">
+                                  <div className="font-bold text-xs text-gold mb-1">{s.step}</div>
+                                  <p className="text-xs text-sand/70 leading-relaxed">{s.detail}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Required Docs + Pro Tip */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="bg-steel-dark/60 border border-steel/40 rounded-xl p-4 space-y-1.5">
+                              <div className="text-xs font-mono text-gold font-bold uppercase">Required Documents</div>
+                              <ul className="text-xs text-sand/60 space-y-1 font-mono">
+                                {perk.requiredDocs.map((doc, dIdx) => (
+                                  <li key={dIdx}>- {doc}</li>
+                                ))}
+                              </ul>
+                            </div>
+
+                            <div className="bg-gold/5 border border-gold/20 rounded-xl p-4 space-y-2">
+                              <div className="text-xs font-mono text-gold font-black uppercase">Insider Pro-Tip</div>
+                              <p className="text-xs text-sand/80 leading-relaxed">{perk.proTip}</p>
+                            </div>
+                          </div>
+
+                          {/* Footer: Complete Toggle + Official Link */}
+                          <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-steel/40">
+                            <button
+                              onClick={() => toggleBenefitCompleted(perk.id)}
+                              className={`px-4 py-2 rounded-lg text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
+                                completedBenefits[perk.id]
+                                  ? 'bg-gold text-steel-dark border border-gold shadow-md'
+                                  : 'bg-steel-dark border border-steel/60 text-sand/60 hover:text-sand hover:border-gold/40'
+                              }`}
                             >
-                              Official Portal & Application Instructions <ExternalLink size={11} />
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+                              <CheckSquare size={12} />
+                              {completedBenefits[perk.id] ? 'Claimed & Active' : 'Mark Benefit Claimed'}
+                            </button>
+                            {perk.officialLink && (
+                              <a
+                                href={perk.officialLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 text-xs text-scarlet hover:text-red-400 font-mono font-bold uppercase tracking-wider transition-colors"
+                              >
+                                Official Application Portal <ExternalLink size={11} />
+                              </a>
+                            )}
+                          </div>
 
-                  </div>
-                ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
