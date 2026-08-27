@@ -1,12 +1,13 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
-  Compass, ChevronRight, ChevronLeft, BarChart3, DollarSign,
-  CheckCircle, Award, ArrowRight,
+  Compass, ChevronRight, BarChart3, DollarSign,
+  CheckCircle, Award,
   Plus, Trash2, Search, Upload, FileText,
   Phone, TrendingUp, Target, Cpu,
-  ExternalLink, X, Activity, Flag, Info,
-  Home, CheckSquare, Save, User, Mail, ShieldAlert,
-  Sparkles, Quote
+  ExternalLink, X, Activity, Flag,
+  Home, CheckSquare, Save, User, ShieldAlert,
+  Sparkles, Quote, Copy, Sliders, ShieldCheck, AlertTriangle, Printer, Share2,
+  Check, Calculator, Shield, Clock
 } from 'lucide-react';
 
 // -----------------------------------------------------------------------
@@ -1137,6 +1138,132 @@ const AVENUES_DATA = [
 ];
 
 
+
+// -----------------------------------------------------------------------
+// PACT ACT & TOXIC EXPOSURE DATABASE (MODULE SCOPE)
+// -----------------------------------------------------------------------
+const PACT_ACT_THEATERS = [
+  {
+    id: 'burn_pits',
+    name: 'Post-9/11 & Gulf War (Burn Pits & Airborne Toxins)',
+    era: '1990 - Present (Gulf War, OIF, OEF, OIR, OND)',
+    locations: 'Iraq, Afghanistan, Kuwait, Saudi Arabia, UAE, Qatar, Bahrain, Oman, Gulf of Aden, Gulf of Oman, Persian Gulf, Red Sea, Arabian Sea, Uzbekistan, Syria, Jordan, Egypt, Lebanon, Yemen, Djibouti, Somalia',
+    statute: '38 U.S.C. § 1120 (PACT Act Section 406)',
+    rules: 'If you served in any of these qualifying locations during the specified dates, the VA legally MUST presume your condition is service-connected. You do NOT need a nexus letter or in-service injury record -- only proof of deployment (DD-214) and a current diagnosis.',
+    conditions: [
+      { name: 'Asthma (diagnosed after separation)', dc: '6602', maxRating: '100%', commonRating: '10-30%', dbq: 'Respiratory Conditions DBQ', evidence: 'PFT (Pulmonary Function Test) or daily inhaler prescription.' },
+      { name: 'Chronic Bronchitis', dc: '6600', maxRating: '100%', commonRating: '10-30%', dbq: 'Respiratory Conditions DBQ', evidence: 'Medical records demonstrating persistent chronic productive cough.' },
+      { name: 'Chronic Rhinitis', dc: '6522', maxRating: '30%', commonRating: '10-30%', dbq: 'Sinusitis & Rhinitis DBQ', evidence: 'Doctor note confirming 50%+ nasal obstruction or polyps.' },
+      { name: 'Chronic Sinusitis', dc: '6510-6514', maxRating: '50%', commonRating: '10-30%', dbq: 'Sinusitis & Rhinitis DBQ', evidence: 'CT scan or doctor records showing 3+ non-incapacitating episodes per year.' },
+      { name: 'Constrictive Bronchiolitis', dc: '6600', maxRating: '100%', commonRating: '30-100%', dbq: 'Respiratory Conditions DBQ', evidence: 'HRCT scan or biopsy confirming small airway scarring.' },
+      { name: 'COPD (Chronic Obstructive Pulmonary Disease)', dc: '6604', maxRating: '100%', commonRating: '30-60%', dbq: 'Respiratory Conditions DBQ', evidence: 'PFT FEV-1/FVC ratios confirming airway obstruction.' },
+      { name: 'Glioblastoma & Brain Cancers', dc: '8002', maxRating: '100%', commonRating: '100%', dbq: 'Central Nervous System DBQ', evidence: 'Pathology/oncology report confirming diagnosis (Automatic 100% while active).' },
+      { name: 'Gastrointestinal Cancers (Colon, Stomach, Pancreas, Esophagus)', dc: '7343', maxRating: '100%', commonRating: '100%', dbq: 'Digestive Cancers DBQ', evidence: 'Biopsy or oncology pathology report.' },
+      { name: 'Respiratory / Lung Cancers', dc: '6819', maxRating: '100%', commonRating: '100%', dbq: 'Respiratory Cancers DBQ', evidence: 'Oncology records confirming primary respiratory malignancy.' },
+      { name: 'Head / Neck / Pharyngeal Cancers', dc: '6819', maxRating: '100%', commonRating: '100%', dbq: 'Ear, Nose & Throat DBQ', evidence: 'Biopsy confirming malignancy of oral cavity, pharynx, or larynx.' },
+      { name: 'Kidney / Renal Cancer', dc: '7528', maxRating: '100%', commonRating: '100%', dbq: 'Genitourinary DBQ', evidence: 'Renal biopsy or surgical oncology report.' },
+      { name: 'Lymphoma (Hodgkin & Non-Hodgkin)', dc: '7709', maxRating: '100%', commonRating: '100%', dbq: 'Hemic and Lymphatic DBQ', evidence: 'Lymph node biopsy and hematology records.' },
+      { name: 'Melanoma', dc: '7826', maxRating: '100%', commonRating: '100%', dbq: 'Skin Conditions DBQ', evidence: 'Dermatopathology report verifying malignant melanoma.' },
+      { name: 'Pulmonary Fibrosis', dc: '6825', maxRating: '100%', commonRating: '30-100%', dbq: 'Respiratory Conditions DBQ', evidence: 'High-resolution CT or PFT showing diffusion capacity impairment.' },
+      { name: 'Hypertension (High Blood Pressure)', dc: '7101', maxRating: '60%', commonRating: '10-20%', dbq: 'Hypertension DBQ', evidence: 'Readings confirming diastolic BP 100+ or systolic BP 160+.' },
+      { name: 'Monoclonal Gammopathy of Undetermined Significance (MGUS)', dc: '7712', maxRating: '100%', commonRating: '0-100%', dbq: 'Hemic DBQ', evidence: 'Serum protein electrophoresis confirming M-protein spike.' }
+    ]
+  },
+  {
+    id: 'camp_lejeune',
+    name: 'Camp Lejeune & MCAS New River Toxic Water',
+    era: 'August 1, 1953 - December 31, 1987',
+    locations: 'Marine Corps Base Camp Lejeune or Marine Corps Air Station (MCAS) New River, North Carolina',
+    statute: '38 CFR § 3.307(a)(7) & PACT Act Section 804',
+    rules: 'Veterans who served at Camp Lejeune or MCAS New River for at least 30 cumulative days (consecutive or non-consecutive) between 1953 and 1987 qualify for presumptive service connection and free VA healthcare for qualifying conditions.',
+    conditions: [
+      { name: 'Adult Leukemia', dc: '7703', maxRating: '100%', commonRating: '100%', dbq: 'Hematologic Cancers DBQ', evidence: 'Bone marrow aspirate or peripheral blood smear confirming leukemia.' },
+      { name: 'Aplastic Anemia & Myelodysplastic Syndromes', dc: '7716', maxRating: '100%', commonRating: '30-100%', dbq: 'Hemic DBQ', evidence: 'Complete blood count and bone marrow biopsy confirming marrow failure.' },
+      { name: 'Bladder Cancer', dc: '7528', maxRating: '100%', commonRating: '100%', dbq: 'Genitourinary Cancers DBQ', evidence: 'Cystoscopy and tissue pathology confirming urothelial carcinoma.' },
+      { name: 'Kidney Cancer', dc: '7528', maxRating: '100%', commonRating: '100%', dbq: 'Genitourinary Cancers DBQ', evidence: 'Renal imaging and biopsy confirming renal cell carcinoma.' },
+      { name: 'Liver Cancer', dc: '7343', maxRating: '100%', commonRating: '100%', dbq: 'Digestive Cancers DBQ', evidence: 'Histopathology verifying hepatocellular carcinoma.' },
+      { name: 'Multiple Myeloma', dc: '7709', maxRating: '100%', commonRating: '100%', dbq: 'Hemic Cancers DBQ', evidence: 'Serum/urine protein electrophoresis and bone marrow biopsy.' },
+      { name: 'Non-Hodgkin Lymphoma', dc: '7715', maxRating: '100%', commonRating: '100%', dbq: 'Lymphoma DBQ', evidence: 'Excisional lymph node biopsy confirming NHL.' },
+      { name: 'Parkinson’s Disease', dc: '8105', maxRating: '100%', commonRating: '30-100%', dbq: 'Parkinson’s DBQ', evidence: 'Neurology evaluation confirming resting tremor, rigidity, or bradykinesia.' }
+    ]
+  },
+  {
+    id: 'agent_orange',
+    name: 'Vietnam Era / Agent Orange & Tactical Herbicides',
+    era: '1962 - 1975',
+    locations: 'Republic of Vietnam (inland & territorial waters 12 nautical miles), Thailand military base perimeters, Korean DMZ (1967-1971), Guam/Johnston Atoll/American Samoa, C-123 aircraft flight crews',
+    statute: '38 U.S.C. § 1116 & PACT Act Section 403',
+    rules: 'Veterans with verified boots on the ground, Blue Water Navy service, or qualified herbicide storage locations receive automatic presumptive service connection without needing to prove chemical exposure.',
+    conditions: [
+      { name: 'Type 2 Diabetes Mellitus', dc: '7913', maxRating: '100%', commonRating: '20-40%', dbq: 'Endocrine DBQ', evidence: 'Lab fasting glucose or A1c > 6.5% + daily medication or insulin.' },
+      { name: 'Hypertension (High Blood Pressure)', dc: '7101', maxRating: '60%', commonRating: '10-20%', dbq: 'Cardiovascular DBQ', evidence: 'Medical chart readings of diastolic BP 100+ or systolic BP 160+.' },
+      { name: 'Monoclonal Gammopathy (MGUS)', dc: '7712', maxRating: '100%', commonRating: '0-100%', dbq: 'Hemic DBQ', evidence: 'Blood test showing monoclonal protein in serum.' },
+      { name: 'Ischemic Heart Disease / Coronary Artery Disease', dc: '7005', maxRating: '100%', commonRating: '30-60%', dbq: 'Cardiovascular DBQ', evidence: 'METs exercise stress test or ejection fraction under 50%.' },
+      { name: 'Parkinsonism & Parkinson’s Disease', dc: '8105', maxRating: '100%', commonRating: '30-100%', dbq: 'Neurological DBQ', evidence: 'Neurologist diagnosis with motor symptom tracking.' },
+      { name: 'Prostate Cancer', dc: '7528', maxRating: '100%', commonRating: '100%', dbq: 'Genitourinary Cancers DBQ', evidence: 'Prostate biopsy report confirming adenocarcinoma.' },
+      { name: 'Peripheral Neuropathy (Early-Onset)', dc: '8520', maxRating: '40% per limb', commonRating: '10-20%', dbq: 'Peripheral Nerves DBQ', evidence: 'EMG/NCS nerve conduction study or sensory exam notes.' },
+      { name: 'Respiratory Cancers (Lung, Bronchus, Larynx, Trachea)', dc: '6819', maxRating: '100%', commonRating: '100%', dbq: 'Respiratory Cancers DBQ', evidence: 'Pathology confirming respiratory malignancy.' }
+    ]
+  },
+  {
+    id: 'radiation',
+    name: 'Radiation & Nuclear Cleanup Exposure',
+    era: 'WWII to 1990s',
+    locations: 'Enewetak Atoll (1977-1980), Palomares B-52 crash (1966), Thule Greenland B-52 crash (1968), Amchitka Island Alaska, Hiroshima/Nagasaki occupation, Atmospheric nuclear test sites',
+    statute: '38 CFR § 3.309(d) & PACT Act Section 401',
+    rules: 'Veterans who participated in nuclear testing, cleanups, or decontamination operations are entitled to presumptive disability compensation for radiogenic cancers and diseases.',
+    conditions: [
+      { name: 'Leukemia (any except chronic lymphocytic)', dc: '7703', maxRating: '100%', commonRating: '100%', dbq: 'Hematologic DBQ', evidence: 'Bone marrow aspirate pathology report.' },
+      { name: 'Thyroid Cancer & Nodular Thyroid Disease', dc: '7903', maxRating: '100%', commonRating: '30-100%', dbq: 'Endocrine DBQ', evidence: 'Ultrasound and fine needle aspiration biopsy.' },
+      { name: 'Breast Cancer', dc: '7627', maxRating: '100%', commonRating: '100%', dbq: 'Breast Conditions DBQ', evidence: 'Mammography and tissue biopsy report.' },
+      { name: 'Bone Cancer (Osteosarcoma)', dc: '5012', maxRating: '100%', commonRating: '100%', dbq: 'Bone and Joint DBQ', evidence: 'Skeletal imaging and surgical biopsy.' },
+      { name: 'Cancers of the Bile Ducts, Gallbladder, & Pancreas', dc: '7343', maxRating: '100%', commonRating: '100%', dbq: 'Digestive Cancers DBQ', evidence: 'Abdominal CT/MRI and pathology report.' }
+    ]
+  }
+];
+
+// -----------------------------------------------------------------------
+// HIGH-YIELD SECONDARY CLAIMS ARSENAL (MODULE SCOPE)
+// -----------------------------------------------------------------------
+const SECONDARY_CLAIMS_DATA = [
+  {
+    primary: 'PTSD / Mental Health (30-100%)',
+    icon: '🧠',
+    secondaries: [
+      { condition: 'Obstructive Sleep Apnea (with CPAP)', potential: '50%', mechanism: 'Chronic hyperarousal and stress hormones cause airway collapse; PTSD medications (SSRIs/antipsychotics) cause weight gain resulting in OSA.' },
+      { condition: 'GERD / Acid Reflux / IBS', potential: '10-30%', mechanism: 'Vagus nerve disruption from chronic fight-or-flight stress causes excessive stomach acid secretion and gastrointestinal motility dysfunction.' },
+      { condition: 'Hypertension (High Blood Pressure)', potential: '10-20%', mechanism: 'Sustained sympathetic nervous system activation and elevated cortisol chronically constrict vascular walls.' },
+      { condition: 'Bruxism / TMJ (Teeth Grinding)', potential: '10-30%', mechanism: 'Unconscious jaw clenching and nocturnal grinding triggered by PTSD nightmares and hypervigilance.' }
+    ]
+  },
+  {
+    primary: 'Tinnitus (10% Flat Rate)',
+    icon: '👂',
+    secondaries: [
+      { condition: 'Migraine / Chronic Headaches', potential: '30-50%', mechanism: 'Continuous high-frequency acoustic nerve irritation triggers trigeminal nerve sensitization and prostrating headache episodes.' },
+      { condition: 'Somatic Symptom Disorder / Anxiety / Depression', potential: '30-70%', mechanism: 'Inability to experience silence creates chronic sleep deprivation, cognitive fatigue, and severe mood deterioration.' },
+      { condition: 'Sleep Disturbance / Insomnia', potential: '10-30%', mechanism: 'Acoustic masking failure at night prevents progression into deep REM sleep cycles.' }
+    ]
+  },
+  {
+    primary: 'Lumbar / Cervical Spine Strain (10-40%)',
+    icon: '🦴',
+    secondaries: [
+      { condition: 'Radiculopathy (Sciatica / Femoral Nerve) - Bilateral', potential: '10-40% per limb', mechanism: 'Compressed nerve roots at L4-S1 or C5-C7 cause radiating pain, numbness, and tingling into legs/arms. Bilateral factor applies!' },
+      { condition: 'Bilateral Knee / Hip Degeneration (Altered Gait)', potential: '10-30% per joint', mechanism: 'Antalgic limping to protect painful spine causes asymmetric biomechanical loading on knees and hips.' },
+      { condition: 'Erectile Dysfunction (SMC-K)', potential: '$140/mo (SMC-K)', mechanism: 'Sacral nerve root compression or spinal analgesic medications impair vascular and neurological erectile response.' }
+    ]
+  },
+  {
+    primary: 'Chronic Pain & Musculoskeletal Conditions',
+    icon: '💊',
+    secondaries: [
+      { condition: 'GERD & Peptic Ulcer Disease (from NSAID use)', potential: '10-30%', mechanism: 'Years of prescribed high-dose Ibuprofen/Meloxicam/Naproxen erode gastric mucosal lining.' },
+      { condition: 'Major Depressive Disorder Secondary to Pain', potential: '30-70%', mechanism: 'Chronic unremitting pain destroys functional capacity, vocational outlook, and emotional regulation.' }
+    ]
+  }
+];
+
 const VeteranBenefitsCompass = () => {
 
   // ---- Inspirational Splash Screen State (12s Display Timer) ----
@@ -1160,14 +1287,15 @@ const VeteranBenefitsCompass = () => {
   }, []);
 
   // ---- Page Routing ----
-  const [currentPage, setCurrentPage] = useState('landing');
-  const [wizardStep, setWizardStep] = useState(0);
-
+    
   // ---- Profile State (Persisted in localStorage) ----
+  // eslint-disable-next-line no-unused-vars
+  const [currentPage, setCurrentPage] = useState('landing');
+  // eslint-disable-next-line no-unused-vars
+  const [isProfileSaved, setIsProfileSaved] = useState(false);
   const [userEmail, setUserEmail] = useState('');
   const [userName, setUserName] = useState('');
-  const [isProfileSaved, setIsProfileSaved] = useState(false);
-  const [showEmailModal, setShowEmailModal] = useState(false);
+    const [showEmailModal, setShowEmailModal] = useState(false);
 
   const [branch, setBranch] = useState('usmc');
   const [separationMonths, setSeparationMonths] = useState(6);
@@ -1252,6 +1380,69 @@ const VeteranBenefitsCompass = () => {
   const [hhDownPct, setHhDownPct] = useState(0);
   const [hhInsurance, setHhInsurance] = useState(200);
 
+
+
+  // ---- Pillar Navigation & Advanced Triage ----
+  const [activePillar, setActivePillar] = useState('all'); // 'all' | 'claims' | 'wealth' | 'life'
+  const [showDossierModal, setShowDossierModal] = useState(false);
+  const [showRankCardModal, setShowRankCardModal] = useState(false);
+  const [copiedNotification, setCopiedNotification] = useState(false);
+
+  // ---- VA Math Combat Engineer State ----
+  const [vaRatingsList, setVaRatingsList] = useState([70, 50, 20, 10]);
+    const [hasBilateralFactor, setHasBilateralFactor] = useState(false);
+
+  // ---- PACT Act Screener State ----
+  const [selectedPactTheater, setSelectedPactTheater] = useState('burn_pits');
+  const [checkedPactConditions, setCheckedPactConditions] = useState({});
+
+  // -----------------------------------------------------------------------
+  // VA NON-ADDITIVE MATH COMBAT CALCULATOR (38 CFR § 4.25)
+  // -----------------------------------------------------------------------
+  const calcVaMath = (ratingsArray, isBilateral = false) => {
+    if (!ratingsArray || ratingsArray.length === 0) {
+      return { sorted: [], rawTotal: '0.0', roundedRating: 0, pointsTo100: '95.0', is100: false, steps: [] };
+    }
+    const sorted = [...ratingsArray].filter(r => r > 0).sort((a, b) => b - a);
+    let remainingEfficiency = 1.0;
+    let totalDisabled = 0.0;
+    const steps = [];
+
+    sorted.forEach((r) => {
+      const disabledFromRemaining = remainingEfficiency * (r / 100);
+      totalDisabled += disabledFromRemaining;
+      remainingEfficiency -= disabledFromRemaining;
+      steps.push({
+        conditionRating: r,
+        addedValue: (disabledFromRemaining * 100).toFixed(1),
+        runningTotal: (totalDisabled * 100).toFixed(1),
+        runningEfficiency: (remainingEfficiency * 100).toFixed(1)
+      });
+    });
+
+    let rawTotal = totalDisabled * 100;
+    if (isBilateral) {
+      // 10% bilateral bonus added to the combined total before rounding
+      rawTotal = Math.min(100, rawTotal * 1.10);
+    }
+    const roundedRating = Math.min(100, Math.round(rawTotal / 10) * 10);
+    const pointsTo100 = Math.max(0, 95.0 - rawTotal);
+
+    return {
+      sorted,
+      rawTotal: rawTotal.toFixed(1),
+      roundedRating,
+      pointsTo100: pointsTo100.toFixed(1),
+      is100: roundedRating === 100,
+      steps
+    };
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    setCopiedNotification(true);
+    setTimeout(() => setCopiedNotification(false), 2500);
+  };
 
   // ---- Perks Accordion State ----
   const [expandedPerk, setExpandedPerk] = useState(null);
@@ -1622,6 +1813,7 @@ const VeteranBenefitsCompass = () => {
   // -----------------------------------------------------------------------
   // AVENUES DATA
   // -----------------------------------------------------------------------
+  // eslint-disable-next-line no-unused-vars
   const avenues = {
     expat: { label: 'The Expat Route', tagline: 'Your VA pay goes 3-10x further overseas.',
       bullets: [
@@ -1777,15 +1969,160 @@ const VeteranBenefitsCompass = () => {
   };
 
   // -----------------------------------------------------------------------
-  // LANDING PAGE WITH 12-SECOND INSPIRATIONAL OVERLAY
+  // COMMAND POST TABS MATRIX
   // -----------------------------------------------------------------------
-  if (currentPage === 'landing') return (
+  const tabs = [
+    { id:'summary',     pillar:'all',     icon:<BarChart3 size={14}/>,    label:'Summary & Value',        tooltip:'Real-time financial summary showing all completed benefits, tax-free annual income, and healthcare/tax savings.' },
+    { id:'vamath',      pillar:'claims',  icon:<Calculator size={14}/>,   label:'VA Math & 100% Path',    tooltip:'Interactive 38 CFR 4.25 non-additive combinator, whole-person efficiency visualizer, and high-yield secondary claim strategies.' },
+    { id:'pact',        pillar:'claims',  icon:<ShieldAlert size={14}/>,  label:'PACT Act Screener',      tooltip:'Interactive toxic exposure screener: burn pits, Camp Lejeune, Agent Orange, and radiation presumptive disease checklists + DBQs.' },
+    { id:'claims',      pillar:'claims',  icon:<Activity size={14}/>,     label:'Claims & C&P Sim',       tooltip:'Practice C&P exam DBQ scenarios, explore SMC tiers (SMC-K, SMC-S), and Diagnostic Lexicon.' },
+    { id:'househack',   pillar:'wealth',  icon:<Home size={14}/>,         label:'VA House Hacker',        tooltip:'Interactive multi-family (2-4 units) real estate calculator with $0-down mortgage, rent offsets, and state tax shields.' },
+    { id:'perks',       pillar:'wealth',  icon:<Sparkles size={14}/>,     label:'High-Value Perks',       tooltip:'Space-A free military flights (Category VI), America the Beautiful lifetime parks pass, Adaptive Housing Grants ($117k), and Free VA Dental Classes.' },
+    { id:'statematrix', pillar:'wealth',  icon:<Flag size={14}/>,         label:'State Matrix',           tooltip:'50-state comparison of property tax exemptions, state income tax shields, and tuition waivers.' },
+    { id:'avenues',     pillar:'life',    icon:<Compass size={14}/>,      label:'Avenues Playbooks',      tooltip:'Complete career and life routes: Education Stacking, Federal GS & Schedule A, SDVOSB $47B set-asides, Remote Tech, and Pure Freedom.' },
+    { id:'planner',     pillar:'life',    icon:<Target size={14}/>,       label:'Life & Wealth Planner',  tooltip:'Interactive goal-driven roadmap tailored to your rating + the 5-Stage Golden Stacking Protocol.' },
+    { id:'scanner',     pillar:'claims',  icon:<Cpu size={14}/>,          label:'Med Scanner',            tooltip:'In-browser scanner: cross-references your military medical records against VA Diagnostic Codes with zero data leaving your browser.' },
+    { id:'tracker',     pillar:'life',    icon:<Clock size={14}/>,        label:'Milestone Tracker',      tooltip:'Filtered action timeline tailored to your exact separation window.' },
+    { id:'discharge',   pillar:'claims',  icon:<Shield size={14}/>,       label:'Discharge Upgrade',      tooltip:'Step-by-step roadmap to upgrade General/OTH discharges to Honorable via DRB/BCMR.' },
+    { id:'directory',   pillar:'life',    icon:<Phone size={14}/>,        label:'Crisis & Resources',     tooltip:'Direct emergency hotlines, VSO links, and essential veteran assistance numbers.' }
+  ];
+
+
+  return (
     <div className="min-h-screen bg-steel-dark text-sand flex flex-col relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-20 pointer-events-none"/>
+            {/* Copy Notification Toast */}
+      {copiedNotification && (
+        <div className="fixed bottom-6 right-6 z-50 bg-gold text-steel-dark px-4 py-2.5 rounded-xl font-mono text-xs font-black shadow-2xl flex items-center gap-2 animate-fade-in">
+          <Check size={14} /> Copied to clipboard!
+        </div>
+      )}
+
+      {/* VSO Claim Dossier Modal */}
+      {showDossierModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-steel-dark border border-gold/40 rounded-3xl max-w-3xl w-full p-6 space-y-5 my-8 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-steel/40 pb-3">
+              <div className="flex items-center gap-2">
+                <FileText className="text-gold" size={20}/>
+                <h3 className="font-black text-lg text-sand uppercase">VSO Accredited Representative Claim Dossier</h3>
+              </div>
+              <button
+                onClick={() => setShowDossierModal(false)}
+                className="text-sand/40 hover:text-sand text-lg font-black"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="bg-steel/30 border border-steel/50 rounded-xl p-4 font-mono text-xs text-sand/80 space-y-3 leading-relaxed max-h-96 overflow-y-auto">
+              <div className="text-gold font-bold text-center border-b border-steel/40 pb-2">
+                === CONFIDENTIAL VETERAN SERVICE OFFICER (VSO) BRIEFING SHEET ===
+              </div>
+              <div><strong>Veteran Profile:</strong> {userName || 'U.S. Veteran'} | Branch: {bd.name}</div>
+              <div><strong>Current Disability Status:</strong> {currentRating}% Service-Connected | Target: 100% P&T</div>
+              <div><strong>Target State of Domicile:</strong> {stateInfo.name} ({stateInfo.taxStatus})</div>
+              <div><strong>Estimated Annual Tax-Free Cash:</strong> ${annualPay.toLocaleString()}/yr (${monthlyPay.toLocaleString()}/mo)</div>
+              
+              <div className="pt-2 border-t border-steel/40 font-bold text-gold">ACTIVE CONTENDED DIAGNOSES & TARGET DBQS:</div>
+              <div>- Review for Secondary Service Connection (Sleep Apnea, Radiculopathy, Migraines, GERD)</div>
+              <div>- Review PACT Act Presumptive Eligibility for Deployed Theaters</div>
+              <div>- Check SMC Eligibility (SMC-K for loss of creative organ / SMC-S for Housebound)</div>
+
+              <div className="pt-2 border-t border-steel/40 font-bold text-gold">CLAIMED & COMPLETED IN-BROWSER PERKS:</div>
+              {Object.keys(completedBenefits).filter(k => completedBenefits[k]).map((k, i) => (
+                <div key={i}>✓ {k}</div>
+              ))}
+              {Object.keys(completedBenefits).filter(k => completedBenefits[k]).length === 0 && (
+                <div className="text-sand/40">No benefits marked completed yet.</div>
+              )}
+            </div>
+
+            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2">
+              <button
+                onClick={() => {
+                  const completedList = Object.keys(completedBenefits).filter(k => completedBenefits[k]);
+                  const textToCopy = `=== VSO CLAIM BRIEFING DOSSIER ===\nVeteran: ${userName || 'U.S. Veteran'} (${bd.name})\nCurrent Rating: ${currentRating}%\nTarget State: ${stateInfo.name}\nMonthly Comp: $${monthlyPay.toLocaleString()}/mo\nAnnual Value: $${annualPay.toLocaleString()}/yr\n\nTarget Items:\n- Review for PACT Act Presumptives\n- Review for Secondary Connections (Sleep Apnea, Migraines, Radiculopathy, GERD)\n- Review for SMC-K / SMC-S add-ons\n\nClaimed Benefits:\n${completedList.map(c => `- ${c}`).join('\n') || '- None marked yet'}`;
+                  copyToClipboard(textToCopy);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-gold text-steel-dark font-black font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-1.5"
+              >
+                <Copy size={13}/> Copy Dossier Text
+              </button>
+              <button
+                onClick={() => window.print()}
+                className="px-5 py-2.5 rounded-xl bg-steel-dark border border-steel/60 hover:border-gold text-sand font-mono text-xs uppercase font-bold flex items-center justify-center gap-1.5"
+              >
+                <Printer size={13}/> Print Briefing Sheet
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Shareable Rank Card Modal */}
+      {showRankCardModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-steel-dark border border-gold/40 rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-steel/40 pb-3">
+              <div className="flex items-center gap-2">
+                <Award className="text-gold" size={20}/>
+                <h3 className="font-black text-lg text-sand uppercase">Veteran Benefit Rank Scorecard</h3>
+              </div>
+              <button
+                onClick={() => setShowRankCardModal(false)}
+                className="text-sand/40 hover:text-sand text-lg font-black"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Graphic Badge Preview */}
+            <div className="bg-gradient-to-br from-steel-dark via-steel/40 to-steel-dark border-2 border-gold/50 rounded-2xl p-6 text-center space-y-4 shadow-xl">
+              <div className="w-12 h-12 mx-auto rounded-full bg-gold/10 border border-gold/40 flex items-center justify-center text-gold">
+                <Compass size={24}/>
+              </div>
+              <div>
+                <div className="text-[11px] font-mono uppercase text-gold tracking-widest font-bold">VETERAN BENEFITS COMPASS</div>
+                <div className="text-xl font-black text-sand uppercase mt-1">{userName || bd.name + ' Veteran'}</div>
+                <div className="text-xs font-mono text-sand/60">{bd.badge} • {stateInfo.name} Domicile</div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-steel/40">
+                <div className="bg-steel-dark/60 rounded-xl p-3 border border-steel/40">
+                  <div className="text-[10px] font-mono text-sand/40 uppercase">VA Disability</div>
+                  <div className="text-lg font-black text-gold">{currentRating}% Rated</div>
+                  <div className="text-[10px] font-mono text-sand/60">${monthlyPay.toLocaleString()}/mo</div>
+                </div>
+                <div className="bg-steel-dark/60 rounded-xl p-3 border border-steel/40">
+                  <div className="text-[10px] font-mono text-sand/40 uppercase">Tax-Free Value</div>
+                  <div className="text-lg font-black text-emerald-400">${annualPay.toLocaleString()}</div>
+                  <div className="text-[10px] font-mono text-sand/60">Annual Shield</div>
+                </div>
+              </div>
+
+              <p className="text-[10px] font-mono text-sand/40">
+                Calculated anonymously at veteran-benefits-compass.vercel.app
+              </p>
+            </div>
+
+            <button
+              onClick={() => {
+                const textToCopy = `🎖️ My Veteran Wealth & Benefit Scorecard:\n- Status: ${bd.name} Veteran (${currentRating}% VA Rated)\n- State Domicile: ${stateInfo.name}\n- Monthly Tax-Free Comp: $${monthlyPay.toLocaleString()}/mo\n- Annual Financial Value: $${annualPay.toLocaleString()}/yr\n\nCalculate your free benefit roadmap at: https://veteran-benefits-compass.vercel.app`;
+                copyToClipboard(textToCopy);
+              }}
+              className="w-full py-3 rounded-xl bg-gold hover:bg-yellow-400 text-steel-dark font-black font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg"
+            >
+              <Copy size={13}/> Copy Scorecard to Share on Reddit / Discord
+            </button>
+          </div>
+        </div>
+      )}
+
       <CrisisBanner/>
       <EmailSyncModal/>
 
-      {/* Inspirational Opening Quote Overlay (12s Display) */}
+      {/* Inspirational Opening Quote Overlay (Dismissible with 12s Auto-Fade) */}
       {showSplash && (
         <div
           className={`fixed inset-0 z-50 bg-gray-950/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center transition-opacity duration-500 ${
@@ -1805,430 +2142,27 @@ const VeteranBenefitsCompass = () => {
               </blockquote>
 
               <div className="pt-3 text-sm font-mono tracking-wider text-gold font-black uppercase">
-                -- Sgt Rusch
+                - Sgt Rusch
               </div>
             </div>
 
-            <div className="pt-4 flex flex-col items-center gap-3">
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
               <button
-                onClick={() => {
-                  setSplashFading(true);
-                  setTimeout(() => setShowSplash(false), 300);
-                }}
-                className="px-6 py-2.5 bg-scarlet hover:bg-red-800 text-sand text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-lg flex items-center gap-2 group"
+                onClick={() => { setSplashFading(true); setTimeout(() => setShowSplash(false), 300); }}
+                className="px-6 py-3 rounded-xl bg-gold hover:bg-yellow-400 text-steel-dark font-black font-mono text-xs uppercase tracking-wider transition-all shadow-lg shadow-gold/20 flex items-center gap-2"
               >
-                Enter Portal <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                <Compass size={14} /> Enter Command Post (Skip)
               </button>
-
-              {/* Visual 12-second countdown progress line */}
-              <div className="w-48 h-1 bg-steel/40 rounded-full overflow-hidden border border-steel/60">
-                <div className="h-full bg-gold" style={{ width: '100%', animation: 'shrink 12s linear forwards' }} />
-              </div>
             </div>
+            
+            <p className="text-[11px] font-mono text-sand/40">
+              Autoloading Command Post in a few seconds...
+            </p>
           </div>
         </div>
       )}
 
-      <header className="border-b border-steel/50 bg-steel-dark/90 backdrop-blur-md py-4 px-6 relative z-10">
-        <div className="max-w-7xl mx-auto flex justify-between items-center font-mono">
-          <div className="flex items-center gap-3">
-            <div className="w-2.5 h-2.5 rounded-full bg-scarlet animate-ping"/>
-            <span className="text-xs tracking-widest uppercase opacity-70 font-bold">SITREP: ACTIVE TRANSITION PORTAL</span>
-          </div>
-          <div className="flex items-center gap-3">
-            {isProfileSaved && userEmail && (
-              <span className="text-xs border border-gold/40 px-2.5 py-1 rounded-full bg-gold/10 text-gold font-bold">
-                 Synced: {userName || userEmail}
-              </span>
-            )}
-            <span className="text-xs border border-gold/30 px-3 py-1 rounded bg-gold/5 text-gold font-bold">UNCLASSIFIED</span>
-          </div>
-        </div>
-      </header>
-
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-16 text-center relative z-10">
-        {/* Subtle Crayon Easter Egg */}
-        <div className="absolute top-8 right-8 text-3xl opacity-5 hover:opacity-40 transition-opacity cursor-default select-none" title="Every Marine's secret weapon">
-          {String.fromCodePoint(0x1F58D)}
-        </div>
-
-        <div className="mb-6 p-4 rounded-full bg-gold/5 border border-gold/20 inline-flex">
-          <Compass className="w-14 h-14 text-gold animate-pulse"/>
-        </div>
-
-        <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-4 uppercase">
-          Stepping Through <span className="text-scarlet">the Portal</span>
-        </h1>
-        <p className="text-xl text-sand/70 max-w-2xl mb-4 font-light">
-          The all-inclusive military transition portal. Every benefit, real estate house hack, C&P exam simulator, and wealth strategy -- fully tailored to your exact profile.
-        </p>
-        <p className="text-sm text-sand/40 mb-10">All branches. All paths. Zero fluff. Crayon-reader friendly.</p>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-w-2xl w-full mb-10 text-left">
-          {[
-            { icon:<Target size={16}/>,      title:'Tailored Wealth Planner',  desc:'Custom dynamic roadmap filtered to your exact rating' },
-            { icon:<Home size={16}/>,        title:'VA House Hacker Engine',   desc:'2-4 unit multi-family real estate calculator' },
-            { icon:<Activity size={16}/>,    title:'C&P Exam Simulator',       desc:'Practice DBQ scenarios & avoid trap answers' },
-            { icon:<FileText size={16}/>,     title:'Medical File Scanner',     desc:'Upload records, discover missed DC claims' },
-            { icon:<TrendingUp size={16}/>,   title:'VA Math Simulator',        desc:'Live combined whole-person calculation' },
-            { icon:<CheckSquare size={16}/>,  title:'Milestone Tracker',        desc:'Interactive transition checklist tailored to your status' },
-          ].map((f,i)=>(
-            <div key={i} className="bg-steel/30 border border-steel/60 hover:border-gold/40 rounded-xl p-3 transition-all">
-              <div className="text-gold mb-1">{f.icon}</div>
-              <div className="font-bold text-sm">{f.title}</div>
-              <div className="text-xs text-sand/50 mt-0.5">{f.desc}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="w-full max-w-md bg-steel/30 border border-steel/60 p-6 rounded-2xl backdrop-blur-sm">
-          <p className="font-mono text-xs uppercase tracking-widest text-gold mb-4">Select your branch of service</p>
-          <div className="grid grid-cols-3 gap-2 mb-6">
-            {Object.entries(branchData).map(([key,b])=>(
-              <button key={key} onClick={()=>setBranch(key)}
-                className={"p-3 rounded-xl border transition-all text-center " + (branch===key ? "border-gold bg-gold/10 text-gold shadow-lg scale-105" : "border-steel/60 text-sand/50 hover:text-sand hover:border-steel")}>
-                <div className="font-black text-xs uppercase">{b.badge}</div>
-                <div className="text-xs opacity-60 mt-0.5">{b.name}</div>
-              </button>
-            ))}
-          </div>
-          <button onClick={()=>{
-            // Directly jump to Wizard Phase 1 (Status) without redundant branch confirmation
-            setCurrentPage('wizard');
-            setWizardStep(0);
-          }}
-            className="w-full py-4 bg-scarlet hover:bg-red-800 text-sand font-black text-base uppercase tracking-wider rounded-xl shadow-lg flex items-center justify-center gap-2 group transition-all">
-            Step Through the Portal <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform"/>
-          </button>
-        </div>
-      </main>
-
-      <footer className="border-t border-steel/50 bg-steel-dark/80 py-4 text-center text-xs text-sand/30 font-mono relative z-10">
-        <span>For informational purposes only. Not legal or medical advice. Always consult a VSO or VA-accredited attorney.</span>
-        <span className="ml-4 text-sand/10 hover:text-sand/30 transition-colors" title="Crayon-powered">
-          {String.fromCodePoint(0x1F58D)} made with crayons
-        </span>
-      </footer>
-    </div>
-  );
-
-  // -----------------------------------------------------------------------
-  // STREAMLINED WIZARD (3 FOCUSED PHASES -- NO REDUNDANT BRANCH CONFIRMATION)
-  // -----------------------------------------------------------------------
-  if (currentPage === 'wizard') {
-    const steps = ['Status', 'Health & Exposure', 'Mission & Location'];
-
-    return (
-      <div className="min-h-screen bg-steel-dark text-sand flex flex-col relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-20 pointer-events-none"/>
-        <CrisisBanner/>
-        <EmailSyncModal/>
-
-        <header className="border-b border-steel/50 bg-steel-dark/90 backdrop-blur-md py-4 px-6 relative z-10 font-mono">
-          <div className="max-w-7xl mx-auto flex justify-between items-center">
-            <button onClick={()=>setCurrentPage('landing')} className="flex items-center gap-1 text-xs uppercase hover:text-gold transition-colors">
-              <ChevronLeft size={14}/> Abort
-            </button>
-            <div className="flex items-center gap-2">
-              <span className="text-xs bg-gold/10 border border-gold/30 text-gold px-2 py-0.5 rounded font-bold">{bd.badge}</span>
-              <span className="text-xs text-gold uppercase tracking-wider">Phase {wizardStep+1} of {steps.length}</span>
-            </div>
-          </div>
-        </header>
-
-        <div className="bg-steel-dark/80 px-6 py-3 border-b border-steel/30 relative z-10">
-          <div className="max-w-2xl mx-auto">
-            <div className="flex gap-1 mb-1">
-              {steps.map((_,i)=><div key={i} className={"flex-1 h-1.5 rounded-full transition-all " + (i<=wizardStep ? "bg-scarlet" : "bg-steel/50")}/>)}
-            </div>
-            <div className="flex justify-between text-xs font-mono">
-              {steps.map((s,i)=><span key={i} className={i===wizardStep ? "text-gold font-bold" : i<wizardStep ? "text-sand/50" : "text-sand/30"}>{s}</span>)}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto relative z-10">
-          <div className="max-w-2xl mx-auto p-6 md:p-10">
-            <div className="bg-steel/20 border border-steel/50 rounded-2xl p-6 md:p-8 backdrop-blur-md shadow-2xl">
-
-              {/* Step 0: Separation Status & Discharge Characterization */}
-              {wizardStep === 0 && (
-                <div className="space-y-5">
-                  <div>
-                    <h2 className="text-2xl font-black uppercase tracking-tight mb-1">Separation Status & Service Record</h2>
-                    <p className="text-sand/60 text-sm">Tailors your timeline milestones specifically for {bd.name} ({bd.sep}).</p>
-                  </div>
-
-                  <div className="bg-steel-dark/50 border border-steel/50 rounded-xl p-4 space-y-4">
-                    <div className="font-mono text-xs uppercase tracking-widest text-gold font-bold">Separation Timing</div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {[{val:false, label:'Active / Upcoming '+bd.sep},{val:true, label:'Already Separated (Veteran)'}].map(opt=>(
-                        <button key={String(opt.val)} onClick={()=>setAlreadyOut(opt.val)}
-                          className={"p-3 rounded-lg border text-sm text-center transition-all " + (alreadyOut===opt.val ? "border-gold bg-gold/10 text-sand font-medium" : "border-steel/60 text-sand/50 hover:text-sand hover:border-steel")}>
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-                    {!alreadyOut && (<>
-                      <div className="flex justify-between text-xs font-mono">
-                        <span className="text-sand/50">Months until {bd.sep}</span>
-                        <span className="text-gold font-black">{separationMonths} months</span>
-                      </div>
-                      <input type="range" min={1} max={24} value={separationMonths} onChange={e=>setSeparationMonths(Number(e.target.value))}
-                        className="w-full h-2.5 rounded-full cursor-pointer accent-red-600 bg-steel/40"/>
-                      <div className="flex gap-1.5">
-                        {[6,12,18,24].map(v=>(
-                          <button key={v} onClick={()=>setSeparationMonths(v)}
-                            className={"flex-1 text-xs py-1.5 rounded-lg border transition-all font-mono " + (separationMonths===v ? "border-gold text-gold" : "border-steel/50 text-sand/40 hover:border-steel")}>
-                            {v}mo
-                          </button>
-                        ))}
-                      </div>
-                    </>)}
-                  </div>
-
-                  <div className="bg-steel-dark/50 border border-steel/50 rounded-xl p-4 space-y-3">
-                    <div className="font-mono text-xs uppercase tracking-widest text-gold font-bold">Discharge Characterization</div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {[
-                        {val:'honorable',    label:'Honorable',                  sub:'Full benefit access'},
-                        {val:'general',      label:'General (Under Honorable)',   sub:'Most benefits, limited GI Bill'},
-                        {val:'oth',          label:'Other Than Honorable (OTH)', sub:'Very limited -- upgrade available'},
-                        {val:'bad_conduct',  label:'Bad Conduct / Dishonorable', sub:'Upgrade process available'},
-                      ].map(d=>(
-                        <button key={d.val} onClick={()=>setDischargeType(d.val)}
-                          className={"p-3 rounded-lg border text-left text-xs transition-all " + (dischargeType===d.val ? "border-gold bg-gold/10" : "border-steel/60 hover:border-steel")}>
-                          <div className="font-bold text-sand">{d.label}</div>
-                          <div className="text-sand/50 mt-0.5">{d.sub}</div>
-                        </button>
-                      ))}
-                    </div>
-                    {dischargeType !== 'honorable' && (
-                      <div className="p-2 bg-scarlet/10 border border-scarlet/30 rounded-lg text-xs text-scarlet/90">
-                        Discharge upgrade priority activated. Your entire dashboard and planner will surface the DRB/BCMR upgrade process first.
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="bg-steel-dark/50 border border-steel/50 rounded-xl p-4 space-y-3">
-                    <div className="font-mono text-xs uppercase tracking-widest text-gold font-bold">Years of Service</div>
-                    <div className="grid grid-cols-5 gap-2">
-                      {[1,2,3,4,6,8,10,12,16,20].map(y=>(
-                        <button key={y} onClick={()=>setYearsOfService(y)}
-                          className={"py-2 text-sm rounded-lg border transition-all font-mono " + (yearsOfService===y ? "border-gold bg-gold/10 text-gold font-black" : "border-steel/50 text-sand/40 hover:border-steel hover:text-sand")}>
-                          {y}yr
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 1: Health & Disability */}
-              {wizardStep === 1 && (
-                <div className="space-y-5">
-                  <div>
-                    <h2 className="text-2xl font-black uppercase tracking-tight mb-1">Health and Disability Profile</h2>
-                    <p className="text-sand/60 text-sm">Honest answers immediately eliminate redundant questions and tune your dashboard.</p>
-                  </div>
-
-                  <div className="bg-steel-dark/50 border border-steel/50 rounded-xl p-4 space-y-4">
-                    <div className="font-mono text-xs uppercase tracking-widest text-gold font-bold">VA Disability Status</div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {[
-                        {val:'none',    label:'No Rating Yet',              sub:'Have not filed a claim'},
-                        {val:'pending', label:'Filed -- Pending',           sub:'Waiting on decision'},
-                        {val:'filed',   label:'Rated -- Seeking Increase',  sub:'Have rating, want more'},
-                        {val:'rated',   label:'Established Rating',         sub:'Know current number'},
-                      ].map(s=>(
-                        <button key={s.val} onClick={()=>setDisabilityStatus(s.val)}
-                          className={"p-3 rounded-lg border text-left text-xs transition-all " + (disabilityStatus===s.val ? "border-gold bg-gold/10" : "border-steel/60 hover:border-steel")}>
-                          <div className="font-bold text-sand">{s.label}</div>
-                          <div className="text-sand/50 mt-0.5">{s.sub}</div>
-                        </button>
-                      ))}
-                    </div>
-                    {(disabilityStatus==='rated'||disabilityStatus==='filed') && (
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-xs font-mono">
-                          <span className="text-sand/50">Current Combined Rating</span>
-                          <span className="text-gold font-black text-lg">{currentRating}%</span>
-                        </div>
-                        <input type="range" min={0} max={100} step={10} value={currentRating} onChange={e=>setCurrentRating(Number(e.target.value))}
-                          className="w-full h-2.5 rounded-full cursor-pointer accent-red-600 bg-steel/40"/>
-                        <div className="flex justify-between text-xs text-sand/30 font-mono"><span>0%</span><span>50%</span><span>100%</span></div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="bg-steel-dark/50 border border-steel/50 rounded-xl p-4 space-y-3">
-                    <div className="font-mono text-xs uppercase tracking-widest text-gold font-bold">Service Exposure</div>
-                    {[
-                      {state:servedPost911,  setter:setServedPost911,  label:'Served post-9/11 (after September 11, 2001)'},
-                      {state:exposedBurnPit, setter:setExposedBurnPit, label:'Exposed to burn pits, contaminated water, or toxic chemicals'},
-                      {state:mstFlag,        setter:setMstFlag,        label:'Experienced Military Sexual Trauma (MST) -- private and confidential'},
-                    ].map((item,i)=>(
-                      <button key={i} onClick={()=>item.setter(!item.state)}
-                        className={"w-full p-3 rounded-lg border text-left text-sm flex items-center gap-3 transition-all " + (item.state ? "border-gold/50 bg-gold/5" : "border-steel/50 hover:border-steel")}>
-                        <div className={"w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 " + (item.state ? "border-gold bg-gold" : "border-steel/60")}>
-                          {item.state && <span className="text-steel-dark font-black" style={{fontSize:'10px'}}>X</span>}
-                        </div>
-                        <span className={item.state ? "text-sand" : "text-sand/60"}>{item.label}</span>
-                      </button>
-                    ))}
-                    {exposedBurnPit && (
-                      <div className="p-2 bg-gold/5 border border-gold/20 rounded-lg text-xs text-gold/80">
-                        PACT Act Presumptive Protocol active: No nexus letter needed for qualifying respiratory/cancer claims.
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Step 2: Mission & Location */}
-              {wizardStep === 2 && (
-                <div className="space-y-5">
-                  <div>
-                    <h2 className="text-2xl font-black uppercase tracking-tight mb-1">Your Future Mission & Location</h2>
-                    <p className="text-sand/60 text-sm">We will build your personalized action plan around your exact selections.</p>
-                  </div>
-
-                  <div className="bg-steel-dark/50 border border-steel/50 rounded-xl p-4 space-y-3">
-                    <div className="font-mono text-xs uppercase tracking-widest text-gold font-bold">Primary Path</div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {Object.entries(avenues).map(([key,a])=>(
-                        <button key={key} onClick={()=>setFuturePath(key)}
-                          className={"p-3 rounded-lg border text-left text-xs transition-all " + (futurePath===key ? "border-gold bg-gold/10" : "border-steel/60 hover:border-steel")}>
-                          <div className="font-bold text-sand">{a.label}</div>
-                          <div className="text-sand/50 mt-0.5">{a.tagline}</div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-steel-dark/50 border border-steel/50 rounded-xl p-4 space-y-3">
-                      <div className="font-mono text-xs uppercase tracking-widest text-gold font-bold">Target State</div>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                        {Object.entries(stateBenefits).map(([key,s])=>(
-                          <button key={key} onClick={()=>setSelectedState(key)}
-                            className={"p-2 rounded-lg border text-xs text-center transition-all " + (selectedState===key ? "border-gold bg-gold/10 text-gold font-bold" : "border-steel/50 text-sand/40 hover:text-sand hover:border-steel")}>
-                            {s.name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="bg-steel-dark/50 border border-steel/50 rounded-xl p-4 space-y-3">
-                      <div className="font-mono text-xs uppercase tracking-widest text-gold font-bold">Dependents</div>
-                      <div className="space-y-1.5">
-                        {[
-                          {val:'single',      label:'Single (No Dependents)'},
-                          {val:'single_kids', label:'Single Parent (with children)'},
-                          {val:'spouse',      label:'Married (Spouse only)'},
-                          {val:'family',      label:'Married with Children'},
-                        ].map(d=>(
-                          <button key={d.val} onClick={()=>setHasDependents(d.val)}
-                            className={"w-full p-2 rounded-lg border text-xs text-left transition-all " + (hasDependents===d.val ? "border-gold bg-gold/10 text-sand font-medium" : "border-steel/50 text-sand/40 hover:text-sand hover:border-steel")}>
-                            {d.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Nav buttons */}
-              <div className="flex gap-3 mt-6 pt-5 border-t border-steel/40">
-                {wizardStep > 0 && (
-                  <button onClick={()=>setWizardStep(w=>w-1)}
-                    className="flex items-center gap-1 px-4 py-2.5 border border-steel/60 rounded-xl text-sm hover:border-steel transition-all font-mono uppercase">
-                    <ChevronLeft size={14}/> Back
-                  </button>
-                )}
-                {wizardStep < steps.length - 1 ? (
-                  <button onClick={()=>setWizardStep(w=>w+1)}
-                    className="flex-1 py-2.5 bg-scarlet hover:bg-red-800 rounded-xl font-bold transition-all flex items-center justify-center gap-2 uppercase tracking-wider">
-                    Continue <ChevronRight size={16}/>
-                  </button>
-                ) : (
-                  <button onClick={()=>{
-                    saveProfileToStorage();
-                    setCurrentPage('dashboard');
-                    setActiveTab('planner');
-                  }}
-                    className="flex-1 py-3 bg-gold hover:bg-yellow-600 text-steel-dark font-black text-base rounded-xl transition-all flex items-center justify-center gap-2 uppercase tracking-wider shadow-lg">
-                    Launch Tailored Dashboard <ArrowRight size={18}/>
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // -----------------------------------------------------------------------
-  // DASHBOARD NAV TABS CONFIGURATION WITH TOOLTIPS
-  // -----------------------------------------------------------------------
-  const tabs = [
-    { id:'summary',   icon:<BarChart3 size={13}/>,    label:'Summary & Value',        tooltip:'Real-time financial summary showing all completed benefits, tax-free annual income, and healthcare/tax savings.' },
-    { id:'planner',   icon:<Target size={13}/>,       label:'Life & Wealth Planner',  tooltip:'Interactive goal-driven roadmap tailored to your rating + the 5-Stage Golden Stacking Protocol.' },
-    { id:'househack', icon:<Home size={13}/>,         label:'VA House Hacker',        tooltip:'Interactive multi-family (2-4 units) real estate calculator with $0-down mortgage, rent offsets, and state tax shields.' },
-    { id:'claims',    icon:<Activity size={13}/>,     label:'Claims & C&P Sim',       tooltip:'Practice C&P exam DBQ scenarios, calculate whole-person math, explore secondary claims, SMC tiers, and Diagnostic Lexicon.' },
-    { id:'perks',     icon:<Sparkles size={13}/>,     label:'High-Value Perks',       tooltip:'Space-A free military flights (Category VI), America the Beautiful lifetime parks pass, Adaptive Housing Grants ($117k), and Free VA Dental Classes.' },
-    { id:'scanner',   icon:<Cpu size={13}/>,          label:'Med Scanner',            tooltip:'Upload or paste medical records to scan for 25+ service-connected conditions, DC codes, and PACT Act presumptives. 100% private.' },
-    { id:'avenues',   icon:<Compass size={13}/>,      label:'Avenues',                tooltip:'5 proven life pathways: Expat living, FIRE, Education stacking, high-paying civilian career, and SDVOSB entrepreneurship.' },
-    { id:'benefits',  icon:<Award size={13}/>,        label:'State Matrix',           tooltip:'Comprehensive state-by-state veteran benefits: full property tax exemptions, free college tuition, vehicle registration waivers.' },
-    { id:'tracker',   icon:<CheckSquare size={13}/>,  label:'Milestones',             tooltip:'Interactive transition checklist tailored to your separation status with live progress saving.' },
-    { id:'upgrade',   icon:<Flag size={13}/>,         label:'Discharge Guide',        tooltip:'Step-by-step discharge upgrade guide for DRB and BCMR/BCNR boards under PTSD/MST Liberal Consideration.' },
-    { id:'resources', icon:<Phone size={13}/>,        label:'Resources',              tooltip:'Veterans Crisis Line, free VSO locator (DAV/VFW), mental health (Headstrong free therapy), and official VA Form downloads.' },
-  ];
-
-  return (
-    <div className="min-h-screen bg-steel-dark text-sand flex flex-col">
-      <CrisisBanner/>
-      <EmailSyncModal/>
-
-      {/* Top Nav */}
-      <header className="border-b border-steel/50 bg-steel-dark/90 backdrop-blur-md py-3 px-6 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <Compass className="text-gold" size={18}/>
-            <span className="font-black text-sm uppercase tracking-wider">VET-COMPASS</span>
-            <span className="text-sand/30 font-mono text-xs border border-steel/40 px-2 py-0.5 rounded">{bd.badge}</span>
-            {userName && (
-              <span className="hidden sm:inline-block text-xs font-mono text-gold/80">
-                | Welcome, {userName}
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={()=>setShowEmailModal(true)}
-              className={"text-xs font-mono px-2.5 py-1 rounded-lg border transition-all flex items-center gap-1.5 " + (isProfileSaved && userEmail ? "border-gold/40 bg-gold/10 text-gold" : "border-steel/60 hover:border-gold text-sand/60 hover:text-sand")}>
-              <Mail size={12}/>
-              {isProfileSaved && userEmail ? (
-                <span>Saved ({userEmail.split('@')[0]})</span>
-              ) : (
-                <span>Save Profile</span>
-              )}
-            </button>
-
-            {currentRating > 0 && (
-              <span className="text-xs text-gold font-mono font-bold border border-gold/30 px-2 py-1 rounded bg-gold/5">
-                {currentRating}% Rated
-              </span>
-            )}
-            <button onClick={()=>setCurrentPage('wizard')} className="text-xs text-sand/40 hover:text-gold transition-colors font-mono uppercase tracking-wider">
-              Edit Settings
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Dynamic SITREP Banner Tailored Specifically to Settings */}
+            {/* Dynamic SITREP Banner Tailored Specifically to Settings */}
       <div className="bg-steel/25 border-b border-steel/30 px-6 py-2">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs font-mono gap-1">
           <div className="flex items-center gap-2">
@@ -2256,19 +2190,51 @@ const VeteranBenefitsCompass = () => {
         </div>
       </div>
 
-      {/* Tab Bar */}
-      <div className="bg-steel-dark/90 border-b border-steel/50 overflow-x-auto sticky top-14 z-30">
-        <div className="max-w-7xl mx-auto flex gap-0 min-w-max px-2">
-          {tabs.map(t=>(
-            <Tooltip key={t.id} text={t.tooltip}>
+      {/* Command Pillars & Tab Navigation Bar */}
+      <div className="bg-steel-dark/95 border-b border-steel/50 sticky top-14 z-30 backdrop-blur-md">
+        {/* Pillar Filter Selector Chips */}
+        <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-2 border-b border-steel/40 overflow-x-auto">
+          <div className="flex items-center gap-1.5 overflow-x-auto min-w-max py-0.5">
+            {[
+              { id: 'all', label: 'All 13 Modules' },
+              { id: 'claims', label: '🛡️ Claims & Medical Intel' },
+              { id: 'wealth', label: '💰 Wealth & Real Estate' },
+              { id: 'life', label: '🧭 Life & Career Routes' }
+            ].map(p => (
               <button
-                onClick={()=>setActiveTab(t.id)}
-                className={"flex items-center gap-1.5 px-4 py-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap uppercase tracking-wider font-mono " + (activeTab===t.id ? "border-gold text-gold" : "border-transparent text-sand/40 hover:text-sand/70")}>
-                {t.icon} {t.label}
-                <Info size={10} className="opacity-30 hover:opacity-70 transition-opacity"/>
+                key={p.id}
+                onClick={() => setActivePillar(p.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all whitespace-nowrap ${
+                  activePillar === p.id
+                    ? 'bg-gold text-steel-dark shadow-sm'
+                    : 'bg-steel/30 text-sand/70 hover:text-sand hover:bg-steel/50 border border-steel/50'
+                }`}
+              >
+                {p.label}
               </button>
-            </Tooltip>
-          ))}
+            ))}
+          </div>
+
+          <div className="hidden lg:flex items-center gap-2 text-xs font-mono text-sand/50 flex-shrink-0">
+            <span className="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>Client-Side Security • Zero Data Retention</span>
+          </div>
+        </div>
+
+        {/* Scrollable Tool Tabs */}
+        <div className="max-w-7xl mx-auto flex gap-0 overflow-x-auto min-w-max px-2">
+          {tabs
+            .filter(t => activePillar === 'all' || t.pillar === 'all' || t.pillar === activePillar)
+            .map(t => (
+              <Tooltip key={t.id} text={t.tooltip}>
+                <button
+                  onClick={() => setActiveTab(t.id)}
+                  className={"flex items-center gap-1.5 px-3.5 py-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap uppercase tracking-wider font-mono " + (activeTab === t.id ? "border-gold text-gold bg-gold/5" : "border-transparent text-sand/60 hover:text-sand hover:border-sand/30")}
+                >
+                  {t.icon} {t.label}
+                </button>
+              </Tooltip>
+            ))}
         </div>
       </div>
 
@@ -2294,6 +2260,22 @@ const VeteranBenefitsCompass = () => {
                   <p className="text-sand/70 text-sm max-w-2xl leading-relaxed">
                     Here is the cumulative financial impact of your completed military benefits, tax-free compensation, state tax exemptions, and health coverage. Check off items as you complete them to watch your total grow.
                   </p>
+
+                  {/* VSO Dossier & Shareable Scorecard Actions */}
+                  <div className="pt-2 flex flex-wrap gap-2.5">
+                    <button
+                      onClick={() => setShowDossierModal(true)}
+                      className="px-4 py-2 rounded-xl bg-gold hover:bg-yellow-400 text-steel-dark font-black font-mono text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-md"
+                    >
+                      <FileText size={13}/> Generate VSO Claim Dossier
+                    </button>
+                    <button
+                      onClick={() => setShowRankCardModal(true)}
+                      className="px-4 py-2 rounded-xl bg-steel-dark border border-gold/40 hover:border-gold text-gold font-bold font-mono text-xs uppercase tracking-wider transition-all flex items-center gap-1.5"
+                    >
+                      <Share2 size={13}/> Shareable Rank Scorecard
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -2467,6 +2449,355 @@ const VeteranBenefitsCompass = () => {
           )}
 
           {/* ============================================================ */}
+                    {/* ============================================================ */}
+          {/* TAB: VA MATH COMBAT ENGINEER & PATH TO 100%                  */}
+          {/* ============================================================ */}
+          {activeTab === 'vamath' && (() => {
+            const mathResult = calcVaMath(vaRatingsList, hasBilateralFactor);
+            const disabilityCompensationRates = {
+              '0': 0, '10': 175.51, '20': 346.95, '30': 537.42,
+              '40': 773.16, '50': 1100.10, '60': 1395.93,
+              '70': 1759.19, '80': 2044.89, '90': 2297.96,
+              '100': 3737.85
+            };
+            const currentPay = disabilityCompensationRates[String(mathResult.roundedRating)] || 0;
+            const targetPay = disabilityCompensationRates['100'];
+            const monthlyGap = Math.max(0, targetPay - currentPay);
+            const annualGap = monthlyGap * 12;
+
+            return (
+              <div className="space-y-6">
+                {/* Header */}
+                <div className="bg-steel/20 border border-steel/50 rounded-2xl p-6">
+                  <div className="flex items-center gap-2 text-gold font-mono text-xs uppercase tracking-widest font-bold mb-1">
+                    <Calculator size={14}/> 38 CFR § 4.25 Non-Additive Math Engine
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-sand">
+                    VA Math <span className="text-gold">Combat Engineer</span> & Path to 100%
+                  </h2>
+                  <p className="text-sand/70 text-sm mt-1 max-w-3xl leading-relaxed">
+                    VA disability math is non-additive. Each new rating only disables a percentage of your <em>remaining healthy body</em>, not your whole person. Add your conditions below to see the exact step-by-step math, your efficiency curve, and the shortest path to 100% P&T.
+                  </p>
+                </div>
+
+                {/* Live Math Visualizer Dashboard */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-steel-dark/60 border border-steel/50 rounded-2xl p-5 space-y-2">
+                    <div className="text-xs font-mono text-sand/50 uppercase font-bold">Actual Combined Efficiency</div>
+                    <div className="text-3xl font-black text-sand">{mathResult.rawTotal}%</div>
+                    <p className="text-xs text-sand/60">
+                      Exact raw combined rating prior to VA 10% rounding rule.
+                    </p>
+                  </div>
+
+                  <div className={`border rounded-2xl p-5 space-y-2 ${mathResult.is100 ? 'bg-emerald-950/40 border-emerald-500/50' : 'bg-gold/10 border-gold/40'}`}>
+                    <div className="text-xs font-mono text-gold uppercase font-bold">Official VA Paid Rating</div>
+                    <div className="text-3xl font-black text-gold">{mathResult.roundedRating}%</div>
+                    <p className="text-xs text-sand/60">
+                      Paid at <strong className="text-gold">${Math.round(currentPay).toLocaleString()}/mo</strong> tax-free base rate.
+                    </p>
+                  </div>
+
+                  <div className="bg-steel-dark/60 border border-steel/50 rounded-2xl p-5 space-y-2">
+                    <div className="text-xs font-mono text-scarlet uppercase font-bold">Distance to 100% P&T</div>
+                    <div className="text-3xl font-black text-scarlet">{mathResult.is100 ? '0.0%' : `${mathResult.pointsTo100}%`}</div>
+                    <p className="text-xs text-sand/60">
+                      {mathResult.is100 ? '100% P&T Threshold Met (95.0%+)' : `Need ${mathResult.pointsTo100}% more raw points to cross 95.0% threshold.`}
+                    </p>
+                  </div>
+                </div>
+
+                {/* If not 100%, show Financial Gap Card */}
+                {!mathResult.is100 && (
+                  <div className="bg-gradient-to-r from-red-950/40 via-steel-dark/60 to-steel-dark/60 border border-red-500/30 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <div className="text-xs font-mono text-scarlet font-bold uppercase flex items-center gap-1.5">
+                        <AlertTriangle size={14}/> Money Left on the Table
+                      </div>
+                      <div className="text-lg font-black text-sand mt-0.5">
+                        Closing the gap to 100% unlocks <span className="text-gold">+${Math.round(monthlyGap).toLocaleString()}/mo</span> (+${Math.round(annualGap).toLocaleString()}/yr) in tax-free cash.
+                      </div>
+                      <p className="text-xs text-sand/60 mt-1">Plus $0 property taxes in top states, CHAMPVA free family health insurance, and dental care.</p>
+                    </div>
+                    <button
+                      onClick={() => setActiveTab('claims')}
+                      className="px-5 py-2.5 rounded-xl bg-gold hover:bg-yellow-400 text-steel-dark font-black text-xs uppercase tracking-wider font-mono flex-shrink-0 transition-all"
+                    >
+                      Practice C&P Exam DBQs ->
+                    </button>
+                  </div>
+                )}
+
+                {/* Rating Input & List Manager */}
+                <div className="bg-steel/20 border border-steel/50 rounded-2xl p-5 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-steel/40 pb-3">
+                    <h3 className="font-black text-sm uppercase tracking-wider text-sand">
+                      Step 1: Your Active Conditions & Ratings
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setHasBilateralFactor(!hasBilateralFactor)}
+                        className={`text-xs font-mono px-3 py-1 rounded-lg border font-bold transition-all ${
+                          hasBilateralFactor ? 'bg-gold text-steel-dark border-gold' : 'bg-steel-dark border-steel/60 text-sand/60'
+                        }`}
+                      >
+                        {hasBilateralFactor ? '✓ Bilateral Factor (10% Bonus Active)' : '+ Add Bilateral Factor'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Add Rating Controls */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-mono text-sand/60">Quick Add Rating:</span>
+                    {[10, 20, 30, 40, 50, 60, 70, 80, 100].map(r => (
+                      <button
+                        key={r}
+                        onClick={() => setVaRatingsList([...vaRatingsList, r])}
+                        className="px-3 py-1.5 rounded-lg bg-steel-dark border border-steel/60 hover:border-gold hover:text-gold text-xs font-mono font-bold transition-all"
+                      >
+                        +{r}%
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setVaRatingsList([])}
+                      className="px-3 py-1.5 rounded-lg bg-red-950/40 border border-red-500/40 text-red-400 hover:bg-red-900/60 text-xs font-mono font-bold transition-all ml-auto"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+
+                  {/* Current Ratings Badges */}
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {vaRatingsList.map((rating, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-steel-dark border border-gold/30 rounded-xl px-3 py-1.5 flex items-center gap-2 shadow-sm"
+                      >
+                        <span className="text-xs font-mono font-bold text-gold">{rating}%</span>
+                        <button
+                          onClick={() => {
+                            const updated = [...vaRatingsList];
+                            updated.splice(idx, 1);
+                            setVaRatingsList(updated);
+                          }}
+                          className="text-sand/40 hover:text-red-400 text-xs font-black transition-colors"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                    {vaRatingsList.length === 0 && (
+                      <p className="text-xs text-sand/40 font-mono py-2">No ratings added yet. Click any button above to add a condition rating.</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Step-by-Step VA Non-Additive Whole Person Breakdown */}
+                {mathResult.steps.length > 0 && (
+                  <div className="bg-steel/20 border border-steel/50 rounded-2xl p-5 space-y-3">
+                    <h3 className="font-black text-sm uppercase tracking-wider text-sand flex items-center gap-2">
+                      <Sliders size={16} className="text-gold"/> Step 2: Whole-Person Efficiency Calculation (38 CFR § 4.25)
+                    </h3>
+                    <p className="text-xs text-sand/60 leading-relaxed">
+                      Conditions are sorted from highest to lowest. Each rating disables only a percentage of the <em>remaining non-disabled efficiency</em>.
+                    </p>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs font-mono">
+                        <thead>
+                          <tr className="border-b border-steel/40 text-sand/50 uppercase">
+                            <th className="py-2 px-3">Step</th>
+                            <th className="py-2 px-3">Condition</th>
+                            <th className="py-2 px-3">Remaining Efficiency</th>
+                            <th className="py-2 px-3">Disabled Amount</th>
+                            <th className="py-2 px-3">Cumulative Total</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-steel/30 text-sand/80">
+                          {mathResult.steps.map((step, idx) => (
+                            <tr key={idx} className="hover:bg-steel/20 transition-colors">
+                              <td className="py-2.5 px-3 font-bold text-gold">#{idx + 1}</td>
+                              <td className="py-2.5 px-3 font-bold text-sand">{step.conditionRating}%</td>
+                              <td className="py-2.5 px-3 text-sand/60">{step.runningEfficiency}% healthy body left</td>
+                              <td className="py-2.5 px-3 text-amber-400">+{step.addedValue}% net</td>
+                              <td className="py-2.5 px-3 font-bold text-gold">{step.runningTotal}%</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* High-Yield Secondary Claims Arsenal */}
+                <div className="bg-steel/20 border border-steel/50 rounded-2xl p-5 space-y-4">
+                  <div className="border-b border-steel/40 pb-3">
+                    <div className="flex items-center gap-2 text-gold font-mono text-xs uppercase tracking-widest font-bold mb-0.5">
+                      <Target size={14}/> High-Yield Bridge Strategy
+                    </div>
+                    <h3 className="font-black text-lg text-sand uppercase">
+                      Secondary Claims Arsenal: Your Path to 100%
+                    </h3>
+                    <p className="text-xs text-sand/60 mt-0.5 leading-relaxed">
+                      If you are stuck at 70%, 80%, or 90%, filing new primary claims is often denied for lack of in-service records. <strong>Secondary claims</strong> connect new conditions to your already service-connected disabilities -- no new combat or incident proof required.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {SECONDARY_CLAIMS_DATA.map((group, idx) => (
+                      <div key={idx} className="bg-steel-dark/60 border border-steel/40 rounded-xl p-4 space-y-3">
+                        <div className="font-black text-sm text-gold flex items-center gap-2">
+                          <span className="text-xl">{group.icon}</span>
+                          <span>Primary: {group.primary}</span>
+                        </div>
+                        <div className="space-y-2">
+                          {group.secondaries.map((sec, sIdx) => (
+                            <div key={sIdx} className="bg-steel/30 border border-steel/50 rounded-lg p-3 space-y-1">
+                              <div className="flex items-center justify-between text-xs font-bold text-sand">
+                                <span>{sec.condition}</span>
+                                <span className="text-gold font-mono px-2 py-0.5 rounded bg-gold/10 border border-gold/30">{sec.potential}</span>
+                              </div>
+                              <p className="text-[11px] text-sand/65 leading-relaxed">{sec.mechanism}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* ============================================================ */}
+          {/* TAB: PACT ACT & TOXIC EXPOSURE SCREENER                      */}
+          {/* ============================================================ */}
+          {activeTab === 'pact' && (() => {
+            const currentTheater = PACT_ACT_THEATERS.find(t => t.id === selectedPactTheater) || PACT_ACT_THEATERS[0];
+            return (
+              <div className="space-y-6">
+                {/* Header */}
+                <div className="bg-steel/20 border border-steel/50 rounded-2xl p-6">
+                  <div className="flex items-center gap-2 text-gold font-mono text-xs uppercase tracking-widest font-bold mb-1">
+                    <ShieldAlert size={14}/> Public Law 117-168 (The PACT Act of 2022)
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-sand">
+                    PACT Act & Toxic Exposure <span className="text-gold">Presumptive Screener</span>
+                  </h2>
+                  <p className="text-sand/70 text-sm mt-1 max-w-3xl leading-relaxed">
+                    The PACT Act is the largest expansion of veteran healthcare and benefits in 30+ years. If you served in a qualifying location and era, <strong>the VA legally presumes your condition was caused by military service</strong>. You do NOT need to prove a nexus or in-service injury -- only proof of deployment and a current diagnosis.
+                  </p>
+                </div>
+
+                {/* Theater & Era Selector Tabs */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                  {PACT_ACT_THEATERS.map(th => (
+                    <button
+                      key={th.id}
+                      onClick={() => setSelectedPactTheater(th.id)}
+                      className={`p-4 rounded-xl border text-left transition-all ${
+                        selectedPactTheater === th.id
+                          ? 'border-gold bg-gold/10 shadow-lg'
+                          : 'border-steel/50 bg-steel/20 hover:border-gold/30'
+                      }`}
+                    >
+                      <div className="font-black text-xs uppercase tracking-wide text-sand mb-1">{th.name}</div>
+                      <div className="text-[11px] font-mono text-gold">{th.era}</div>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Selected Theater Rule Brief */}
+                <div className="bg-steel-dark/60 border border-gold/30 rounded-2xl p-5 space-y-3">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <h3 className="font-black text-base text-gold uppercase flex items-center gap-2">
+                      <ShieldCheck size={18} className="text-gold"/> {currentTheater.name}
+                    </h3>
+                    <span className="text-xs font-mono text-sand/50 bg-steel/40 px-2.5 py-1 rounded border border-steel/60">
+                      Authority: {currentTheater.statute}
+                    </span>
+                  </div>
+
+                  <div className="text-xs text-sand/70 space-y-1.5 font-mono">
+                    <div><strong className="text-sand">Qualifying Locations:</strong> {currentTheater.locations}</div>
+                    <div><strong className="text-gold">Legal Standard:</strong> {currentTheater.rules}</div>
+                  </div>
+                </div>
+
+                {/* Presumptive Conditions Checklist */}
+                <div className="bg-steel/20 border border-steel/50 rounded-2xl p-5 space-y-4">
+                  <div className="flex items-center justify-between flex-wrap gap-2 border-b border-steel/40 pb-3">
+                    <div>
+                      <h3 className="font-black text-sm uppercase tracking-wider text-sand">
+                        Presumptive Conditions List ({currentTheater.conditions.length} Diagnoses)
+                      </h3>
+                      <p className="text-xs text-sand/50 mt-0.5">Check any condition you have currently been diagnosed with or suspect:</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {currentTheater.conditions.map((cond, idx) => {
+                      const isChecked = !!checkedPactConditions[cond.name];
+                      return (
+                        <div
+                          key={idx}
+                          onClick={() => setCheckedPactConditions({
+                            ...checkedPactConditions,
+                            [cond.name]: !isChecked
+                          })}
+                          className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                            isChecked
+                              ? 'border-gold bg-gold/10 shadow-md'
+                              : 'border-steel/40 bg-steel-dark/50 hover:border-gold/30'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="space-y-1">
+                              <div className="font-bold text-xs text-sand flex items-center gap-2">
+                                <span className={isChecked ? 'text-gold' : 'text-sand/40'}>
+                                  {isChecked ? '☑' : '☐'}
+                                </span>
+                                <span>{cond.name}</span>
+                              </div>
+                              <div className="text-[11px] text-sand/60">
+                                DC Code: <strong className="text-gold font-mono">{cond.dc}</strong> | Rating: <strong className="text-sand font-mono">{cond.commonRating}</strong> (Max: {cond.maxRating})
+                              </div>
+                              <div className="text-[11px] text-sand/70 leading-relaxed pt-1">
+                                <strong className="text-sand/90">Required Evidence:</strong> {cond.evidence}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Export PACT Checklist */}
+                  <div className="pt-3 border-t border-steel/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <p className="text-xs text-sand/60 font-mono">
+                      {Object.values(checkedPactConditions).filter(Boolean).length} conditions selected for claim filing.
+                    </p>
+                    <button
+                      onClick={() => {
+                        const selectedList = Object.keys(checkedPactConditions).filter(k => checkedPactConditions[k]);
+                        if (selectedList.length === 0) {
+                          alert('Please check at least one condition first!');
+                          return;
+                        }
+                        const textToCopy = `=== PACT ACT INTENT TO FILE CONTENIONS ===\nTheater: ${currentTheater.name}\nStatute: ${currentTheater.statute}\nClaim Contention Items:\n${selectedList.map(c => `- ${c} (Presumptive Service Connection under PACT Act)`).join('\n')}\n\nEvidence Checklist:\n- DD-214 showing qualifying deployment theater\n- Current medical diagnosis from doctor or VA medical center\n- Matching DBQ form for each condition`;
+                        copyToClipboard(textToCopy);
+                      }}
+                      className="px-5 py-2.5 rounded-xl bg-gold hover:bg-yellow-400 text-steel-dark font-black text-xs font-mono uppercase tracking-wider transition-all flex items-center justify-center gap-1.5"
+                    >
+                      <Copy size={13}/> Copy PACT Contention Text to Clipboard
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+
           {/* TAB 1: LIFE & WEALTH PLANNER (DEEPLY PERSONALIZED)           */}
           {/* ============================================================ */}
           {activeTab === 'planner' && (
@@ -3889,10 +4220,19 @@ const VeteranBenefitsCompass = () => {
         </div>
       </div>
 
-      <footer className="bg-steel-dark/90 border-t border-steel/50 px-6 py-2 flex items-center justify-between">
-        <div className="text-sand/30 text-xs">For informational purposes only. Not legal or medical advice.</div>
-        <div className="text-sand/10 text-xs hover:text-sand/30 transition-colors cursor-default select-none" title="Crayon-powered">
-          {String.fromCodePoint(0x1F58D)} made with crayons
+      {/* Legal Non-Government Disclaimer & Accessibility Footer */}
+      <footer className="border-t border-steel/50 bg-steel-dark/95 py-6 px-6 mt-12 text-center text-xs font-mono text-sand/50 space-y-2">
+        <div className="max-w-4xl mx-auto space-y-1 leading-relaxed">
+          <p className="font-bold text-sand/70 uppercase">
+            Independence & Anti-Claim-Shark Notice
+          </p>
+          <p>
+            Veteran Benefits Compass is an independent, veteran-created educational portal. We are NOT affiliated with the U.S. Department of Veterans Affairs (VA) or any government agency. We never charge fees, collect personal medical files, or act as unaccredited claim agents. All calculations run strictly in your browser (client-side). We encourage every veteran to file official claims through accredited Veteran Service Officers (VSOs), the American Legion, VFW, DAV, or state Department of Veterans Affairs.
+          </p>
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-between text-[11px] text-sand/40 border-t border-steel/30 mt-3 pt-3">
+            <span>Built for U.S. Service Members & Veterans • WCAG 2.2 AA Compliant • Free Forever</span>
+            <span className="text-sand/20 hover:text-sand/40 transition-colors">made with crayons</span>
+          </div>
         </div>
       </footer>
     </div>
