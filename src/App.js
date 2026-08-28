@@ -7,7 +7,7 @@ import {
   ExternalLink, X, Activity, Flag,
   Home, CheckSquare, Save, User, ShieldAlert,
   Sparkles, Quote, Copy, Sliders, ShieldCheck, AlertTriangle, Printer, Share2,
-  Check, Calculator, Shield, Clock
+  Check, Calculator, Shield, Calendar, HelpCircle, ChevronDown
 } from 'lucide-react';
 
 // -----------------------------------------------------------------------
@@ -1370,7 +1370,10 @@ const VeteranBenefitsCompass = () => {
     va_healthcare: true
   });
   const [hideCompletedMilestones, setHideCompletedMilestones] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [milestoneFilter, setMilestoneFilter] = useState('all'); // 'all' | 'pending' | 'completed'
+  const [timelinePhaseFilter, setTimelinePhaseFilter] = useState('all'); // 'all' | 'p1' | 'p2' | 'p3' | 'p4'
+  const [expandedTimelineCard, setExpandedTimelineCard] = useState('bdd_fast_track');
 
 
   // ---- House Hacker State ----
@@ -1770,7 +1773,9 @@ const VeteranBenefitsCompass = () => {
   // -----------------------------------------------------------------------
   // FILTERED MILESTONES (TRACKER)
   // -----------------------------------------------------------------------
+  // eslint-disable-next-line no-unused-vars
   const profileForMilestones = { alreadyOut, currentRating, hasDependents };
+  // eslint-disable-next-line no-unused-vars
   const filteredMilestones = ALL_MILESTONES.filter(m => !m.hideWhen || !m.hideWhen(profileForMilestones));
 
   // -----------------------------------------------------------------------
@@ -1999,7 +2004,7 @@ const VeteranBenefitsCompass = () => {
     { id:'avenues',     pillar:'life',    icon:<Compass size={14}/>,      label:'Avenues Playbooks',      tooltip:'Complete career and life routes: Education Stacking, Federal GS & Schedule A, SDVOSB $47B set-asides, Remote Tech, and Pure Freedom.' },
     { id:'planner',     pillar:'life',    icon:<Target size={14}/>,       label:'Life & Wealth Planner',  tooltip:'Interactive goal-driven roadmap tailored to your rating + the 5-Stage Golden Stacking Protocol.' },
     { id:'scanner',     pillar:'claims',  icon:<Cpu size={14}/>,          label:'Med Scanner',            tooltip:'In-browser scanner: cross-references your military medical records against VA Diagnostic Codes with zero data leaving your browser.' },
-    { id:'tracker',     pillar:'life',    icon:<Clock size={14}/>,        label:'Milestone Tracker',      tooltip:'Filtered action timeline tailored to your exact separation window.' },
+    { id:'tracker',     pillar:'life',    icon:<Calendar size={14}/>,     label:'Life in Months Timeline', tooltip:'Personalized statutory deadline clocks, retroactive backpay calculators, and hand-held action guides.' },
     { id:'discharge',   pillar:'claims',  icon:<Shield size={14}/>,       label:'Discharge Upgrade',      tooltip:'Step-by-step roadmap to upgrade General/OTH discharges to Honorable via DRB/BCMR.' },
     { id:'directory',   pillar:'life',    icon:<Phone size={14}/>,        label:'Crisis & Resources',     tooltip:'Direct emergency hotlines, VSO links, and essential veteran assistance numbers.' }
   ];
@@ -4396,276 +4401,554 @@ const VeteranBenefitsCompass = () => {
           {/* ============================================================ */}
           {/* TAB 8: MILESTONE TRACKER (FILTERED TO VETERAN STATUS)        */}
           {/* ============================================================ */}
-          {activeTab === 'tracker' && (
-            <div className="space-y-6">
-              {/* Header Hero */}
-              <div className="bg-gradient-to-r from-steel/30 via-steel-dark to-steel-dark border border-steel/50 rounded-2xl p-6 relative overflow-hidden">
-                <div className="flex items-center gap-2 text-gold font-mono text-xs uppercase tracking-widest font-bold mb-1">
-                  <Clock size={14} /> Mission Clocks & Strategic Roadmaps
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-sand">
-                  Your Life in Months & <span className="text-gold">Milestone Command Post</span>
-                </h2>
-                <p className="text-sand/70 text-sm mt-1 max-w-3xl leading-relaxed">
-                  Veterans lose thousands of dollars simply by missing time clocks. Below are your active countdown clocks, statutory transition windows, and a personalized milestone checklist that auto-filters out completed tasks.
-                </p>
-              </div>
+          {activeTab === 'tracker' && (() => {
+            // Milestone items list with hand-held step-by-step guides
+            const TIMELINE_EVENTS = [
+              {
+                id: 'bdd_fast_track',
+                phase: 'p1',
+                phaseName: 'Phase 1: Pre-Separation (T-180 to T-0)',
+                timing: '180 to 90 Days Pre-Separation',
+                urgency: 'critical',
+                urgencyLabel: '🔴 CRITICAL TIME CLOCK',
+                title: 'Benefits Delivery at Discharge (BDD) Fast-Track Claim',
+                value: '+$1,759 to +$3,737/mo from Day 1',
+                badge: '38 U.S.C. § 5101',
+                summary: 'Submit your VA disability claim while still on active duty. VA schedules your C&P exams immediately so your rating and tax-free paycheck begin on Day 1 after discharge.',
+                why: 'Filing after separation puts you in the civilian backlog (6-14 months). BDD guarantees your check starts immediately upon ETS/EAS.',
+                steps: [
+                  'Step 1: Go to your base medical clinic and request your full, certified Service Treatment Records (STR) and dental records on CD/flash drive.',
+                  'Step 2: Log into VA.gov and submit VA Form 21-526EZ under the BDD program between Day 180 and Day 90 before separation.',
+                  'Step 3: Attend all contracted C&P exams (VES, QTC, Optum Serve). Describe your symptoms on your worst days, not your best.'
+                ],
+                form: 'VA Form 21-526EZ',
+                formUrl: 'https://www.va.gov/find-forms/about-form-21-526ez/',
+                script: 'What to tell medical: "I need a complete certified copy of all inpatient, outpatient, and mental health medical records for my BDD claim filing."'
+              },
+              {
+                id: 'skillbridge_internship',
+                phase: 'p1',
+                phaseName: 'Phase 1: Pre-Separation (T-180 to T-0)',
+                timing: '180 Days Pre-Separation',
+                urgency: 'high',
+                urgencyLabel: '🟡 CAREER ACCELERATOR',
+                title: 'DoD SkillBridge Corporate Internship & Apprenticeship',
+                value: 'Full Military Pay + Civilian Salary Pipeline',
+                badge: 'DoD Instruction 1322.29',
+                summary: 'Spend your final 180 days of active duty working full-time at a civilian corporation while still collecting 100% military base pay, BAH, and BAS.',
+                why: 'Eliminates transition unemployment. Over 85% of SkillBridge participants convert directly into high-paying six-figure civilian careers.',
+                steps: [
+                  'Step 1: Browse authorized corporate partners on the official DoD SkillBridge portal (Amazon, Microsoft, Lockheed, local trades).',
+                  'Step 2: Obtain Commander authorization (O-4 or above approval).',
+                  'Step 3: Secure formal offer letter and complete military ethics transition briefing.'
+                ],
+                form: 'DoD SkillBridge App',
+                formUrl: 'https://skillbridge.osd.mil/program-overview.htm',
+                script: 'What to tell your CO: "This program aligns with my post-service employment and I have trained my relief to ensure zero operational disruption."'
+              },
+              {
+                id: 'intent_to_file_backpay',
+                phase: 'p2',
+                phaseName: 'Phase 2: Immediate Transition (Months 0 to 6)',
+                timing: 'Day 1 Post-Separation',
+                urgency: 'critical',
+                urgencyLabel: '🔴 BACKPAY SHIELD',
+                title: 'Intent to File (ITF) — Lock In Up to 12 Months of Backpay',
+                value: '$15,000 to $44,000+ Retroactive Lump Sum',
+                badge: '38 CFR § 3.155',
+                summary: 'Submitting a simple 1-page Intent to File freezes your legal effective date for 365 days while you gather medical evidence, nexus letters, and buddy statements.',
+                why: 'If your claim takes 10 months to reach 100% ($3,737/mo), having an ITF active means the VA must cut you a single tax-free backpay check of $37,370 on approval.',
+                steps: [
+                  'Step 1: Log in to VA.gov and click "Start a new claim" (this automatically submits an Intent to File) or submit VA Form 21-0966.',
+                  'Step 2: You now have exactly 365 days to collect private medical records, buddy letters, and Nexus letters.',
+                  'Step 3: When your claim is awarded, every dollar dating back to your ITF submission is deposited into your bank account.'
+                ],
+                form: 'VA Form 21-0966',
+                formUrl: 'https://www.va.gov/find-forms/about-form-21-0966/',
+                script: 'What to do: Submit this on Day 1 after separation even if you don\'t have all your medical records ready yet!'
+              },
+              {
+                id: 'va_free_dental_180',
+                phase: 'p2',
+                phaseName: 'Phase 2: Immediate Transition (Months 0 to 6)',
+                timing: 'Within 180 Days of Separation',
+                urgency: 'high',
+                urgencyLabel: '🟡 TIME-SENSITIVE FREEBIE',
+                title: 'VA 100% Free Dental Treatment Window (Class II(b))',
+                value: '$2,500 to $8,000+ Free Dental Care',
+                badge: '38 U.S.C. § 1712',
+                summary: 'All separated veterans with 90+ days continuous active service are legally entitled to one-time 100% free comprehensive dental treatment if applied within 180 days of discharge.',
+                why: 'Normally only 100% P&T veterans receive VA dental. This 180-day grace period gives any honorably separated veteran free cleanings, cavity repairs, and crowns.',
+                steps: [
+                  'Step 1: Check your DD-214 Box 29 to verify it indicates dental care was not completed prior to separation (or apply regardless).',
+                  'Step 2: Contact your local VA Medical Center Dental Department within 180 days of your DD-214 separation date.',
+                  'Step 3: Complete VA Form 10-10EZ and schedule your comprehensive initial evaluation and treatment plan.'
+                ],
+                form: 'VA Form 10-10EZ',
+                formUrl: 'https://www.va.gov/find-forms/about-form-10-10ez/',
+                script: 'What to tell VA Dental: "I was separated within the last 180 days and I am requesting my one-time comprehensive dental evaluation under Class II(b) eligibility."'
+              },
+              {
+                id: 'vgli_life_insurance',
+                phase: 'p2',
+                phaseName: 'Phase 2: Immediate Transition (Months 0 to 6)',
+                timing: 'Within 240 Days of Separation',
+                urgency: 'high',
+                urgencyLabel: '🟡 GUARANTEED ISSUE LIFE INSURANCE',
+                title: 'SGLI to VGLI Conversion — No Health Questions or Physical Exams',
+                value: '$500,000 Guaranteed Life Coverage',
+                badge: '38 U.S.C. § 1968',
+                summary: 'Convert up to $500,000 in military SGLI life insurance to Veterans\' Group Life Insurance (VGLI) with zero medical exams, no physicals, and guaranteed issue.',
+                why: 'Commercial life insurance companies routinely deny veterans or charge exorbitant rates if they have PTSD, TBI, or disability ratings. VGLI cannot deny you based on medical history.',
+                steps: [
+                  'Step 1: Log in to the Prudential / OSGLI portal via milConnect within 240 days of separation.',
+                  'Step 2: Select your coverage amount (up to $500,000 in $10,000 increments).',
+                  'Step 3: Set up automatic bank draft to keep coverage active for life.'
+                ],
+                form: 'Form SGLV 8714',
+                formUrl: 'https://www.va.gov/life-insurance/options-eligibility/vgli/',
+                script: 'Key Rule: Apply within 240 days of discharge for 100% guaranteed approval with zero medical questions.'
+              },
+              {
+                id: 'va_loan_house_hack',
+                phase: 'p3',
+                phaseName: 'Phase 3: Wealth Building (Months 6 to 24)',
+                timing: 'Month 6+ Post-Separation',
+                urgency: 'wealth',
+                urgencyLabel: '🟢 WEALTH GENERATOR',
+                title: 'VA Multi-Family House Hacking ($0 Down + Funding Fee Waived)',
+                value: '$4,000 to $15,000+ Fee Waived + $0 Rent',
+                badge: '38 U.S.C. § 3729',
+                summary: 'Use your VA Loan to purchase a 2 to 4 unit multi-family property with $0 down payment. If you have a 10%+ VA disability rating, the 1.25% to 3.3% VA funding fee is 100% WAIVED.',
+                why: 'Live in 1 unit for free while the other 1-3 tenants pay your entire mortgage and generate monthly tax-free cash flow.',
+                steps: [
+                  'Step 1: Download your VA Certificate of Eligibility (COE) from VA.gov to prove funding fee exemption.',
+                  'Step 2: Connect with a military-savvy VA Loan broker to get pre-approved up to 4 units.',
+                  'Step 3: Run the numbers inside our VA House Hacker tab to calculate your cash flow in your target state.'
+                ],
+                form: 'VA Form 26-1880 (COE)',
+                formUrl: 'https://www.va.gov/housing-assistance/home-loans/how-to-apply-for-coe/',
+                script: 'What to tell your lender: "I am purchasing a primary multi-family residence using my VA Loan with 10%+ service-connected disability funding fee exemption."'
+              },
+              {
+                id: 'secondary_claims_bridge',
+                phase: 'p3',
+                phaseName: 'Phase 3: Wealth Building (Months 6 to 24)',
+                timing: 'Month 12+ Post-Separation',
+                urgency: 'wealth',
+                urgencyLabel: '🟢 RATING MULTIPLIER',
+                title: 'High-Yield Secondary Claims Bridging (Bridge to 100% P&T)',
+                value: '+$1,400 to +$2,000+/mo for Life',
+                badge: '38 CFR § 3.310',
+                summary: 'Claim conditions that were caused or aggravated by your existing primary service-connected disabilities (Sleep Apnea secondary to PTSD, Radiculopathy secondary to Lumbar Strain, Migraines secondary to Tinnitus).',
+                why: 'Secondary claims require no in-service medical record proof — only a medical nexus showing your primary disability caused the secondary ailment.',
+                steps: [
+                  'Step 1: Identify your primary service-connected conditions inside our VA Math & Scanner tabs.',
+                  'Step 2: Obtain a formal diagnosis from your private doctor or VA physician for the secondary condition.',
+                  'Step 3: Obtain a written Medical Nexus Letter stating the condition is "at least as likely as not (50%+ probability)" caused by your primary disability.'
+                ],
+                form: 'VA Form 21-526EZ',
+                formUrl: 'https://www.va.gov/find-forms/about-form-21-526ez/',
+                script: 'Nexus Magic Words: The doctor\'s letter must use the exact legal standard: "It is my professional medical opinion that it is at least as likely as not (50% or greater probability) that the veteran\'s [Condition] is secondary to their service-connected [Primary Disability]."'
+              },
+              {
+                id: 'property_tax_exemption',
+                phase: 'p3',
+                phaseName: 'Phase 3: Wealth Building (Months 6 to 24)',
+                timing: 'Upon Receiving 100% P&T (or 70%+)',
+                urgency: 'wealth',
+                urgencyLabel: '🟢 MASSIVE TAX SHIELD',
+                title: 'County Homestead Property Tax Exemption Submission',
+                value: '$4,000 to $12,000+/year Saved Permanently',
+                badge: 'State Statutory Code',
+                summary: 'Submit your VA Rating Decision Letter to your county tax appraisal district to wipe out 100% of property taxes on your primary residence in eligible states (Texas, Florida, Illinois, Michigan, Alabama, etc.).',
+                why: 'On a $350,000 home, saving 2.2% in property taxes puts an extra $640/month ($7,700/year) directly into your pocket.',
+                steps: [
+                  'Step 1: Download your VA Benefit Summary / Commissary Letter from VA.gov showing 100% P&T status.',
+                  'Step 2: Visit your County Tax Assessor-Collector or Appraisal District website.',
+                  'Step 3: Submit the Disabled Veteran Homestead Exemption application before the annual county filing deadline.'
+                ],
+                form: 'County Homestead Form',
+                formUrl: 'https://www.va.gov/records/download-va-letters/',
+                script: 'What to submit: Your DD-214 copy, VA Commissary / P&T Summary Letter, and state drivers license matching the property address.'
+              },
+              {
+                id: 'rating_defense_rules',
+                phase: 'p4',
+                phaseName: 'Phase 4: Lifelong Protection (Years 2 to Forever)',
+                timing: 'Continuous Protection',
+                urgency: 'defense',
+                urgencyLabel: '🛡️ LEGAL SHIELD',
+                title: 'The 5-Year, 10-Year, and 20-Year VA Rating Protection Rules',
+                value: 'Permanent Lifetime Compensation Defense',
+                badge: '38 CFR § 3.951 & § 3.327',
+                summary: 'Federal law strictly protects your disability rating from arbitrary reductions over time through three statutory grandfathering rules.',
+                why: 'Veterans fear VA reduction audits. Knowing the law ensures you never lose sleep over your monthly income.',
+                steps: [
+                  '5-Year Rule (38 CFR § 3.327): The VA cannot reduce a rating on a single re-evaluation unless they prove sustained, long-term material improvement under everyday life conditions.',
+                  '10-Year Rule (38 CFR § 3.957): The VA cannot sever service connection for any condition rated for 10 consecutive years except in cases of proven fraud.',
+                  '20-Year Rule (38 CFR § 3.951): A disability rating in continuous effect for 20 years is permanently locked and cannot be reduced for any reason.'
+                ],
+                form: '38 CFR § 3.951',
+                formUrl: 'https://www.ecfr.gov/current/title-38/chapter-I/part-3/subpart-A/subject-group-ECFRf346b0a7c41398c/section-3.951',
+                script: 'Defense Rule: Never miss a scheduled VA re-examination appointment, and always seek care at least once a year to keep medical continuity active in your file.'
+              },
+              {
+                id: 'champva_family_healthcare',
+                phase: 'p4',
+                phaseName: 'Phase 4: Lifelong Protection (Years 2 to Forever)',
+                timing: 'Immediate Upon 100% P&T',
+                urgency: 'defense',
+                urgencyLabel: '🛡️ FAMILY HEALTHCARE',
+                title: 'CHAMPVA Free Healthcare for Spouse and Children',
+                value: '$12,000 to $24,000/yr Healthcare Savings',
+                badge: '38 U.S.C. § 1781',
+                summary: '100% P&T disabled veterans receive completely free comprehensive medical, hospital, pharmacy, and prescription coverage for their spouse and dependent children under CHAMPVA.',
+                why: 'Completely eliminates employer healthcare insurance premiums, deductibles, and family out-of-pocket health costs.',
+                steps: [
+                  'Step 1: Download and complete VA Form 10-10d (Application for CHAMPVA) and Form 10-7959c (Other Health Insurance Certification).',
+                  'Step 2: Attach copies of your marriage certificate, children\'s birth certificates, and your VA Rating Decision Letter.',
+                  'Step 3: Mail or fax to the CHAMPVA Eligibility Center in Denver, CO (Fax: 303-331-7809).'
+                ],
+                form: 'VA Form 10-10d',
+                formUrl: 'https://www.va.gov/find-forms/about-form-10-10d/',
+                script: 'What to include: Marriage certificate, birth certificates for all dependent children under 18 (or 23 if enrolled in college full-time), and VA P&T Summary Letter.'
+              }
+            ];
 
-              {/* "YOUR LIFE IN MONTHS" — Tactical Countdown Clocks */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-mono text-xs uppercase tracking-widest text-gold font-bold flex items-center gap-1.5">
-                    <Target size={14} /> Critical Statutory Deadline Clocks
-                  </h3>
-                  <span className="text-[11px] font-mono text-sand/50">
-                    Live client-side tracking based on your service timeline
-                  </span>
+            // Computed counts
+            const completedCount = TIMELINE_EVENTS.filter(e => completedMilestones[e.id]).length;
+            // eslint-disable-next-line no-unused-vars
+            const pendingCount = TIMELINE_EVENTS.length - completedCount;
+
+            return (
+              <div className="space-y-6">
+                {/* Header Hero Banner */}
+                <div className="bg-gradient-to-r from-steel/30 via-steel-dark to-steel-dark border border-gold/40 rounded-3xl p-6 relative overflow-hidden shadow-2xl">
+                  <div className="flex items-center gap-2 text-gold font-mono text-xs uppercase tracking-widest font-bold mb-1">
+                    <Calendar size={14} /> Mission Clocks & Statutory Windows
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-sand">
+                    "Your Life in Months" <span className="text-gold">Mission Timeline Generator</span>
+                  </h2>
+                  <p className="text-sand/70 text-sm mt-1 max-w-3xl leading-relaxed">
+                    Veterans lose thousands of dollars simply by missing time clocks. Below are your active statutory countdown clocks, step-by-step hand-held execution guides, and a chronological battle map tailored to your service timeline.
+                  </p>
+
+                  <div className="pt-3 flex flex-wrap items-center gap-2">
+                    <button
+                      onClick={() => setShowSettingsModal(true)}
+                      className="px-3.5 py-1.5 rounded-xl bg-gold text-steel-dark font-black font-mono text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-md"
+                    >
+                      <Sliders size={12}/> Edit Timeline Profile ({currentRating}% Rated • {stateInfo.name})
+                    </button>
+                    <button
+                      onClick={() => window.print()}
+                      className="px-3.5 py-1.5 rounded-xl bg-steel-dark border border-steel/60 hover:border-gold text-sand font-mono text-xs uppercase font-bold flex items-center gap-1.5"
+                    >
+                      <Printer size={12}/> Print 1-Page Mission Brief
+                    </button>
+                  </div>
                 </div>
 
+                {/* Tactical Top Countdown Dashboard */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* BDD Window Clock */}
-                  <div className="bg-steel/20 border border-steel/50 rounded-2xl p-5 space-y-3">
+                  {/* BDD Window Card */}
+                  <div className="bg-steel/20 border border-steel/50 rounded-2xl p-5 space-y-2.5">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded font-bold bg-steel text-sand/70">
-                        Pre-Separation
+                        Pre-Separation Clock
                       </span>
                       <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
                         alreadyOut
                           ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-500/30'
                           : separationMonths <= 180 && separationMonths >= 90
                             ? 'bg-emerald-900/60 text-emerald-300 border border-emerald-500/40 animate-pulse'
-                            : separationMonths < 90
-                              ? 'bg-red-950/60 text-scarlet border border-scarlet/40'
-                              : 'bg-steel/40 text-sand/60'
+                            : 'bg-red-950/60 text-scarlet border border-scarlet/40'
                       }`}>
-                        {alreadyOut ? '✓ Window Passed (Separated)' : separationMonths <= 180 && separationMonths >= 90 ? '🟢 OPEN RIGHT NOW' : separationMonths < 90 ? '🔴 Standard Claim Mode' : `Opens in ${separationMonths - 180}mo`}
+                        {alreadyOut ? '✓ Completed' : separationMonths <= 180 && separationMonths >= 90 ? '🟢 OPEN RIGHT NOW' : separationMonths < 90 ? '🔴 Standard Queue' : `Opens in ${separationMonths - 180}mo`}
                       </span>
                     </div>
-
-                    <div>
-                      <div className="font-black text-sand text-base">BDD Fast-Track Claim Window</div>
-                      <div className="text-xs text-sand/60 mt-1 leading-relaxed">
-                        180 to 90 days prior to separation. Allows your VA rating and tax-free monthly compensation to take effect on <strong>Day 1 after discharge</strong>.
-                      </div>
+                    <div className="font-black text-sand text-base">BDD Fast-Track Window</div>
+                    <div className="text-xs text-sand/60 leading-relaxed">
+                      180 to 90 days before discharge. Guarantees your VA disability check starts on <strong>Day 1 as a civilian</strong>.
                     </div>
-
                     <div className="pt-2 border-t border-steel/40 text-[11px] font-mono text-gold flex items-center justify-between">
-                      <span>Statutory Law: 38 U.S.C. § 5101</span>
-                      <button onClick={() => setActiveTab('claims')} className="underline hover:text-yellow-300">
-                        Prep DBQs &rarr;
-                      </button>
+                      <span>38 U.S.C. § 5101</span>
+                      <span className="text-sand/50">{alreadyOut ? 'Separated' : `${separationMonths}mo to ETS`}</span>
                     </div>
                   </div>
 
-                  {/* Post-Separation VA Dental Grace Clock */}
-                  <div className="bg-steel/20 border border-steel/50 rounded-2xl p-5 space-y-3">
+                  {/* Dental Window Card */}
+                  <div className="bg-steel/20 border border-steel/50 rounded-2xl p-5 space-y-2.5">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded font-bold bg-steel text-sand/70">
-                        180-Day Grace
+                        180-Day Grace Clock
                       </span>
                       <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-gold/10 text-gold border border-gold/30">
                         Class II(b) Dental
                       </span>
                     </div>
-
-                    <div>
-                      <div className="font-black text-sand text-base">VA Free Dental Examination</div>
-                      <div className="text-xs text-sand/60 mt-1 leading-relaxed">
-                        All separated veterans with 90+ days continuous active service qualify for <strong>one-time 100% free comprehensive dental treatment</strong> if applied within 180 days of discharge.
-                      </div>
+                    <div className="font-black text-sand text-base">100% Free VA Dental Care</div>
+                    <div className="text-xs text-sand/60 leading-relaxed">
+                      All separated veterans qualify for <strong>one-time 100% free comprehensive dental treatment</strong> if applied within 180 days of separation.
                     </div>
-
                     <div className="pt-2 border-t border-steel/40 text-[11px] font-mono text-gold flex items-center justify-between">
-                      <span>Form: VA 10-10EZ (Box Dental)</span>
-                      <button onClick={() => setActiveTab('perks')} className="underline hover:text-yellow-300">
-                        View Dental Guide &rarr;
-                      </button>
+                      <span>VA Form 10-10EZ</span>
+                      <span className="text-emerald-400 font-bold">$2,500-$8,000 Value</span>
                     </div>
                   </div>
 
-                  {/* SGLI to VGLI Conversion Window */}
-                  <div className="bg-steel/20 border border-steel/50 rounded-2xl p-5 space-y-3">
+                  {/* VGLI Guaranteed Life Insurance Clock */}
+                  <div className="bg-steel/20 border border-steel/50 rounded-2xl p-5 space-y-2.5">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded font-bold bg-steel text-sand/70">
-                        240 Days Exam-Free
+                        240-Day Exam-Free Clock
                       </span>
                       <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-500/30">
-                        No Medical Underwriting
+                        No Medical Questions
                       </span>
                     </div>
-
-                    <div>
-                      <div className="font-black text-sand text-base">VGLI Guaranteed Life Insurance</div>
-                      <div className="text-xs text-sand/60 mt-1 leading-relaxed">
-                        Convert your $500,000 military SGLI to civilian VGLI within 240 days of separation with <strong>ZERO physical exams, no medical records checks, and guaranteed approval</strong> regardless of PTSD or disabilities.
-                      </div>
+                    <div className="font-black text-sand text-base">VGLI Guaranteed Life Insurance</div>
+                    <div className="text-xs text-sand/60 leading-relaxed">
+                      Convert up to $500k life insurance with <strong>ZERO physical exams and guaranteed approval</strong> regardless of PTSD or service ratings.
                     </div>
-
                     <div className="pt-2 border-t border-steel/40 text-[11px] font-mono text-gold flex items-center justify-between">
-                      <span>Deadline: 1 yr + 120 days</span>
-                      <span className="text-sand/50">Guaranteed Issue</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Dynamic Next High-Dollar Action Brief */}
-              <div className="bg-gradient-to-r from-steel-dark via-steel/30 to-steel-dark border-2 border-gold/40 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-12 h-12 rounded-2xl bg-gold/10 border border-gold/40 flex items-center justify-center text-gold flex-shrink-0">
-                    <Award size={24} />
-                  </div>
-                  <div>
-                    <div className="text-[10px] font-mono uppercase tracking-widest text-gold font-bold">
-                      Your Immediate Next Tactical Move
-                    </div>
-                    <div className="text-base font-black text-sand mt-0.5">
-                      {currentRating === 100 ? (
-                        <span>Lock in 100% P&T State Property Tax Exemption + Enroll Family in CHAMPVA</span>
-                      ) : currentRating >= 70 ? (
-                        <span>File High-Yield Secondary Claims (Sleep Apnea / Migraines) to Bridge to 100% P&T</span>
-                      ) : alreadyOut ? (
-                        <span>Request Complete C-File & Medical Records to Establish Service Connection</span>
-                      ) : (
-                        <span>Document All Ailments in Military Treatment Records Before BDD Filing</span>
-                      )}
-                    </div>
-                    <div className="text-xs text-sand/60 mt-1">
-                      {currentRating === 100 ? (
-                        <span>Estimated ongoing value: <strong>$0 property taxes ($6,000-$12,000/yr saved) + $0 healthcare premiums</strong>.</span>
-                      ) : (
-                        <span>Crossing to 100% P&T unlocks an additional <strong>+${(3737 - monthlyPay).toLocaleString()}/mo tax-free cash for life</strong>.</span>
-                      )}
+                      <span>Guaranteed Issue</span>
+                      <span className="text-sand/50">Up to $500,000</span>
                     </div>
                   </div>
                 </div>
 
-                <button
-                  onClick={() => setActiveTab(currentRating === 100 ? 'perks' : 'vamath')}
-                  className="px-4 py-2.5 bg-gold hover:bg-yellow-400 text-steel-dark font-black font-mono text-xs uppercase tracking-wider rounded-xl transition-all shadow-md whitespace-nowrap self-stretch sm:self-auto text-center"
-                >
-                  {currentRating === 100 ? 'Claim Perks &rarr;' : 'Calculate Path &rarr;'}
-                </button>
-              </div>
-
-              {/* Milestone Checklist Header + Smart Filters */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-steel/40 pb-4">
-                <div>
-                  <h3 className="text-xl font-black uppercase tracking-tight text-sand">
-                    Step-by-Step Transition & Wealth Checklist
-                  </h3>
-                  <p className="text-sand/50 text-xs mt-0.5">
-                    {alreadyOut ? 'Filtered for separated veterans. Irrelevant pre-separation tasks hidden.' : 'Tailored for active duty countdown.'} Check off tasks to watch your progress update in real-time.
-                  </p>
-                </div>
-
-                {/* Filter Controls */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <div className="flex items-center gap-1 bg-steel-dark border border-steel/50 rounded-xl p-1 text-xs font-mono">
+                {/* Filter Ribbon & Declutter Controls */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-steel/20 border border-steel/50 rounded-2xl p-4">
+                  {/* Phase Filter Chips */}
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     {[
-                      { id: 'all', label: `All (${filteredMilestones.length})` },
-                      { id: 'pending', label: `Pending (${filteredMilestones.filter(m=>!completedMilestones[m.id]).length})` },
-                      { id: 'completed', label: `Done (${filteredMilestones.filter(m=>completedMilestones[m.id]).length})` },
-                    ].map(f => (
+                      { id: 'all', label: `All Phases (${TIMELINE_EVENTS.length})` },
+                      { id: 'p1',  label: 'Pre-Separation' },
+                      { id: 'p2',  label: 'First 6 Months' },
+                      { id: 'p3',  label: 'Wealth & Housing' },
+                      { id: 'p4',  label: 'Lifelong Defense' },
+                    ].map(p => (
                       <button
-                        key={f.id}
-                        onClick={() => setMilestoneFilter(f.id)}
-                        className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
-                          milestoneFilter === f.id
-                            ? 'bg-gold text-steel-dark shadow-sm'
-                            : 'text-sand/60 hover:text-sand'
+                        key={p.id}
+                        onClick={() => setTimelinePhaseFilter(p.id)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all border ${
+                          timelinePhaseFilter === p.id
+                            ? 'bg-gold text-steel-dark border-gold shadow-sm'
+                            : 'bg-steel-dark/60 border-steel/50 text-sand/70 hover:text-sand hover:bg-steel/40'
                         }`}
                       >
-                        {f.label}
+                        {p.label}
                       </button>
                     ))}
                   </div>
 
-                  <label className="flex items-center gap-1.5 text-xs font-mono text-sand/70 cursor-pointer select-none bg-steel/30 border border-steel/50 px-3 py-1.5 rounded-xl">
+                  {/* Declutter Checkbox */}
+                  <label className="flex items-center gap-2 cursor-pointer text-xs font-mono text-sand/80 select-none bg-steel-dark/60 border border-steel/50 px-3 py-1.5 rounded-xl">
                     <input
                       type="checkbox"
                       checked={hideCompletedMilestones}
                       onChange={(e) => setHideCompletedMilestones(e.target.checked)}
                       className="rounded border-steel/60 text-gold focus:ring-gold bg-steel-dark"
                     />
-                    <span>Hide Completed</span>
+                    <span>Hide Completed ({completedCount})</span>
                   </label>
                 </div>
-              </div>
 
-              {/* Filtered Milestone Cards */}
-              <div className="bg-steel/20 border border-steel/50 rounded-2xl p-6 space-y-3">
-                {filteredMilestones
-                  .filter(m => {
-                    const isDone = Boolean(completedMilestones[m.id]);
-                    if (hideCompletedMilestones && isDone) return false;
-                    if (milestoneFilter === 'pending') return !isDone;
-                    if (milestoneFilter === 'completed') return isDone;
-                    return true;
-                  })
-                  .map(m => (
-                    <button
-                      key={m.id}
-                      onClick={() => {
-                        const updated = {
-                          ...completedMilestones,
-                          [m.id]: !completedMilestones[m.id]
-                        };
-                        setCompletedMilestones(updated);
-                        try {
-                          const saved = localStorage.getItem('vbc_veteran_profile');
-                          if (saved) {
-                            const p = JSON.parse(saved);
-                            p.completedMilestones = updated;
-                            localStorage.setItem('vbc_veteran_profile', JSON.stringify(p));
-                          }
-                        } catch (e) {}
-                      }}
-                      className={"w-full p-4 rounded-xl border text-left transition-all flex items-start gap-3 " + (
-                        completedMilestones[m.id]
-                          ? "bg-steel-dark/80 border-gold/40 text-sand shadow-sm"
-                          : "bg-steel-dark/30 border-steel/40 text-sand/70 hover:border-gold/40"
-                      )}
-                    >
-                      <div className={"w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 mt-0.5 " + (
-                        completedMilestones[m.id]
-                          ? "bg-gold border-gold text-steel-dark"
-                          : "border-steel/60"
-                      )}>
-                        {completedMilestones[m.id] && <CheckSquare size={13}/>}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 flex-wrap mb-1">
-                          <span className="text-[10px] font-mono uppercase tracking-wider text-gold px-2 py-0.5 rounded bg-gold/5 border border-gold/20 font-bold">
-                            {m.stage}
-                          </span>
-                          {completedMilestones[m.id] && (
-                            <span className="text-[10px] font-mono text-emerald-400 font-bold">
-                              ✓ Completed & Synced
-                            </span>
+                {/* Hand-Held Step-by-Step Timeline Cards */}
+                <div className="space-y-4">
+                  {TIMELINE_EVENTS
+                    .filter(item => {
+                      const isDone = Boolean(completedMilestones[item.id]);
+                      if (hideCompletedMilestones && isDone) return false;
+                      if (timelinePhaseFilter !== 'all' && item.phase !== timelinePhaseFilter) return false;
+                      return true;
+                    })
+                    .map(item => {
+                      const isOpen = expandedTimelineCard === item.id;
+                      const isDone = Boolean(completedMilestones[item.id]);
+
+                      return (
+                        <div
+                          key={item.id}
+                          className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
+                            isDone
+                              ? 'border-emerald-500/40 bg-emerald-950/20'
+                              : isOpen
+                                ? 'border-gold/60 bg-steel/30 shadow-xl shadow-gold/5'
+                                : 'border-steel/50 bg-steel/20 hover:border-gold/30'
+                          }`}
+                        >
+                          {/* Card Click Header */}
+                          <div
+                            onClick={() => setExpandedTimelineCard(isOpen ? null : item.id)}
+                            className="p-5 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 select-none"
+                          >
+                            <div className="flex items-start gap-3.5">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const updated = {
+                                    ...completedMilestones,
+                                    [item.id]: !completedMilestones[item.id]
+                                  };
+                                  setCompletedMilestones(updated);
+                                  try {
+                                    const saved = localStorage.getItem('vbc_veteran_profile');
+                                    if (saved) {
+                                      const p = JSON.parse(saved);
+                                      p.completedMilestones = updated;
+                                      localStorage.setItem('vbc_veteran_profile', JSON.stringify(p));
+                                    }
+                                  } catch (err) {}
+                                }}
+                                className={`w-6 h-6 rounded-lg border flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${
+                                  isDone
+                                    ? 'bg-gold border-gold text-steel-dark shadow-sm'
+                                    : 'border-steel/60 hover:border-gold bg-steel-dark'
+                                }`}
+                                title="Click to mark completed"
+                              >
+                                {isDone && <CheckSquare size={14} />}
+                              </button>
+
+                              <div>
+                                <div className="flex items-center gap-2 flex-wrap mb-1">
+                                  <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-steel text-sand/70">
+                                    {item.timing}
+                                  </span>
+                                  <span className="text-[10px] font-mono font-bold text-gold">
+                                    {item.urgencyLabel}
+                                  </span>
+                                  {isDone && (
+                                    <span className="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
+                                      ✓ Completed & Handled
+                                    </span>
+                                  )}
+                                </div>
+                                <div className={`text-base font-black tracking-tight ${isDone ? 'line-through opacity-70 text-sand' : 'text-sand'}`}>
+                                  {item.title}
+                                </div>
+                                <div className="text-xs text-sand/60 mt-0.5">
+                                  {item.summary}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3 self-end sm:self-center font-mono flex-shrink-0">
+                              <span className="text-xs font-black text-gold bg-gold/10 border border-gold/20 px-3 py-1.5 rounded-xl whitespace-nowrap">
+                                {item.value}
+                              </span>
+                              <div className="text-sand/40">
+                                <ChevronDown size={18} className={`transition-transform duration-200 ${isOpen ? 'rotate-180 text-gold' : ''}`} />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Expanded Hand-Held Step-by-Step Details */}
+                          {isOpen && (
+                            <div className="px-5 pb-6 pt-2 border-t border-steel/30 space-y-4 bg-steel-dark/50">
+                              {/* Why It Matters Callout */}
+                              <div className="bg-steel/30 border border-steel/50 rounded-xl p-4 space-y-1">
+                                <div className="text-xs font-mono uppercase text-gold font-bold flex items-center gap-1.5">
+                                  <HelpCircle size={13}/> Why This Window Matters:
+                                </div>
+                                <p className="text-xs text-sand/80 leading-relaxed">
+                                  {item.why}
+                                </p>
+                              </div>
+
+                              {/* Step-by-step Action Checklist */}
+                              <div className="space-y-2">
+                                <div className="text-xs font-mono uppercase text-sand/60 font-bold">
+                                  Hand-Held Step-by-Step Execution:
+                                </div>
+                                <div className="space-y-2">
+                                  {item.steps.map((st, sIdx) => (
+                                    <div key={sIdx} className="bg-steel-dark/80 border border-steel/40 rounded-xl p-3 text-xs text-sand/90 flex items-start gap-2.5">
+                                      <span className="w-5 h-5 rounded-full bg-gold/10 border border-gold/30 text-gold font-mono font-bold text-[11px] flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        {sIdx + 1}
+                                      </span>
+                                      <span className="leading-relaxed">{st}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Exact Word-for-Word Script */}
+                              {item.script && (
+                                <div className="bg-gold/5 border border-gold/30 rounded-xl p-3.5 space-y-1">
+                                  <div className="text-[11px] font-mono uppercase text-gold font-bold">
+                                    💬 Word-for-Word Script / Exact Language:
+                                  </div>
+                                  <div className="text-xs font-mono text-sand/90 italic bg-steel-dark/60 p-2.5 rounded-lg border border-steel/50">
+                                    "{item.script}"
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Action Links & Completed Button */}
+                              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+                                {item.formUrl && (
+                                  <a
+                                    href={item.formUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-4 py-2 rounded-xl bg-steel-dark border border-gold/40 hover:border-gold text-gold font-mono text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                                  >
+                                    <FileText size={13}/> Open Official {item.form} <ExternalLink size={11}/>
+                                  </a>
+                                )}
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = {
+                                      ...completedMilestones,
+                                      [item.id]: !completedMilestones[item.id]
+                                    };
+                                    setCompletedMilestones(updated);
+                                    try {
+                                      const saved = localStorage.getItem('vbc_veteran_profile');
+                                      if (saved) {
+                                        const p = JSON.parse(saved);
+                                        p.completedMilestones = updated;
+                                        localStorage.setItem('vbc_veteran_profile', JSON.stringify(p));
+                                      }
+                                    } catch (err) {}
+                                  }}
+                                  className={`px-5 py-2 rounded-xl font-mono text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
+                                    isDone
+                                      ? 'bg-steel-dark border border-steel/60 text-sand/70 hover:border-gold'
+                                      : 'bg-gold hover:bg-yellow-400 text-steel-dark shadow-md'
+                                  }`}
+                                >
+                                  {isDone ? '✓ Handled (Click to Unmark)' : 'Mark as Handled & Done'}
+                                </button>
+                              </div>
+                            </div>
                           )}
                         </div>
-                        <div className={"text-sm " + (completedMilestones[m.id] ? "line-through opacity-60" : "font-medium text-sand")}>
-                          {m.label}
-                        </div>
-                      </div>
-                    </button>
-                  ))}
+                      );
+                    })}
 
-                {filteredMilestones.filter(m => {
-                  const isDone = Boolean(completedMilestones[m.id]);
-                  if (hideCompletedMilestones && isDone) return false;
-                  if (milestoneFilter === 'pending') return !isDone;
-                  if (milestoneFilter === 'completed') return isDone;
-                  return true;
-                }).length === 0 && (
-                  <div className="p-8 text-center text-sand/40 font-mono text-xs border border-dashed border-steel/40 rounded-xl">
-                    All milestones in this view are completed! Toggle "Hide Completed" or switch filter to view past achievements.
-                  </div>
-                )}
+                  {TIMELINE_EVENTS.filter(item => {
+                    const isDone = Boolean(completedMilestones[item.id]);
+                    if (hideCompletedMilestones && isDone) return false;
+                    if (timelinePhaseFilter !== 'all' && item.phase !== timelinePhaseFilter) return false;
+                    return true;
+                  }).length === 0 && (
+                    <div className="p-8 text-center text-sand/40 font-mono text-xs border border-dashed border-steel/40 rounded-xl">
+                      All timeline tasks in this filter are complete! Uncheck "Hide Completed" or switch phase filter to review past milestones.
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* ============================================================ */}
           {/* TAB 9: DISCHARGE UPGRADE GUIDE                               */}
