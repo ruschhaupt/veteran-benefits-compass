@@ -2,6 +2,117 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: system-ui, -apple-system, sans-serif;
+@layer base {
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: #0f172a;
+    color: #f5f3f0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Accessible focus indicators for keyboard navigation (WCAG 2.2 AA) */
+  :focus-visible {
+    outline: 2px solid #d4a574;
+    outline-offset: 2px;
+  }
+}
+
+/* ----------------------------------------------------------------------- */
+/* 1. CALM MODE (PTSD / TBI Neurological Accessibility)                   */
+/* ----------------------------------------------------------------------- */
+.calm-mode * {
+  animation: none !important;
+  transition: none !important;
+}
+
+.calm-mode .animate-pulse,
+.calm-mode .animate-bounce,
+.calm-mode .animate-fade-in {
+  animation: none !important;
+}
+
+/* ----------------------------------------------------------------------- */
+/* 2. READER MODE (Distraction-Free High Contrast Reading)                 */
+/* ----------------------------------------------------------------------- */
+.reader-mode {
+  background-color: #faf9f6 !important;
+  color: #111827 !important;
+}
+
+.reader-mode body {
+  background-color: #faf9f6 !important;
+  color: #111827 !important;
+}
+
+.reader-mode .bg-steel-dark,
+.reader-mode .bg-steel,
+.reader-mode .bg-steel\/20,
+.reader-mode .bg-steel\/30,
+.reader-mode .bg-steel\/40,
+.reader-mode .bg-steel-dark\/95,
+.reader-mode .bg-steel-dark\/80,
+.reader-mode .bg-steel-dark\/60 {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border-color: #d1d5db !important;
+  box-shadow: none !important;
+}
+
+.reader-mode .text-sand,
+.reader-mode .text-sand\/90,
+.reader-mode .text-sand\/80,
+.reader-mode .text-sand\/70,
+.reader-mode .text-sand\/60,
+.reader-mode .text-sand\/50,
+.reader-mode .text-sand\/40 {
+  color: #1f2937 !important;
+}
+
+.reader-mode .text-gold {
+  color: #92400e !important;
+  font-weight: 800 !important;
+}
+
+.reader-mode .text-emerald-400 {
+  color: #065f46 !important;
+  font-weight: 800 !important;
+}
+
+/* ----------------------------------------------------------------------- */
+/* 3. HIGH CONTRAST MODE                                                   */
+/* ----------------------------------------------------------------------- */
+.high-contrast {
+  --tw-text-opacity: 1;
+}
+
+.high-contrast .text-sand\/70,
+.high-contrast .text-sand\/60,
+.high-contrast .text-sand\/50,
+.high-contrast .text-sand\/40 {
+  color: #ffffff !important;
+}
+
+.high-contrast border {
+  border-color: #facc15 !important;
+}
+
+/* ----------------------------------------------------------------------- */
+/* 4. UTILITIES & ANIMATIONS                                               */
+/* ----------------------------------------------------------------------- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+/* Custom hide scrollbars */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
