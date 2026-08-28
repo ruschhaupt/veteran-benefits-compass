@@ -1369,6 +1369,8 @@ const VeteranBenefitsCompass = () => {
     va_account_set: true,
     va_healthcare: true
   });
+  const [hideCompletedMilestones, setHideCompletedMilestones] = useState(false);
+  const [milestoneFilter, setMilestoneFilter] = useState('all'); // 'all' | 'pending' | 'completed'
 
 
   // ---- House Hacker State ----
@@ -1384,6 +1386,7 @@ const VeteranBenefitsCompass = () => {
 
   // ---- Pillar Navigation & Advanced Triage ----
   const [activePillar, setActivePillar] = useState('all'); // 'all' | 'claims' | 'wealth' | 'life'
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showDossierModal, setShowDossierModal] = useState(false);
   const [showRankCardModal, setShowRankCardModal] = useState(false);
   const [copiedNotification, setCopiedNotification] = useState(false);
@@ -1444,8 +1447,16 @@ const VeteranBenefitsCompass = () => {
     setTimeout(() => setCopiedNotification(false), 2500);
   };
 
-  // ---- Perks Accordion State ----
+
+  // ---- Smart Personalization Derived State ----
+  // These are computed from the veteran's profile for cross-tab intelligence
+  // eslint-disable-next-line no-unused-vars
+  const is100PT = currentRating === 100;
+
+// ---- Perks Accordion State ----
   const [expandedPerk, setExpandedPerk] = useState(null);
+  const [perkFilter, setPerkFilter] = useState('all'); // 'all' | 'unclaimed' | 'claimed'
+  const [hideClaimedPerks, setHideClaimedPerks] = useState(false);
 
   // ---- Avenues Accordion State ----
   const [expandedAvenue, setExpandedAvenue] = useState(null);
@@ -1798,15 +1809,21 @@ const VeteranBenefitsCompass = () => {
   // STATE BENEFITS MATRIX (EXPANDED)
   // -----------------------------------------------------------------------
   const stateBenefits = {
-    tx: { name:'Texas',          highlights:['100% P&T = 100% property tax exemption ($4K-$12K+/yr)','No state income tax on any income','Hazlewood Act: 150 credit hours free tuition at TX public colleges (transferable to dependents)','Free DV license plates and hunting/fishing licenses','VLB land and home loan program (low-rate second lien loans)'] },
-    fl: { name:'Florida',        highlights:['No state income tax','100% P&T = full property tax exemption','Free college tuition for dependents of 100% P&T vets at FL state schools','Free hunting and fishing license for any rating','Florida Resident Access Grant for private colleges'] },
-    nv: { name:'Nevada',         highlights:['No state income tax on any income','Property tax exemption: $22,500 base; 100% P&T = full exemption','Free Nevada State Parks annual pass','Free NDOW hunting and fishing licenses at 100% P&T','DMV waives registration fees for disabled veterans'] },
-    ca: { name:'California',     highlights:['No state tax on VA disability pay (military retirement partially taxed)','CalVet Farm and Home Loan at below-market rates','Property tax exemption up to $271K assessed value reduction','College Fee Waiver for veteran dependents at all CA public colleges','Free fishing and hunting license at 100% P&T'] },
-    nc: { name:'North Carolina', highlights:['No state tax on military retirement pay (Harper v. Virginia tax relief)','Property tax: $45,000 assessed value reduction for disabled veterans','NC Scholarship for Children of Wartime Veterans (Full tuition at UNC system schools)','Free hunting and inland fishing licenses at 50%+ disability'] },
-    oh: { name:'Ohio',           highlights:['100% homestead property tax exemption for 100% P&T veterans','Ohio Veterans Bonus Program (tax-free cash bonus for wartime deployments)','Ohio War Orphans & Severely Disabled Veterans Scholarship (80%+ tuition waiver)','Military retirement pay 100% exempt from state income tax'] },
-    ga: { name:'Georgia',        highlights:['100% P&T disabled veteran homestead exemption (up to $109,986 exemption)','Free Georgia drivers license and disabled veteran license plates','State income tax exemption on first $35,000 of military retirement pay','Free lifetime hunting and fishing license'] },
-    wa: { name:'Washington',     highlights:['No state income tax on any income','Property tax exemption at 100% P&T on primary residence','Free state park passes and discounted hunting/fishing licenses','Tuition waivers at WA state public colleges'] },
-    az: { name:'Arizona',        highlights:['Military retirement pay 100% exempt from state income tax','Property tax exemption for disabled veterans','AZ Veteran Supportive Campus priority college admissions','Free AZ hunting and fishing licenses at 100% P&T'] },
+    tx: { name:'Texas',          taxStatus: 'A+ Tax Shield', highlights:['100% P&T = 100% property tax exemption ($4K-$12K+/yr)','No state income tax on any income','Hazlewood Act: 150 credit hours free tuition at TX public colleges (transferable to dependents)','Free DV license plates and hunting/fishing licenses','VLB land and home loan program (low-rate second lien loans)'] },
+    fl: { name:'Florida',        taxStatus: 'A+ Tax Shield', highlights:['No state income tax','100% P&T = full property tax exemption','Free college tuition for dependents of 100% P&T vets at FL state schools','Free hunting and fishing license for any rating','Florida Resident Access Grant for private colleges'] },
+    nv: { name:'Nevada',         taxStatus: 'A Tax Shield',  highlights:['No state income tax on any income','Property tax exemption: $22,500 base; 100% P&T = full exemption','Free Nevada State Parks annual pass','Free NDOW hunting and fishing licenses at 100% P&T','DMV waives registration fees for disabled veterans'] },
+    ca: { name:'California',     taxStatus: 'B Tax Shield',  highlights:['No state tax on VA disability pay (military retirement partially taxed)','CalVet Farm and Home Loan at below-market rates','Property tax exemption up to $271K assessed value reduction','College Fee Waiver for veteran dependents at all CA public colleges','Free fishing and hunting license at 100% P&T'] },
+    nc: { name:'North Carolina', taxStatus: 'A- Tax Shield', highlights:['No state tax on military retirement pay (Harper v. Virginia tax relief)','Property tax: $45,000 assessed value reduction for disabled veterans','NC Scholarship for Children of Wartime Veterans (Full tuition at UNC system schools)','Free hunting and inland fishing licenses at 50%+ disability'] },
+    oh: { name:'Ohio',           taxStatus: 'A Tax Shield',  highlights:['100% homestead property tax exemption for 100% P&T veterans','Ohio Veterans Bonus Program (tax-free cash bonus for wartime deployments)','Ohio War Orphans & Severely Disabled Veterans Scholarship (80%+ tuition waiver)','Military retirement pay 100% exempt from state income tax'] },
+    ga: { name:'Georgia',        taxStatus: 'A Tax Shield',  highlights:['100% P&T disabled veteran homestead exemption (up to $109,986 exemption)','Free Georgia drivers license and disabled veteran license plates','State income tax exemption on first $35,000 of military retirement pay','Free lifetime hunting and fishing license'] },
+    wa: { name:'Washington',     taxStatus: 'A+ Tax Shield', highlights:['No state income tax on any income','Property tax exemption at 100% P&T on primary residence','Free state park passes and discounted hunting/fishing licenses','Tuition waivers at WA state public colleges'] },
+    az: { name:'Arizona',        taxStatus: 'A- Tax Shield', highlights:['Military retirement pay 100% exempt from state income tax','Property tax exemption for disabled veterans','AZ Veteran Supportive Campus priority college admissions','Free AZ hunting and fishing licenses at 100% P&T'] },
+    tn: { name:'Tennessee',      taxStatus: 'A+ Tax Shield', highlights:['No state income tax on wages or retirement','Property tax relief up to $175,000 of property market value for 100% P&T','Free in-state tuition for dependents of disabled veterans','Free state park camping and disabled veteran license plates'] },
+    va: { name:'Virginia',       taxStatus: 'A Tax Shield',  highlights:['100% P&T veterans receive 100% real estate tax exemption on primary residence','VMSDEP: Full tuition and fee waiver at public Virginia colleges for spouse and children','Exemption on one motor vehicle personal property tax'] },
+    il: { name:'Illinois',       taxStatus: 'A+ Tax Shield', highlights:['70%-100% disabled veterans pay $0 in residential property taxes statewide','Illinois Veteran Grant (IVG): 120 eligibility units of tuition and fees paid','Military retirement pay 100% exempt from state income tax'] },
+    co: { name:'Colorado',       taxStatus: 'B+ Tax Shield', highlights:['50% of first $200,000 of primary residence value exempt from property taxes for 100% P&T','State income tax exemption on military retirement pay (up to $15,000)','Free Colorado State Parks pass and hunting/fishing licenses'] },
+    sc: { name:'South Carolina', taxStatus: 'A Tax Shield',  highlights:['100% P&T veterans exempt from all property taxes on home + up to 5 acres + two vehicles','Free tuition for children of 100% disabled veterans at all SC public colleges and tech schools','No state income tax on military retirement pay'] },
+    al: { name:'Alabama',        taxStatus: 'A+ Tax Shield', highlights:['100% P&T disabled veterans exempt from all ad valorem property taxes on primary residence','Alabama GI Dependent Scholarship provides 5 standard academic years of tuition at state schools','Military retirement 100% exempt from AL state income tax'] },
   };
   const stateInfo = stateBenefits[selectedState] || stateBenefits.tx;
 
@@ -2122,6 +2139,249 @@ const VeteranBenefitsCompass = () => {
       <CrisisBanner/>
       <EmailSyncModal/>
 
+      {/* Tactical Veteran Profile & Settings Modal */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-steel-dark border border-gold/50 rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl my-8 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-steel/40 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gold/10 border border-gold/40 flex items-center justify-center text-gold">
+                  <Compass size={20} />
+                </div>
+                <div>
+                  <h3 className="font-black text-lg sm:text-xl text-sand uppercase tracking-tight">
+                    Veteran Profile & Command Settings
+                  </h3>
+                  <p className="text-xs font-mono text-sand/50">
+                    Adjust your profile to instantly recalculate all benefits, tax shields, and roadmap priorities.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowSettingsModal(false)}
+                className="text-sand/40 hover:text-sand text-xl font-black px-2"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-5">
+              {/* Branch of Service */}
+              <div>
+                <label className="block text-xs font-mono uppercase text-gold font-bold mb-2">
+                  1. Branch of Service
+                </label>
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                  {[
+                    { id: 'usmc', label: 'USMC' },
+                    { id: 'army', label: 'Army' },
+                    { id: 'navy', label: 'Navy' },
+                    { id: 'usaf', label: 'USAF' },
+                    { id: 'uscg', label: 'Coast Guard' },
+                    { id: 'ussf', label: 'Space Force' },
+                  ].map(b => (
+                    <button
+                      key={b.id}
+                      type="button"
+                      onClick={() => setBranch(b.id)}
+                      className={`py-2 px-2 rounded-xl text-xs font-mono font-black border transition-all text-center ${
+                        branch === b.id
+                          ? 'bg-gold text-steel-dark border-gold shadow-md'
+                          : 'bg-steel/20 border-steel/50 text-sand/70 hover:border-sand/40'
+                      }`}
+                    >
+                      {b.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Current Disability Rating */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-mono uppercase text-gold font-bold">
+                    2. Current VA Disability Rating
+                  </label>
+                  <span className="text-xs font-mono text-gold font-black bg-gold/10 px-2 py-0.5 rounded border border-gold/30">
+                    {currentRating}% {currentRating === 100 ? 'P&T' : 'Service-Connected'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
+                  {[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map(r => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => {
+                        setCurrentRating(r);
+                        setDisabilityStatus(r > 0 ? (r === 100 ? '100' : 'rated') : 'none');
+                      }}
+                      className={`py-2 rounded-xl text-xs font-mono font-bold border transition-all ${
+                        currentRating === r
+                          ? 'bg-gold text-steel-dark border-gold shadow-md'
+                          : 'bg-steel/20 border-steel/50 text-sand/70 hover:border-sand/40'
+                      }`}
+                    >
+                      {r}%
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Transition Status */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-mono uppercase text-gold font-bold mb-2">
+                    3. Transition Status
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setAlreadyOut(false)}
+                      className={`flex-1 py-2 rounded-xl text-xs font-mono font-bold border transition-all ${
+                        !alreadyOut
+                          ? 'bg-gold text-steel-dark border-gold'
+                          : 'bg-steel/20 border-steel/50 text-sand/70'
+                      }`}
+                    >
+                      Active Duty
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAlreadyOut(true)}
+                      className={`flex-1 py-2 rounded-xl text-xs font-mono font-bold border transition-all ${
+                        alreadyOut
+                          ? 'bg-gold text-steel-dark border-gold'
+                          : 'bg-steel/20 border-steel/50 text-sand/70'
+                      }`}
+                    >
+                      Already Separated
+                    </button>
+                  </div>
+                </div>
+
+                {/* State of Domicile */}
+                <div>
+                  <label className="block text-xs font-mono uppercase text-gold font-bold mb-2">
+                    4. State of Domicile ({stateInfo.name} - {stateInfo.taxStatus || "A Grade"})
+                  </label>
+                  <select
+                    value={selectedState}
+                    onChange={(e) => setSelectedState(e.target.value)}
+                    className="w-full bg-steel/30 border border-steel/60 rounded-xl px-3 py-2 text-xs font-mono text-sand focus:outline-none focus:border-gold"
+                  >
+                    {Object.keys(stateBenefits).map(stKey => (
+                      <option key={stKey} value={stKey} className="bg-steel-dark text-sand">
+                        {stateBenefits[stKey].name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Discharge & Dependents */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-mono uppercase text-gold font-bold mb-2">
+                    5. Discharge Characterization
+                  </label>
+                  <select
+                    value={dischargeType}
+                    onChange={(e) => setDischargeType(e.target.value)}
+                    className="w-full bg-steel/30 border border-steel/60 rounded-xl px-3 py-2 text-xs font-mono text-sand focus:outline-none focus:border-gold"
+                  >
+                    <option value="honorable" className="bg-steel-dark text-sand">Honorable Discharge</option>
+                    <option value="general" className="bg-steel-dark text-sand">General Under Honorable Conditions</option>
+                    <option value="oth" className="bg-steel-dark text-sand">Other Than Honorable (OTH)</option>
+                    <option value="bad_conduct" className="bg-steel-dark text-sand">Bad Conduct Discharge (BCD)</option>
+                    <option value="dishonorable" className="bg-steel-dark text-sand">Dishonorable Discharge</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-mono uppercase text-gold font-bold mb-2">
+                    6. Family & Dependents
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setHasDependents(false)}
+                      className={`flex-1 py-2 rounded-xl text-xs font-mono font-bold border transition-all ${
+                        !hasDependents
+                          ? 'bg-gold text-steel-dark border-gold'
+                          : 'bg-steel/20 border-steel/50 text-sand/70'
+                      }`}
+                    >
+                      Single (No Deps)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setHasDependents(true)}
+                      className={`flex-1 py-2 rounded-xl text-xs font-mono font-bold border transition-all ${
+                        hasDependents
+                          ? 'bg-gold text-steel-dark border-gold'
+                          : 'bg-steel/20 border-steel/50 text-sand/70'
+                      }`}
+                    >
+                      Spouse / Children
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Primary Objective */}
+              <div>
+                <label className="block text-xs font-mono uppercase text-gold font-bold mb-2">
+                  7. Primary Transition Objective
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
+                    { id: 'school',   label: '🎓 Degree Stacking' },
+                    { id: 'homeBuy',  label: '🏠 VA House Hacking' },
+                    { id: 'career',   label: '💼 Contracting & GS' },
+                    { id: 'freedom',  label: '⚡ Financial Freedom' },
+                  ].map(f => (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => setFuturePath(f.id)}
+                      className={`py-2 px-2 rounded-xl text-xs font-mono font-bold border transition-all text-center ${
+                        futurePath === f.id
+                          ? 'bg-gold text-steel-dark border-gold shadow-md'
+                          : 'bg-steel/20 border-steel/50 text-sand/70 hover:border-sand/40'
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex gap-3 pt-4 border-t border-steel/40">
+              <button
+                type="button"
+                onClick={() => {
+                  saveProfileToStorage();
+                  setShowSettingsModal(false);
+                }}
+                className="flex-1 py-3 bg-gold hover:bg-yellow-400 text-steel-dark font-black font-mono text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
+              >
+                <CheckCircle size={15} /> Apply Settings & Recalculate
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowSettingsModal(false)}
+                className="px-5 py-3 bg-steel/30 hover:bg-steel/50 text-sand font-mono text-xs uppercase font-bold rounded-xl transition-all"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
       {/* Inspirational Opening Quote Overlay (Dismissible with 12s Auto-Fade) */}
       {showSplash && (
         <div
@@ -2162,81 +2422,176 @@ const VeteranBenefitsCompass = () => {
         </div>
       )}
 
-            {/* Dynamic SITREP Banner Tailored Specifically to Settings */}
-      <div className="bg-steel/25 border-b border-steel/30 px-6 py-2">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs font-mono gap-1">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-gold animate-pulse"/>
-            <span className="text-gold font-bold">TAILORED SITREP:</span>
-            <span className="text-sand/80">
-              {currentRating === 100 ? (
-                <span>100% P&T Active - {stateInfo.name} Tax Shield Unlocked - Priority 1 VA Care - Space-A Cat VI Eligible</span>
-              ) : alreadyOut ? (
-                <span>Separated Veteran - Current Rating: {currentRating}% - Target: 100% P&T Stacking</span>
-              ) : (
-                <span>{separationMonths} Months to {bd.sep} - BDD Window Priority Active - SkillBridge Eligible</span>
-              )}
-              {dischargeType !== 'honorable' && ' - Discharge Upgrade Priority'}
-            </span>
+                  {/* ============================================================ */}
+      {/* COMMAND POST HEADER — Option C: No Sign-Up. No BS. Free.    */}
+      {/* ============================================================ */}
+      <div className="bg-steel-dark border-b border-steel/50 px-5 py-3 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+
+          {/* Brand Identity */}
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <Compass className="text-gold" size={18}/>
+              <div>
+                <div className="font-black text-sm uppercase tracking-wider text-sand leading-tight whitespace-nowrap">
+                  Veteran Benefits Compass
+                </div>
+                <div className="text-[10px] font-mono text-sand/40 uppercase tracking-widest hidden sm:block whitespace-nowrap">
+                  No Sign-Up&nbsp;&bull;&nbsp;No BS&nbsp;&bull;&nbsp;Free Forever
+                </div>
+              </div>
+            </div>
+            {userName && (
+              <span className="hidden md:inline text-xs font-mono text-gold/70 border-l border-steel/40 pl-3 truncate">
+                {userName}
+              </span>
+            )}
           </div>
 
-          <div className="flex items-center gap-3 text-sand/60">
+          {/* Right Controls */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-950/40 border border-emerald-500/20 text-[10px] font-mono text-emerald-400 font-bold whitespace-nowrap">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0"/>
+              CLIENT-SIDE PRIVATE
+            </div>
+            {currentRating > 0 && (
+              <span className="text-xs text-gold font-mono font-bold border border-gold/30 px-2.5 py-1 rounded-lg bg-gold/5 whitespace-nowrap">
+                {currentRating}% SC
+              </span>
+            )}
+            <button
+              onClick={() => setShowEmailModal(true)}
+              className={"text-xs font-mono px-2.5 py-1.5 rounded-lg border transition-all flex items-center gap-1.5 whitespace-nowrap " +
+                (isProfileSaved && userEmail
+                  ? "border-gold/40 bg-gold/10 text-gold"
+                  : "border-steel/60 hover:border-gold text-sand/60 hover:text-sand")}
+            >
+              <Save size={11}/>
+              <span className="hidden sm:inline">{isProfileSaved && userEmail ? userEmail.split('@')[0] : 'Save'}</span>
+            </button>
+            <button
+              onClick={() => setShowSettingsModal(true)}
+              className="text-xs font-mono px-2.5 py-1.5 rounded-lg border border-steel/50 text-sand/50 hover:border-gold hover:text-gold transition-all uppercase tracking-wider hidden sm:flex items-center gap-1.5"
+            >
+              Settings
+            </button>
+          </div>
+        </div>
+      </div>
+
+{/* Smart Personalized SITREP Status Bar */}
+      <div className="bg-steel/20 border-b border-steel/30 px-5 py-2">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs font-mono gap-1 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="w-2 h-2 rounded-full bg-gold animate-pulse flex-shrink-0"/>
+            <span className="text-gold font-bold">SITREP:</span>
+            <span className="text-sand/80">
+              {currentRating === 100 ? (
+                <span>100% P&T Active — Priority 1 VA Healthcare — Space-A Cat VI — {stateInfo.name} Tax Shield</span>
+              ) : alreadyOut ? (
+                <span>Separated — {currentRating > 0 ? `${currentRating}% Rated` : 'Unrated'} — Target: 100% P&T — {stateInfo.name}</span>
+              ) : (
+                <span>{separationMonths}mo to ETS — BDD Window: {separationMonths <= 180 && separationMonths >= 90 ? '✓ Open Now' : separationMonths < 90 ? '⚠ Closing' : 'Not Yet'} — SkillBridge Eligible</span>
+              )}
+              {dischargeType !== 'honorable' && <span className="ml-1 text-amber-400"> — Discharge Upgrade Priority</span>}
+            </span>
+          </div>
+          <div className="flex items-center gap-3 text-sand/60 flex-wrap">
             {currentRating > 0 ? (
-              <span>Monthly Comp: <strong className="text-gold">${monthlyPay.toLocaleString()}/mo</strong> (${annualPay.toLocaleString()}/yr)</span>
+              <>
+                <span>Tax-Free: <strong className="text-gold">${monthlyPay.toLocaleString()}/mo</strong></span>
+                {currentRating < 100 && (
+                  <span className="text-scarlet/80">Gap: <strong className="text-scarlet">+${(3737 - monthlyPay).toLocaleString()}/mo unclaimed</strong></span>
+                )}
+              </>
             ) : (
-              <span className="text-scarlet">Unrated (Potential $3,737+/mo Available)</span>
+              <span className="text-scarlet">Unrated — Up to $3,737+/mo available</span>
             )}
           </div>
         </div>
       </div>
 
-      {/* Command Pillars & Tab Navigation Bar */}
-      <div className="bg-steel-dark/95 border-b border-steel/50 sticky top-14 z-30 backdrop-blur-md">
-        {/* Pillar Filter Selector Chips */}
-        <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-2 border-b border-steel/40 overflow-x-auto">
-          <div className="flex items-center gap-1.5 overflow-x-auto min-w-max py-0.5">
+{/* ================================================================ */}
+      {/* SMART COMMAND NAVIGATION — Pillar Chips + Context-Aware Tabs   */}
+      {/* ================================================================ */}
+      <div className="bg-steel-dark/95 sticky top-[56px] z-30 backdrop-blur-md border-b border-steel/50">
+
+        {/* ROW 1: Pillar selector chips */}
+        <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
             {[
-              { id: 'all', label: 'All 13 Modules' },
-              { id: 'claims', label: '🛡️ Claims & Medical Intel' },
-              { id: 'wealth', label: '💰 Wealth & Real Estate' },
-              { id: 'life', label: '🧭 Life & Career Routes' }
+              { id: 'all',    emoji: '',    label: 'All Modules',              count: tabs.length },
+              { id: 'claims', emoji: '🛡️', label: 'Claims & Medical',         count: tabs.filter(t=>t.pillar==='claims').length },
+              { id: 'wealth', emoji: '💰', label: 'Wealth & Real Estate',      count: tabs.filter(t=>t.pillar==='wealth').length },
+              { id: 'life',   emoji: '🧭', label: 'Life & Career',             count: tabs.filter(t=>t.pillar==='life').length }
             ].map(p => (
               <button
                 key={p.id}
                 onClick={() => setActivePillar(p.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all whitespace-nowrap ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all whitespace-nowrap border ${
                   activePillar === p.id
-                    ? 'bg-gold text-steel-dark shadow-sm'
-                    : 'bg-steel/30 text-sand/70 hover:text-sand hover:bg-steel/50 border border-steel/50'
+                    ? 'bg-gold text-steel-dark border-gold shadow-md shadow-gold/20'
+                    : 'bg-steel/20 text-sand/70 hover:text-sand hover:bg-steel/40 border-steel/50'
                 }`}
               >
+                {p.emoji && <span>{p.emoji}</span>}
                 {p.label}
+                <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${activePillar === p.id ? 'bg-steel-dark/30 text-steel-dark' : 'bg-steel/50 text-sand/50'}`}>
+                  {p.count}
+                </span>
               </button>
             ))}
           </div>
-
-          <div className="hidden lg:flex items-center gap-2 text-xs font-mono text-sand/50 flex-shrink-0">
-            <span className="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
-            <span>Client-Side Security • Zero Data Retention</span>
+          {/* Privacy badge — always visible, desktop only */}
+          <div className="hidden md:flex items-center gap-1.5 text-[11px] font-mono text-sand/40">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"/>
+            <span>0 data stored&nbsp;•&nbsp;100% private</span>
           </div>
         </div>
 
-        {/* Scrollable Tool Tabs */}
-        <div className="max-w-7xl mx-auto flex gap-0 overflow-x-auto min-w-max px-2">
-          {tabs
-            .filter(t => activePillar === 'all' || t.pillar === 'all' || t.pillar === activePillar)
-            .map(t => (
-              <Tooltip key={t.id} text={t.tooltip}>
-                <button
-                  onClick={() => setActiveTab(t.id)}
-                  className={"flex items-center gap-1.5 px-3.5 py-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap uppercase tracking-wider font-mono " + (activeTab === t.id ? "border-gold text-gold bg-gold/5" : "border-transparent text-sand/60 hover:text-sand hover:border-sand/30")}
-                >
-                  {t.icon} {t.label}
-                </button>
-              </Tooltip>
-            ))}
+        {/* ROW 2: Scrollable module tabs for active pillar */}
+        <div className="overflow-x-auto border-t border-steel/30">
+          <div className="max-w-7xl mx-auto flex min-w-max px-2">
+            {tabs
+              .filter(t => activePillar === 'all' || t.pillar === 'all' || t.pillar === activePillar)
+              .map(t => {
+                const isActive = activeTab === t.id;
+                // Smart dim: tabs already fully relevant given profile
+                const isDimmed = (
+                  (t.id === 'discharge' && dischargeType === 'honorable') ||
+                  (t.id === 'vamath'    && currentRating === 100) ||
+                  (t.id === 'pact'      && currentRating === 100)
+                );
+                const isDone = (
+                  (t.id === 'discharge' && dischargeType === 'honorable') ||
+                  (t.id === 'vamath'    && currentRating === 100)
+                );
+                return (
+                  <Tooltip key={t.id} text={isDone ? `${t.label} — Complete based on your profile` : t.tooltip}>
+                    <button
+                      onClick={() => setActiveTab(t.id)}
+                      className={[
+                        'relative flex items-center gap-1.5 px-3.5 py-3 text-xs font-bold border-b-2 transition-all whitespace-nowrap uppercase tracking-wider font-mono',
+                        isActive
+                          ? 'border-gold text-gold bg-gold/5'
+                          : isDimmed
+                            ? 'border-transparent text-sand/25 hover:text-sand/50 hover:border-sand/20'
+                            : 'border-transparent text-sand/60 hover:text-sand hover:border-sand/30'
+                      ].join(' ')}
+                    >
+                      {t.icon}
+                      {t.label}
+                      {isDone && (
+                        <span className="ml-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" title="Complete"/>
+                      )}
+                    </button>
+                  </Tooltip>
+                );
+              })}
+          </div>
         </div>
       </div>
+
 
       {/* Page Content */}
       <div className="flex-1 overflow-y-auto">
@@ -2832,7 +3187,7 @@ const VeteranBenefitsCompass = () => {
                   <span className="text-gold font-bold">Active Configuration:</span>
                   <span className="text-sand/70">{bd.name} - {dischargeType.toUpperCase()} - {alreadyOut ? 'Veteran' : `${separationMonths}mo to ${bd.sep}`} - {selectedState.toUpperCase()} - {hasDependents.replace('_',' ')}</span>
                 </div>
-                <button onClick={()=>setCurrentPage('wizard')} className="text-gold hover:underline">
+                <button onClick={() => setShowSettingsModal(true)} className="text-gold hover:underline">
                   Adjust Settings
                 </button>
               </div>
@@ -3573,9 +3928,50 @@ const VeteranBenefitsCompass = () => {
                 </p>
               </div>
 
+              {/* Smart Perk Filters & Decluttering Bar */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-steel/20 border border-steel/50 rounded-2xl p-4">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {[
+                    { id: 'all', label: `All Perks (${SPECIAL_PERKS.length})` },
+                    { id: 'unclaimed', label: `🎯 Available (${SPECIAL_PERKS.filter(p => !completedBenefits[p.id]).length})` },
+                    { id: 'claimed', label: `✓ Claimed (${SPECIAL_PERKS.filter(p => completedBenefits[p.id]).length})` },
+                  ].map(f => (
+                    <button
+                      key={f.id}
+                      onClick={() => setPerkFilter(f.id)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all border ${
+                        perkFilter === f.id
+                          ? 'bg-gold text-steel-dark border-gold shadow-sm'
+                          : 'bg-steel-dark/60 border-steel/50 text-sand/70 hover:text-sand hover:bg-steel/40'
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-mono text-sand/80 select-none">
+                  <input
+                    type="checkbox"
+                    checked={hideClaimedPerks}
+                    onChange={(e) => setHideClaimedPerks(e.target.checked)}
+                    className="rounded border-steel/60 text-gold focus:ring-gold bg-steel-dark"
+                  />
+                  <span>Hide Claimed Perks ({SPECIAL_PERKS.filter(p => completedBenefits[p.id]).length})</span>
+                </label>
+              </div>
+
               {/* Accordion Perk Cards */}
               <div className="space-y-2">
-                {SPECIAL_PERKS.map((perk) => {
+                {SPECIAL_PERKS
+                  .filter(perk => {
+                    const isClaimed = Boolean(completedBenefits[perk.id]);
+                    if (hideClaimedPerks && isClaimed) return false;
+                    if (perkFilter === 'unclaimed') return !isClaimed;
+                    if (perkFilter === 'claimed') return isClaimed;
+                    return true;
+                  })
+                  .map((perk) => {
                   const isOpen = expandedPerk === perk.id;
                   return (
                     <div
@@ -3966,7 +4362,7 @@ const VeteranBenefitsCompass = () => {
           {/* ============================================================ */}
           {/* TAB 7: STATE MATRIX (EXPANDED)                               */}
           {/* ============================================================ */}
-          {activeTab === 'benefits' && (
+          {(activeTab === 'statematrix' || activeTab === 'benefits') && (
             <div className="space-y-5">
               <div>
                 <h2 className="text-2xl font-black uppercase tracking-tight mb-1">State Benefits Matrix</h2>
@@ -4002,52 +4398,271 @@ const VeteranBenefitsCompass = () => {
           {/* ============================================================ */}
           {activeTab === 'tracker' && (
             <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-steel/40 pb-4">
-                <div>
-                  <h2 className="text-2xl font-black uppercase tracking-tight">Personalized Milestone Tracker</h2>
-                  <p className="text-sand/50 text-sm">
-                    {alreadyOut ? 'Checklist filtered for separated veterans. Irrelevant pre-separation tasks hidden.' : 'Checklist tailored for active duty transition countdown.'}
-                  </p>
+              {/* Header Hero */}
+              <div className="bg-gradient-to-r from-steel/30 via-steel-dark to-steel-dark border border-steel/50 rounded-2xl p-6 relative overflow-hidden">
+                <div className="flex items-center gap-2 text-gold font-mono text-xs uppercase tracking-widest font-bold mb-1">
+                  <Clock size={14} /> Mission Clocks & Strategic Roadmaps
                 </div>
-                <div className="bg-steel-dark border border-steel/50 rounded-xl px-4 py-2 text-xs font-mono">
-                  <span className="text-sand/50">Progress: </span>
-                  <span className="text-gold font-black">
-                    {filteredMilestones.filter(m=>completedMilestones[m.id]).length} / {filteredMilestones.length} Completed
+                <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-sand">
+                  Your Life in Months & <span className="text-gold">Milestone Command Post</span>
+                </h2>
+                <p className="text-sand/70 text-sm mt-1 max-w-3xl leading-relaxed">
+                  Veterans lose thousands of dollars simply by missing time clocks. Below are your active countdown clocks, statutory transition windows, and a personalized milestone checklist that auto-filters out completed tasks.
+                </p>
+              </div>
+
+              {/* "YOUR LIFE IN MONTHS" — Tactical Countdown Clocks */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-mono text-xs uppercase tracking-widest text-gold font-bold flex items-center gap-1.5">
+                    <Target size={14} /> Critical Statutory Deadline Clocks
+                  </h3>
+                  <span className="text-[11px] font-mono text-sand/50">
+                    Live client-side tracking based on your service timeline
                   </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* BDD Window Clock */}
+                  <div className="bg-steel/20 border border-steel/50 rounded-2xl p-5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded font-bold bg-steel text-sand/70">
+                        Pre-Separation
+                      </span>
+                      <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
+                        alreadyOut
+                          ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-500/30'
+                          : separationMonths <= 180 && separationMonths >= 90
+                            ? 'bg-emerald-900/60 text-emerald-300 border border-emerald-500/40 animate-pulse'
+                            : separationMonths < 90
+                              ? 'bg-red-950/60 text-scarlet border border-scarlet/40'
+                              : 'bg-steel/40 text-sand/60'
+                      }`}>
+                        {alreadyOut ? '✓ Window Passed (Separated)' : separationMonths <= 180 && separationMonths >= 90 ? '🟢 OPEN RIGHT NOW' : separationMonths < 90 ? '🔴 Standard Claim Mode' : `Opens in ${separationMonths - 180}mo`}
+                      </span>
+                    </div>
+
+                    <div>
+                      <div className="font-black text-sand text-base">BDD Fast-Track Claim Window</div>
+                      <div className="text-xs text-sand/60 mt-1 leading-relaxed">
+                        180 to 90 days prior to separation. Allows your VA rating and tax-free monthly compensation to take effect on <strong>Day 1 after discharge</strong>.
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-steel/40 text-[11px] font-mono text-gold flex items-center justify-between">
+                      <span>Statutory Law: 38 U.S.C. § 5101</span>
+                      <button onClick={() => setActiveTab('claims')} className="underline hover:text-yellow-300">
+                        Prep DBQs &rarr;
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Post-Separation VA Dental Grace Clock */}
+                  <div className="bg-steel/20 border border-steel/50 rounded-2xl p-5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded font-bold bg-steel text-sand/70">
+                        180-Day Grace
+                      </span>
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-gold/10 text-gold border border-gold/30">
+                        Class II(b) Dental
+                      </span>
+                    </div>
+
+                    <div>
+                      <div className="font-black text-sand text-base">VA Free Dental Examination</div>
+                      <div className="text-xs text-sand/60 mt-1 leading-relaxed">
+                        All separated veterans with 90+ days continuous active service qualify for <strong>one-time 100% free comprehensive dental treatment</strong> if applied within 180 days of discharge.
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-steel/40 text-[11px] font-mono text-gold flex items-center justify-between">
+                      <span>Form: VA 10-10EZ (Box Dental)</span>
+                      <button onClick={() => setActiveTab('perks')} className="underline hover:text-yellow-300">
+                        View Dental Guide &rarr;
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* SGLI to VGLI Conversion Window */}
+                  <div className="bg-steel/20 border border-steel/50 rounded-2xl p-5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded font-bold bg-steel text-sand/70">
+                        240 Days Exam-Free
+                      </span>
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-500/30">
+                        No Medical Underwriting
+                      </span>
+                    </div>
+
+                    <div>
+                      <div className="font-black text-sand text-base">VGLI Guaranteed Life Insurance</div>
+                      <div className="text-xs text-sand/60 mt-1 leading-relaxed">
+                        Convert your $500,000 military SGLI to civilian VGLI within 240 days of separation with <strong>ZERO physical exams, no medical records checks, and guaranteed approval</strong> regardless of PTSD or disabilities.
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-steel/40 text-[11px] font-mono text-gold flex items-center justify-between">
+                      <span>Deadline: 1 yr + 120 days</span>
+                      <span className="text-sand/50">Guaranteed Issue</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
+              {/* Dynamic Next High-Dollar Action Brief */}
+              <div className="bg-gradient-to-r from-steel-dark via-steel/30 to-steel-dark border-2 border-gold/40 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-12 h-12 rounded-2xl bg-gold/10 border border-gold/40 flex items-center justify-center text-gold flex-shrink-0">
+                    <Award size={24} />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-mono uppercase tracking-widest text-gold font-bold">
+                      Your Immediate Next Tactical Move
+                    </div>
+                    <div className="text-base font-black text-sand mt-0.5">
+                      {currentRating === 100 ? (
+                        <span>Lock in 100% P&T State Property Tax Exemption + Enroll Family in CHAMPVA</span>
+                      ) : currentRating >= 70 ? (
+                        <span>File High-Yield Secondary Claims (Sleep Apnea / Migraines) to Bridge to 100% P&T</span>
+                      ) : alreadyOut ? (
+                        <span>Request Complete C-File & Medical Records to Establish Service Connection</span>
+                      ) : (
+                        <span>Document All Ailments in Military Treatment Records Before BDD Filing</span>
+                      )}
+                    </div>
+                    <div className="text-xs text-sand/60 mt-1">
+                      {currentRating === 100 ? (
+                        <span>Estimated ongoing value: <strong>$0 property taxes ($6,000-$12,000/yr saved) + $0 healthcare premiums</strong>.</span>
+                      ) : (
+                        <span>Crossing to 100% P&T unlocks an additional <strong>+${(3737 - monthlyPay).toLocaleString()}/mo tax-free cash for life</strong>.</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setActiveTab(currentRating === 100 ? 'perks' : 'vamath')}
+                  className="px-4 py-2.5 bg-gold hover:bg-yellow-400 text-steel-dark font-black font-mono text-xs uppercase tracking-wider rounded-xl transition-all shadow-md whitespace-nowrap self-stretch sm:self-auto text-center"
+                >
+                  {currentRating === 100 ? 'Claim Perks &rarr;' : 'Calculate Path &rarr;'}
+                </button>
+              </div>
+
+              {/* Milestone Checklist Header + Smart Filters */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-steel/40 pb-4">
+                <div>
+                  <h3 className="text-xl font-black uppercase tracking-tight text-sand">
+                    Step-by-Step Transition & Wealth Checklist
+                  </h3>
+                  <p className="text-sand/50 text-xs mt-0.5">
+                    {alreadyOut ? 'Filtered for separated veterans. Irrelevant pre-separation tasks hidden.' : 'Tailored for active duty countdown.'} Check off tasks to watch your progress update in real-time.
+                  </p>
+                </div>
+
+                {/* Filter Controls */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-1 bg-steel-dark border border-steel/50 rounded-xl p-1 text-xs font-mono">
+                    {[
+                      { id: 'all', label: `All (${filteredMilestones.length})` },
+                      { id: 'pending', label: `Pending (${filteredMilestones.filter(m=>!completedMilestones[m.id]).length})` },
+                      { id: 'completed', label: `Done (${filteredMilestones.filter(m=>completedMilestones[m.id]).length})` },
+                    ].map(f => (
+                      <button
+                        key={f.id}
+                        onClick={() => setMilestoneFilter(f.id)}
+                        className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
+                          milestoneFilter === f.id
+                            ? 'bg-gold text-steel-dark shadow-sm'
+                            : 'text-sand/60 hover:text-sand'
+                        }`}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <label className="flex items-center gap-1.5 text-xs font-mono text-sand/70 cursor-pointer select-none bg-steel/30 border border-steel/50 px-3 py-1.5 rounded-xl">
+                    <input
+                      type="checkbox"
+                      checked={hideCompletedMilestones}
+                      onChange={(e) => setHideCompletedMilestones(e.target.checked)}
+                      className="rounded border-steel/60 text-gold focus:ring-gold bg-steel-dark"
+                    />
+                    <span>Hide Completed</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Filtered Milestone Cards */}
               <div className="bg-steel/20 border border-steel/50 rounded-2xl p-6 space-y-3">
-                {filteredMilestones.map(m=>(
-                  <button key={m.id}
-                    onClick={()=>{
-                      const updated = {...completedMilestones,
-      completedBenefits, [m.id]: !completedMilestones[m.id]};
-                      setCompletedMilestones(updated);
-                      // Auto-save
-                      try {
-                        const saved = localStorage.getItem('vbc_veteran_profile');
-                        if (saved) {
-                          const p = JSON.parse(saved);
-                          p.completedMilestones = updated;
-                          localStorage.setItem('vbc_veteran_profile', JSON.stringify(p));
-                        }
-                      } catch (e) {}
-                    }}
-                    className={"w-full p-4 rounded-xl border text-left transition-all flex items-start gap-3 " + (completedMilestones[m.id] ? "bg-steel-dark/80 border-gold/40 text-sand" : "bg-steel-dark/30 border-steel/40 text-sand/60 hover:border-steel")}>
-                    <div className={"w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 mt-0.5 " + (completedMilestones[m.id] ? "bg-gold border-gold text-steel-dark" : "border-steel/60")}>
-                      {completedMilestones[m.id] && <CheckSquare size={13}/>}
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-mono uppercase tracking-wider text-gold px-2 py-0.5 rounded bg-gold/5 border border-gold/20 inline-block mb-1">
-                        {m.stage}
-                      </span>
-                      <div className={"text-sm " + (completedMilestones[m.id] ? "line-through opacity-60" : "font-medium")}>
-                        {m.label}
+                {filteredMilestones
+                  .filter(m => {
+                    const isDone = Boolean(completedMilestones[m.id]);
+                    if (hideCompletedMilestones && isDone) return false;
+                    if (milestoneFilter === 'pending') return !isDone;
+                    if (milestoneFilter === 'completed') return isDone;
+                    return true;
+                  })
+                  .map(m => (
+                    <button
+                      key={m.id}
+                      onClick={() => {
+                        const updated = {
+                          ...completedMilestones,
+                          [m.id]: !completedMilestones[m.id]
+                        };
+                        setCompletedMilestones(updated);
+                        try {
+                          const saved = localStorage.getItem('vbc_veteran_profile');
+                          if (saved) {
+                            const p = JSON.parse(saved);
+                            p.completedMilestones = updated;
+                            localStorage.setItem('vbc_veteran_profile', JSON.stringify(p));
+                          }
+                        } catch (e) {}
+                      }}
+                      className={"w-full p-4 rounded-xl border text-left transition-all flex items-start gap-3 " + (
+                        completedMilestones[m.id]
+                          ? "bg-steel-dark/80 border-gold/40 text-sand shadow-sm"
+                          : "bg-steel-dark/30 border-steel/40 text-sand/70 hover:border-gold/40"
+                      )}
+                    >
+                      <div className={"w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 mt-0.5 " + (
+                        completedMilestones[m.id]
+                          ? "bg-gold border-gold text-steel-dark"
+                          : "border-steel/60"
+                      )}>
+                        {completedMilestones[m.id] && <CheckSquare size={13}/>}
                       </div>
-                    </div>
-                  </button>
-                ))}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-gold px-2 py-0.5 rounded bg-gold/5 border border-gold/20 font-bold">
+                            {m.stage}
+                          </span>
+                          {completedMilestones[m.id] && (
+                            <span className="text-[10px] font-mono text-emerald-400 font-bold">
+                              ✓ Completed & Synced
+                            </span>
+                          )}
+                        </div>
+                        <div className={"text-sm " + (completedMilestones[m.id] ? "line-through opacity-60" : "font-medium text-sand")}>
+                          {m.label}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+
+                {filteredMilestones.filter(m => {
+                  const isDone = Boolean(completedMilestones[m.id]);
+                  if (hideCompletedMilestones && isDone) return false;
+                  if (milestoneFilter === 'pending') return !isDone;
+                  if (milestoneFilter === 'completed') return isDone;
+                  return true;
+                }).length === 0 && (
+                  <div className="p-8 text-center text-sand/40 font-mono text-xs border border-dashed border-steel/40 rounded-xl">
+                    All milestones in this view are completed! Toggle "Hide Completed" or switch filter to view past achievements.
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -4055,7 +4670,7 @@ const VeteranBenefitsCompass = () => {
           {/* ============================================================ */}
           {/* TAB 9: DISCHARGE UPGRADE GUIDE                               */}
           {/* ============================================================ */}
-          {activeTab === 'upgrade' && (
+          {(activeTab === 'discharge' || activeTab === 'upgrade') && (
             <div className="space-y-5">
               <div>
                 <h2 className="text-2xl font-black uppercase tracking-tight mb-1">Discharge Upgrade Guide</h2>
@@ -4119,7 +4734,7 @@ const VeteranBenefitsCompass = () => {
           {/* ============================================================ */}
           {/* TAB 10: RESOURCES & HOTLINE DIRECTORY                        */}
           {/* ============================================================ */}
-          {activeTab === 'resources' && (
+          {(activeTab === 'directory' || activeTab === 'resources') && (
             <div className="space-y-5">
               <div>
                 <h2 className="text-2xl font-black uppercase tracking-tight mb-1">Resources and Key Contacts</h2>
