@@ -30,6 +30,7 @@ import { calculateVeteranWealth } from './utils/wealthCalculator';
 // Component imports
 import ZeroCatchBanner from './components/layout/ZeroCatchBanner';
 import AccessibilityBar from './components/layout/AccessibilityBar';
+import CrisisQuickBar from './components/navigation/CrisisQuickBar';
 import NotTheVAModal from './components/layout/NotTheVAModal';
 import Footer from './components/layout/Footer';
 import HeroSection from './components/home/HeroSection';
@@ -37,6 +38,7 @@ import MissionTimelineGenerator from './components/timeline/MissionTimelineGener
 import ClaimStrengthGrader from './components/claims/ClaimStrengthGrader';
 import VeteranWealthScorecard from './components/scorecard/VeteranWealthScorecard';
 import LifeEventNav from './components/navigation/LifeEventNav';
+import VsoLocator from './components/directory/VsoLocator';
 
 const VeteranBenefitsCompass = () => {
   // ---- Profile State ----
@@ -288,7 +290,10 @@ const VeteranBenefitsCompass = () => {
       {/* 2. Neuro-Accessibility Suite Controls (Reader Mode, Calm Mode, Font Size) */}
       <AccessibilityBar />
 
-      {/* 3. "Not The VA" First-Visit Battle Buddy Disclosure Modal */}
+      {/* 3. 24/7 Crisis Response Quick Bar */}
+      <CrisisQuickBar />
+
+      {/* 4. "Not The VA" First-Visit Battle Buddy Disclosure Modal */}
       <NotTheVAModal />
 
       {/* 4. Copy Notification Toast */}
@@ -1323,28 +1328,8 @@ const VeteranBenefitsCompass = () => {
               </p>
             </div>
 
-            {/* Free VSO Links */}
-            <div className="space-y-3">
-              <h3 className="font-bold text-sand uppercase text-sm font-mono text-gold">Accredited Veteran Service Officers (VSOs):</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {[
-                  { name: 'Disabled American Veterans (DAV)', url: 'https://www.dav.org', desc: 'Free claims assistance, VSO reps nationwide', phone: '877-426-2838' },
-                  { name: 'Veterans of Foreign Wars (VFW)', url: 'https://www.vfw.org', desc: 'Free claims support & legislative advocacy', phone: '816-756-3390' },
-                  { name: 'American Legion', url: 'https://www.legion.org', desc: 'Accredited local chapters nationwide', phone: '800-433-3318' },
-                  { name: 'VA Accredited VSO Search', url: 'https://www.va.gov/ogc/apps/accreditation/index.asp', desc: 'Official OGC searchable database' },
-                  { name: 'NVLSP (Free Legal Help)', url: 'https://www.nvlsp.org', desc: 'Free legal representation for denied claims' },
-                  { name: 'Vet Center Mental Health', url: 'https://www.vetcenter.va.gov', desc: 'Walk-in free confidential PTSD/MST therapy', phone: '877-927-8387' },
-                ].map((vso, idx) => (
-                  <div key={idx} className="bg-steel/20 border border-steel/50 rounded-2xl p-4 space-y-2">
-                    <a href={vso.url} target="_blank" rel="noopener noreferrer" className="font-bold text-sand hover:text-gold text-sm flex items-center gap-1">
-                      {vso.name} <ExternalLink size={11} />
-                    </a>
-                    <div className="text-xs text-sand/50">{vso.desc}</div>
-                    {vso.phone && <div className="text-xs font-mono text-gold font-bold">{vso.phone}</div>}
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Accredited VSO Locator Component */}
+            <VsoLocator selectedState={selectedState} />
           </div>
         )}
 

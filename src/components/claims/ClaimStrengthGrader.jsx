@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import {
-  Award, Search, Printer, Check
+  Award, Search, Check, FileText
 } from 'lucide-react';
 import { gradeClaimStrength } from '../../utils/claimGrader';
 import { MED_DB } from '../../data/medDb';
+import DBQPrepSheet from './DBQPrepSheet';
 
 export const ClaimStrengthGrader = () => {
   const [conditionInput, setConditionInput] = useState('');
@@ -14,6 +15,7 @@ export const ClaimStrengthGrader = () => {
     hasBuddyStatement: true,
     isPactPresumptive: false
   });
+  const [showDbqModal, setShowDbqModal] = useState(false);
 
   const gradedResult = gradeClaimStrength(conditionInput || 'Lumbar Spine Strain', evidence);
 
@@ -218,16 +220,30 @@ export const ClaimStrengthGrader = () => {
               {/* Print DBQ Prep Sheet Button */}
               <div className="pt-2">
                 <button
-                  onClick={() => window.print()}
+                  onClick={() => setShowDbqModal(true)}
                   className="w-full py-3 rounded-xl bg-gold hover:bg-yellow-600 text-steel-dark font-black font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all"
                 >
-                  <Printer size={14} /> Print Doctor / DBQ Prep Sheet
+                  <FileText size={14} /> Open Doctor / DBQ Prep Sheet
                 </button>
               </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* DBQ Prep Sheet Modal */}
+      {showDbqModal && gradedResult && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-4xl w-full p-2 sm:p-4 my-8 relative shadow-2xl">
+            <DBQPrepSheet
+              condition={gradedResult.conditionName}
+              dcCode={gradedResult.dcCode}
+              targetRating={gradedResult.ratingRange}
+              onClose={() => setShowDbqModal(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
