@@ -1,5 +1,6 @@
 // -----------------------------------------------------------------------
 // SERVICE WORKER REGISTRATION (Production PWA Lifecycle)
+// Auto-reloads client when a new service worker version activates
 // -----------------------------------------------------------------------
 
 const isLocalhost = Boolean(
@@ -15,14 +16,20 @@ export function register(config) {
       return;
     }
 
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!refreshing) {
+        refreshing = true;
+        console.log('[VBC] New service worker controller claimed; auto-refreshing page.');
+        window.location.reload();
+      }
+    });
+
     window.addEventListener('load', () => {
       const swUrl = `${process.env.PUBLIC_URL}/sw.js`;
 
       if (isLocalhost) {
         checkValidServiceWorker(swUrl, config);
-        navigator.serviceWorker.ready.then(() => {
-          console.log('[VBC] Service worker active locally.');
-        });
       } else {
         registerValidSW(swUrl, config);
       }
@@ -34,13 +41,14 @@ function registerValidSW(swUrl, config) {
   navigator.serviceWorker
     .register(swUrl)
     .then((registration) => {
+      // Check for SW updates periodically
       registration.onupdatefound = () => {
         const installingWorker = registration.installing;
         if (installingWorker == null) return;
         installingWorker.onstatechange = () => {
           if (installingWorker.state === 'installed') {
             if (navigator.serviceWorker.controller) {
-              console.log('[VBC] New content available; please refresh.');
+              console.log('[VBC] New content available; updating.');
               if (config && config.onUpdate) {
                 config.onUpdate(registration);
               }
@@ -79,7 +87,7 @@ function checkValidServiceWorker(swUrl, config) {
       }
     })
     .catch(() => {
-      console.log('[VBC] No internet connection. App running in offline mode.');
+      console.log('[VBC] No internet connection found. App is running in offline mode.');
     });
 }
 

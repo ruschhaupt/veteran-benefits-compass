@@ -1,10 +1,10 @@
 // -----------------------------------------------------------------------
 // VETERAN BENEFITS COMPASS - OFFLINE SERVICE WORKER (PWA)
-// Cache-First Strategy for 100% Offline Capability (VA Hospital Basements)
+// Network-First for HTML/Navigation + Cache-First for Hashed Static Assets
 // -----------------------------------------------------------------------
 
-const CACHE_NAME = 'vbc-offline-v2.0';
-const OFFLINE_URLS = [
+const CACHE_NAME = 'vbc-offline-v4.0';
+const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/favicon.ico',
@@ -12,22 +12,24 @@ const OFFLINE_URLS = [
   '/logo192.png'
 ];
 
-// Install Event: Pre-cache static shell
+// Install Event: Cache essential shell & skip waiting
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(OFFLINE_URLS);
-    }).then(() => self.skipWaiting())
+      return cache.addAll(STATIC_ASSETS);
+    })
   );
 });
 
-// Activate Event: Clean up outdated caches
+// Activate Event: Delete old caches & immediately claim clients
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keyList) => {
       return Promise.all(
         keyList.map((key) => {
           if (key !== CACHE_NAME) {
+            console.log('[VBC SW] Purging obsolete cache:', key);
             return caches.delete(key);
           }
         })
@@ -36,35 +38,50 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch Event: Cache First, Network Fallback
+// Fetch Event
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
+  const url = new URL(event.request.url);
+  const isHtmlNavigation = event.request.mode === 'navigate' || event.request.headers.get('accept')?.includes('text/html');
 
-      return fetch(event.request)
+  if (isHtmlNavigation) {
+    // 1. HTML Navigation: Network-First with Cache Fallback
+    event.respondWith(
+      fetch(event.request)
         .then((networkResponse) => {
-          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-            return networkResponse;
+          if (networkResponse && networkResponse.status === 200) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseClone);
+            });
           }
-
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-
           return networkResponse;
         })
-        .catch(() => {
-          // If offline and requesting page, return cached index.html
-          if (event.request.headers.get('accept')?.includes('text/html')) {
-            return caches.match('/index.html');
+        .catch(async () => {
+          const cached = await caches.match(event.request);
+          if (cached) return cached;
+          return caches.match('/index.html');
+        })
+    );
+  } else {
+    // 2. Static Assets (Hashed JS, CSS, Images): Cache-First with Network Fallback
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
+        return fetch(event.request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseClone);
+            });
           }
+          return networkResponse;
         });
-    })
-  );
+      })
+    );
+  }
 });
