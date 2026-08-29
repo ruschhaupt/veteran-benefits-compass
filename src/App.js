@@ -6,7 +6,7 @@ import {
   Home, ShieldAlert, Sparkles, Copy,
   Sliders, Printer, Share2, Check,
   Calculator, ChevronDown, ChevronUp,
-  ArrowRight, RefreshCw
+  ArrowRight, RefreshCw, Zap
 } from 'lucide-react';
 
 // Data imports
@@ -34,8 +34,10 @@ import CrisisQuickBar from './components/navigation/CrisisQuickBar';
 import NotTheVAModal from './components/layout/NotTheVAModal';
 import Footer from './components/layout/Footer';
 import HeroSection from './components/home/HeroSection';
+import BenefitFinderWizard from './components/home/BenefitFinderWizard';
 import MissionTimelineGenerator from './components/timeline/MissionTimelineGenerator';
 import ClaimStrengthGrader from './components/claims/ClaimStrengthGrader';
+import SidecarCredibilityPanel from './components/claims/SidecarCredibilityPanel';
 import VeteranWealthScorecard from './components/scorecard/VeteranWealthScorecard';
 import LifeEventNav from './components/navigation/LifeEventNav';
 import VsoLocator from './components/directory/VsoLocator';
@@ -64,7 +66,9 @@ const VeteranBenefitsCompass = () => {
   const [activeTab, setActiveTab] = useState('summary');
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showDossierModal, setShowDossierModal] = useState(false);
+  const [showFinderWizard, setShowFinderWizard] = useState(false);
   const [copiedNotification, setCopiedNotification] = useState(false);
+  const [claimedNotification, setClaimedNotification] = useState(null);
 
   // ---- Planner & Stage State ----
   const [lifeGoals, setLifeGoals] = useState(['freedom', 'home', 'wealth']);
@@ -171,8 +175,13 @@ const VeteranBenefitsCompass = () => {
 
   const toggleBenefitCompleted = (id) => {
     setCompletedBenefits(prev => {
-      const updated = { ...prev, [id]: !prev[id] };
+      const isClaiming = !prev[id];
+      const updated = { ...prev, [id]: isClaiming };
       saveState({ completedBenefits: updated });
+      if (isClaiming) {
+        setClaimedNotification('🎖️ Benefit marked as claimed! Locked into your profile.');
+        setTimeout(() => setClaimedNotification(null), 3000);
+      }
       return updated;
     });
   };
@@ -303,6 +312,13 @@ const VeteranBenefitsCompass = () => {
         </div>
       )}
 
+      {/* 4b. Claimed Benefit Win Toast */}
+      {claimedNotification && (
+        <div className="fixed bottom-6 left-6 z-50 bg-emerald-500 text-steel-dark px-4 py-2.5 rounded-xl font-mono text-xs font-black shadow-2xl flex items-center gap-2 animate-fade-in border border-emerald-400">
+          <Sparkles size={14} /> {claimedNotification}
+        </div>
+      )}
+
       {/* 5. Main Tactical Navigation Header */}
       <header className="border-b border-steel/50 bg-steel-dark/90 px-4 py-3 flex items-center justify-between flex-wrap gap-3 z-20">
         <div className="flex items-center gap-3">
@@ -401,6 +417,58 @@ const VeteranBenefitsCompass = () => {
                 <div className="text-xs text-sand/60">Compounding Sovereign Base</div>
               </div>
             </div>
+
+            {/* 60-Second Benefit Finder Wizard Card / Component */}
+            {showFinderWizard ? (
+              <div className="space-y-3">
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => setShowFinderWizard(false)}
+                    className="text-xs font-mono text-sand/60 hover:text-gold uppercase font-bold"
+                  >
+                    ✕ Close Benefit Finder
+                  </button>
+                </div>
+                <BenefitFinderWizard
+                  initialBranch={branch}
+                  initialState={selectedState}
+                  onCompleteQuiz={(answers) => {
+                    if (answers.rating !== undefined) setCurrentRating(answers.rating);
+                    if (answers.state) setSelectedState(answers.state);
+                    if (answers.goals) setLifeGoals(answers.goals);
+                    saveState({
+                      currentRating: answers.rating,
+                      selectedState: answers.state,
+                      lifeGoals: answers.goals
+                    });
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="bg-gradient-to-r from-gold/15 via-steel/30 to-steel-dark border-2 border-gold/40 rounded-3xl p-6 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+                <div className="space-y-1 max-w-2xl">
+                  <div className="flex items-center gap-2 text-gold font-mono text-xs uppercase tracking-wider font-bold">
+                    <Zap size={14} className="text-gold animate-pulse" />
+                    <span>60-Second Tactical Benefit Finder</span>
+                  </div>
+                  <h3 className="text-xl font-black text-sand uppercase">
+                    Not sure what benefits you qualify for?
+                  </h3>
+                  <p className="text-xs text-sand/70 leading-relaxed font-sans">
+                    Answer 4 quick questions. Our client-side algorithm instantly maps your highest-value monthly disability pay, state tax exemptions, and housing grants.
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setShowFinderWizard(true)}
+                  className="px-6 py-3.5 rounded-2xl bg-gold hover:bg-yellow-600 text-steel-dark font-black font-mono text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-gold/20 flex-shrink-0 transition-all"
+                >
+                  <Sparkles size={14} />
+                  <span>Launch 60-Sec Finder</span>
+                  <ArrowRight size={14} />
+                </button>
+              </div>
+            )}
 
             {/* Quick Action Matrix */}
             <div className="bg-steel/20 border border-steel/50 rounded-3xl p-6 space-y-4">
@@ -652,6 +720,9 @@ const VeteranBenefitsCompass = () => {
                 ))}
               </div>
             </div>
+
+            {/* Statutory Legal Credibility & 38 CFR Citations Panel */}
+            <SidecarCredibilityPanel />
           </div>
         )}
 
