@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import {
   Calendar, Award, Calculator, Home, DollarSign,
   Phone, Cpu, Sparkles, Shield, Activity, Flag, Compass,
-  GraduationCap, ChevronLeft, ChevronRight, LayoutGrid, X, Check
+  GraduationCap, Briefcase, ChevronLeft, ChevronRight, LayoutGrid, X, Check
 } from 'lucide-react';
 
 export const LIFE_EVENT_PILLARS = [
@@ -71,7 +71,15 @@ export const LIFE_EVENT_PILLARS = [
     category: 'transition',
     icon: <GraduationCap size={14} />,
     label: 'Education & GI Bill',
-    sublabel: 'VR&E 48-Mo Stacking'
+    sublabel: 'GI Bill & Yellow Ribbon'
+  },
+  {
+    id: 'vocrehab',
+    category: 'transition',
+    icon: <Briefcase size={14} />,
+    label: 'Voc Rehab (VR&E)',
+    sublabel: 'Chapter 31 5 Tracks & Degrees',
+    badge: '100% Paid'
   },
   {
     id: 'statematrix',

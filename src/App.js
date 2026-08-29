@@ -45,6 +45,7 @@ import EducationMaximizer from './components/education/EducationMaximizer';
 import VaLoanAnalyzer from './components/housing/VaLoanAnalyzer';
 import FederalCareerFastTrack from './components/career/FederalCareerFastTrack';
 import TransitionCommandCenter from './components/transition/TransitionCommandCenter';
+import VocRehabCommandCenter from './components/vre/VocRehabCommandCenter';
 
 const VeteranBenefitsCompass = () => {
   // ---- Profile State ----
@@ -1048,6 +1049,15 @@ const VeteranBenefitsCompass = () => {
         {activeTab === 'education' && (
           <div className="animate-fade-in">
             <EducationMaximizer currentRating={currentRating} selectedState={selectedState} />
+          </div>
+        )}
+
+        {/* ============================================================ */}
+        {/* TAB 8c: VOC REHAB (VR&E - CHAPTER 31) COMMAND CENTER         */}
+        {/* ============================================================ */}
+        {activeTab === 'vocrehab' && (
+          <div className="animate-fade-in">
+            <VocRehabCommandCenter currentRating={currentRating} />
           </div>
         )}
 
