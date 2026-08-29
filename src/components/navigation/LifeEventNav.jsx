@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Calendar, Award, Calculator, Home, DollarSign,
-  Phone, Cpu, Sparkles, Shield, Activity, Flag, Compass
+  Phone, Cpu, Sparkles, Shield, Activity, Flag, Compass, GraduationCap
 } from 'lucide-react';
 
 export const LIFE_EVENT_PILLARS = [
@@ -46,8 +46,15 @@ export const LIFE_EVENT_PILLARS = [
     id: 'househack',
     pillar: 'wealth',
     icon: <Home size={15} />,
-    label: 'VA House Hacker',
-    sublabel: '2-4 Unit $0 Down Real Estate'
+    label: 'VA Loan & House Hacker',
+    sublabel: 'Zero-Down & Refi Engine'
+  },
+  {
+    id: 'education',
+    pillar: 'life',
+    icon: <GraduationCap size={15} />,
+    label: 'Education & GI Bill',
+    sublabel: 'VR&E 48-Mo Stacking'
   },
   {
     id: 'statematrix',

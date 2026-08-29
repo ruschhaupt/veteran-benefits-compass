@@ -41,6 +41,9 @@ import SidecarCredibilityPanel from './components/claims/SidecarCredibilityPanel
 import VeteranWealthScorecard from './components/scorecard/VeteranWealthScorecard';
 import LifeEventNav from './components/navigation/LifeEventNav';
 import VsoLocator from './components/directory/VsoLocator';
+import EducationMaximizer from './components/education/EducationMaximizer';
+import VaLoanAnalyzer from './components/housing/VaLoanAnalyzer';
+import FederalCareerFastTrack from './components/career/FederalCareerFastTrack';
 
 const VeteranBenefitsCompass = () => {
   // ---- Profile State ----
@@ -1023,6 +1026,18 @@ const VeteranBenefitsCompass = () => {
                 </div>
               </div>
             </div>
+
+            {/* VA Loan Zero-Down & Streamline Refinance Suite */}
+            <VaLoanAnalyzer currentRating={currentRating} />
+          </div>
+        )}
+
+        {/* ============================================================ */}
+        {/* TAB 8b: EDUCATION & GI BILL / VR&E STACKING                  */}
+        {/* ============================================================ */}
+        {activeTab === 'education' && (
+          <div className="animate-fade-in">
+            <EducationMaximizer currentRating={currentRating} selectedState={selectedState} />
           </div>
         )}
 
@@ -1143,6 +1158,9 @@ const VeteranBenefitsCompass = () => {
                 </div>
               );
             })()}
+
+            {/* Federal GS Career & FERS Buy-Back Suite */}
+            <FederalCareerFastTrack currentRating={currentRating} yearsOfService={yearsOfService} />
           </div>
         )}
 
