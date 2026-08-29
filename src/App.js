@@ -44,6 +44,7 @@ import VsoLocator from './components/directory/VsoLocator';
 import EducationMaximizer from './components/education/EducationMaximizer';
 import VaLoanAnalyzer from './components/housing/VaLoanAnalyzer';
 import FederalCareerFastTrack from './components/career/FederalCareerFastTrack';
+import TransitionCommandCenter from './components/transition/TransitionCommandCenter';
 
 const VeteranBenefitsCompass = () => {
   // ---- Profile State ----
@@ -514,6 +515,15 @@ const VeteranBenefitsCompass = () => {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* ============================================================ */}
+        {/* TAB 1b: ETS & SEPARATION COMMAND CENTER                      */}
+        {/* ============================================================ */}
+        {activeTab === 'transition' && (
+          <div className="animate-fade-in">
+            <TransitionCommandCenter branch={branch} currentRating={currentRating} />
           </div>
         )}
 

@@ -6,6 +6,14 @@ import {
 
 export const LIFE_EVENT_PILLARS = [
   {
+    id: 'transition',
+    pillar: 'life',
+    icon: <Calendar size={15} />,
+    label: 'Separation & ETS',
+    sublabel: 'SkillBridge & 180-Day BDD',
+    badge: 'Pillar 1'
+  },
+  {
     id: 'tracker',
     pillar: 'life',
     icon: <Calendar size={15} />,
