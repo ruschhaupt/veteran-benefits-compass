@@ -3,7 +3,19 @@
 // -----------------------------------------------------------------------
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-const AccessibilityContext = createContext();
+const defaultAccessibilityContext = {
+  readerMode: false,
+  calmMode: false,
+  fontSize: 100,
+  highContrast: false,
+  toggleReaderMode: () => {},
+  toggleCalmMode: () => {},
+  toggleHighContrast: () => {},
+  cycleFontSize: () => {},
+  setFontSize: () => {}
+};
+
+const AccessibilityContext = createContext(defaultAccessibilityContext);
 
 export const AccessibilityProvider = ({ children }) => {
   const [readerMode, setReaderMode] = useState(false);

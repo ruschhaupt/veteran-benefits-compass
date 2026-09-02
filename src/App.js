@@ -46,12 +46,17 @@ import VaLoanAnalyzer from './components/housing/VaLoanAnalyzer';
 import FederalCareerFastTrack from './components/career/FederalCareerFastTrack';
 import TransitionCommandCenter from './components/transition/TransitionCommandCenter';
 import VocRehabCommandCenter from './components/vre/VocRehabCommandCenter';
+import GuardReserveCalculator from './components/transition/GuardReserveCalculator';
+import RetireeCrdpCalculator from './components/retirement/RetireeCrdpCalculator';
+import FamilyBenefitsSuite from './components/scorecard/FamilyBenefitsSuite';
+import { SERVICE_PERSONAS } from './data/serviceTypes';
 
 const VeteranBenefitsCompass = () => {
   // ---- Profile State ----
   const [userEmail, setUserEmail] = useState('');
   const [userName, setUserName] = useState('');
 
+  const [serviceCategory, setServiceCategory] = useState('enlisted_4yr');
   const [branch, setBranch] = useState('usmc');
   const [enlistmentDate, setEnlistmentDate] = useState('2016-08-01');
   const [separationDate, setSeparationDate] = useState('2024-08-01');
@@ -129,6 +134,7 @@ const VeteranBenefitsCompass = () => {
     if (loaded) {
       if (loaded.userEmail) setUserEmail(loaded.userEmail);
       if (loaded.userName) setUserName(loaded.userName);
+      if (loaded.serviceCategory) setServiceCategory(loaded.serviceCategory);
       if (loaded.branch) setBranch(loaded.branch);
       if (loaded.enlistmentDate) setEnlistmentDate(loaded.enlistmentDate);
       if (loaded.separationDate) setSeparationDate(loaded.separationDate);
@@ -155,6 +161,7 @@ const VeteranBenefitsCompass = () => {
     const payload = {
       userEmail,
       userName,
+      serviceCategory,
       branch,
       enlistmentDate,
       separationDate,
@@ -376,7 +383,7 @@ const VeteranBenefitsCompass = () => {
         {/* ============================================================ */}
         {activeTab === 'summary' && (
           <div className="space-y-8 animate-fade-in">
-            {/* Hero Section (Option C) */}
+            {/* Hero Section */}
             <HeroSection
               currentRating={currentRating}
               onRatingChange={(r) => {
@@ -385,6 +392,11 @@ const VeteranBenefitsCompass = () => {
               }}
               onLaunchTimeline={() => setActiveTab('tracker')}
               onLaunchCalculator={() => setActiveTab('vamath')}
+              selectedServicePersona={serviceCategory}
+              onSelectServicePersona={(p) => {
+                setServiceCategory(p);
+                saveState({ serviceCategory: p });
+              }}
               branchSlang={bd.slang}
             />
 
@@ -529,6 +541,33 @@ const VeteranBenefitsCompass = () => {
         )}
 
         {/* ============================================================ */}
+        {/* TAB 1c: NATIONAL GUARD & RESERVE DRILL PAY OFFSET            */}
+        {/* ============================================================ */}
+        {activeTab === 'guardreserve' && (
+          <div className="animate-fade-in">
+            <GuardReserveCalculator currentRating={currentRating} hasDependents={hasDependents} />
+          </div>
+        )}
+
+        {/* ============================================================ */}
+        {/* TAB 1d: 20-YEAR RETIREE CRDP / CRSC & PENSION COMBINATOR     */}
+        {/* ============================================================ */}
+        {activeTab === 'retireecrdp' && (
+          <div className="animate-fade-in">
+            <RetireeCrdpCalculator currentRating={currentRating} hasDependents={hasDependents} />
+          </div>
+        )}
+
+        {/* ============================================================ */}
+        {/* TAB 1e: 100% P&T FAMILY SHIELD (DEA, CHAMPVA, TPD)           */}
+        {/* ============================================================ */}
+        {activeTab === 'familybenefits' && (
+          <div className="animate-fade-in">
+            <FamilyBenefitsSuite currentRating={currentRating} selectedState={selectedState} />
+          </div>
+        )}
+
+        {/* ============================================================ */}
         {/* TAB 2: "YOUR LIFE IN MONTHS" TIMELINE GENERATOR              */}
         {/* ============================================================ */}
         {activeTab === 'tracker' && (
@@ -578,15 +617,15 @@ const VeteranBenefitsCompass = () => {
         {/* ============================================================ */}
         {activeTab === 'vamath' && (
           <div className="space-y-6 animate-fade-in">
-            <div className="bg-gradient-to-r from-steel/40 via-steel-dark to-steel-dark border border-gold/40 rounded-3xl p-6 sm:p-8 space-y-3 shadow-2xl">
+            <div className="border border-steel/60 bg-steel-dark/95 rounded-2xl p-6 sm:p-8 space-y-3 relative overflow-hidden shadow-xl">
               <div className="flex items-center gap-2 text-gold font-mono text-xs uppercase tracking-widest font-bold">
-                <Calculator size={14} /> 38 CFR § 4.25 Non-Additive Math
+                <Calculator size={14} /> 38 CFR § 4.25 Non-Additive Disability Math
               </div>
-              <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-sand">
-                VA Math <span className="text-gold">Combat Combinator & 100% Path</span>
+              <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-sand">
+                VA Math <span className="text-gold">Combinator & Secondary Claim Arsenal</span>
               </h2>
               <p className="text-sand/70 text-sm leading-relaxed font-sans max-w-3xl">
-                The VA does not use standard addition. Each disability percentage is calculated against your <em>remaining whole-person efficiency</em>. Understand the math and discover high-yield secondary claims to close the gap.
+                The VA calculates each disability against your <em>remaining whole-person efficiency</em> rather than standard addition. Calculate your combined rating and identify high-yield secondary claims to close the gap to 100% P&T.
               </p>
             </div>
 
@@ -745,15 +784,15 @@ const VeteranBenefitsCompass = () => {
         {/* ============================================================ */}
         {activeTab === 'pact' && (
           <div className="space-y-6 animate-fade-in">
-            <div className="bg-gradient-to-r from-steel/40 via-steel-dark to-steel-dark border border-gold/40 rounded-3xl p-6 sm:p-8 space-y-3 shadow-2xl">
+            <div className="border border-steel/60 bg-steel-dark/95 rounded-2xl p-6 sm:p-8 space-y-3 relative overflow-hidden shadow-xl">
               <div className="flex items-center gap-2 text-gold font-mono text-xs uppercase tracking-widest font-bold">
-                <ShieldAlert size={14} /> PACT Act Section 406 & 804 Presumptives
+                <ShieldAlert size={14} /> PACT Act Section 406 & 804 Presumptive Rules
               </div>
-              <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-sand">
-                PACT Act <span className="text-gold">Toxic Exposure Screener</span>
+              <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-sand">
+                PACT Act <span className="text-gold">Toxic Exposure Presumptive Screener</span>
               </h2>
               <p className="text-sand/70 text-sm leading-relaxed font-sans max-w-3xl">
-                If you served in qualifying deployed theaters (SW Asia, Iraq, Afghanistan, Camp Lejeune, Agent Orange), the VA legally <strong>must presume</strong> your condition was caused by military service. No nexus letter required.
+                If you served in qualifying deployed theaters (SW Asia, Iraq, Afghanistan, Camp Lejeune, Agent Orange), the VA legally <strong>must presume</strong> your condition was caused by military service. No medical nexus letter required.
               </p>
             </div>
 
@@ -778,7 +817,7 @@ const VeteranBenefitsCompass = () => {
             {(() => {
               const currentTheater = PACT_ACT_THEATERS.find(t => t.id === selectedPactTheater) || PACT_ACT_THEATERS[0];
               return (
-                <div className="bg-steel/20 border border-steel/50 rounded-3xl p-6 space-y-5">
+                <div className="bg-steel/20 border border-steel/50 rounded-2xl p-6 space-y-5">
                   <div className="border-b border-steel/50 pb-4 space-y-1">
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <h3 className="text-xl font-black uppercase text-sand">{currentTheater.name}</h3>
@@ -816,15 +855,15 @@ const VeteranBenefitsCompass = () => {
         {/* ============================================================ */}
         {activeTab === 'claims' && (
           <div className="space-y-6 animate-fade-in">
-            <div className="bg-gradient-to-r from-steel/40 via-steel-dark to-steel-dark border border-gold/40 rounded-3xl p-6 sm:p-8 space-y-3 shadow-2xl">
+            <div className="border border-steel/60 bg-steel-dark/95 rounded-2xl p-6 sm:p-8 space-y-3 relative overflow-hidden shadow-xl">
               <div className="flex items-center gap-2 text-gold font-mono text-xs uppercase tracking-widest font-bold">
-                <Activity size={14} /> Clinical Examination Rehearsal
+                <Activity size={14} /> Clinical DBQ Examination Preparation
               </div>
-              <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-sand">
+              <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-sand">
                 C&P Exam <span className="text-gold">DBQ Practice Simulator</span>
               </h2>
               <p className="text-sand/70 text-sm leading-relaxed font-sans max-w-3xl">
-                Military culture trains service members to say "I'm fine." In a C&P examination, that response destroys your claim. Practice common DBQ examiner prompts and learn how to describe your worst days with legal precision.
+                Military culture trains service members to say "I'm fine." In a C&P examination, that reflex can cause claim denials. Practice common DBQ examiner prompts and learn how to describe your symptoms on your worst days with legal precision.
               </p>
             </div>
 
@@ -852,8 +891,8 @@ const VeteranBenefitsCompass = () => {
             {(() => {
               const currentScenario = CP_SIMULATOR_SCENARIOS.find(s => s.id === selectedCpScenario) || CP_SIMULATOR_SCENARIOS[0];
               return (
-                <div className="bg-steel/20 border border-steel/50 rounded-3xl p-6 sm:p-8 space-y-6">
-                  <div className="bg-steel-dark border border-gold/30 rounded-2xl p-5 space-y-2">
+                <div className="bg-steel/20 border border-steel/50 rounded-2xl p-6 sm:p-8 space-y-6">
+                  <div className="bg-steel-dark border border-gold/30 rounded-xl p-5 space-y-2">
                     <span className="text-[10px] font-mono text-gold uppercase font-bold">Examiner Prompt:</span>
                     <div className="text-base sm:text-lg font-bold text-sand italic font-sans">
                       {currentScenario.examinerPrompt}
@@ -867,7 +906,7 @@ const VeteranBenefitsCompass = () => {
                       <div
                         key={i}
                         onClick={() => setCpChoice(i)}
-                        className={`p-4 rounded-2xl border cursor-pointer transition-all space-y-2 ${
+                        className={`p-4 rounded-xl border cursor-pointer transition-all space-y-2 ${
                           cpChoice === i
                             ? opt.isOptimal
                               ? 'bg-emerald-950/40 border-emerald-500/60 shadow-lg'
@@ -892,13 +931,13 @@ const VeteranBenefitsCompass = () => {
             })()}
 
             {/* SMC Tiers Section */}
-            <div className="bg-steel/20 border border-steel/50 rounded-3xl p-6 space-y-4">
+            <div className="bg-steel/20 border border-steel/50 rounded-2xl p-6 space-y-4">
               <h3 className="text-xl font-black uppercase text-sand">Special Monthly Compensation (SMC) Maximizer</h3>
               <p className="text-xs text-sand/60">Additional tax-free monthly add-ons on top of your standard 100% disability compensation.</p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {SMC_DATA.map((smc, i) => (
-                  <div key={i} className="bg-steel-dark border border-steel/60 rounded-2xl p-5 space-y-2">
+                  <div key={i} className="bg-steel-dark border border-steel/60 rounded-xl p-5 space-y-2">
                     <div className="flex justify-between items-baseline border-b border-steel/40 pb-2">
                       <span className="text-gold font-black font-mono text-base">{smc.level}</span>
                       <span className="text-emerald-400 font-mono text-xs font-bold">{smc.rate2026}</span>
@@ -920,15 +959,15 @@ const VeteranBenefitsCompass = () => {
         {/* ============================================================ */}
         {activeTab === 'househack' && (
           <div className="space-y-6 animate-fade-in">
-            <div className="bg-gradient-to-r from-steel/40 via-steel-dark to-steel-dark border border-gold/40 rounded-3xl p-6 sm:p-8 space-y-3 shadow-2xl">
+            <div className="border border-steel/60 bg-steel-dark/95 rounded-2xl p-6 sm:p-8 space-y-3 relative overflow-hidden shadow-xl">
               <div className="flex items-center gap-2 text-gold font-mono text-xs uppercase tracking-widest font-bold">
-                <Home size={14} /> $0-Down Multi-Family Real Estate
+                <Home size={14} /> $0-Down Multi-Family Real Estate (2–4 Units)
               </div>
-              <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-sand">
-                VA House Hacker <span className="text-gold">Calculator (2–4 Units)</span>
+              <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-sand">
+                VA Loan House Hacker <span className="text-gold">& Multi-Unit Engine</span>
               </h2>
               <p className="text-sand/70 text-sm leading-relaxed font-sans max-w-3xl">
-                Use your VA Loan to purchase a duplex, triplex, or fourplex with zero down payment and zero PMI. Live in unit 1 while tenant rents pay your entire mortgage and generate monthly cash flow.
+                Use your VA Loan to purchase a duplex, triplex, or fourplex with zero down payment and zero monthly mortgage insurance (PMI). Live in unit 1 while tenant rental income offsets your mortgage and builds equity.
               </p>
             </div>
 
@@ -1066,15 +1105,15 @@ const VeteranBenefitsCompass = () => {
         {/* ============================================================ */}
         {activeTab === 'statematrix' && (
           <div className="space-y-6 animate-fade-in">
-            <div className="bg-gradient-to-r from-steel/40 via-steel-dark to-steel-dark border border-gold/40 rounded-3xl p-6 sm:p-8 space-y-3 shadow-2xl">
+            <div className="border border-steel/60 bg-steel-dark/95 rounded-2xl p-6 sm:p-8 space-y-3 relative overflow-hidden shadow-xl">
               <div className="flex items-center gap-2 text-gold font-mono text-xs uppercase tracking-widest font-bold">
-                <Flag size={14} /> State Tax Shields & Waivers
+                <Flag size={14} /> 50-State Property Tax & Tuition Exemptions
               </div>
-              <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-sand">
+              <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-sand">
                 50-State <span className="text-gold">Benefits & Tax Shield Matrix</span>
               </h2>
               <p className="text-sand/70 text-sm leading-relaxed font-sans max-w-3xl">
-                Where you choose to live after the military changes your net worth by hundreds of thousands of dollars. Compare property tax exemptions, state income tax shields, and dependent tuition programs across all 50 states.
+                Where you choose to establish residency after service impacts your annual net income by thousands of dollars. Compare full property tax exemptions, state pension tax shields, and dependent tuition programs across all 50 states.
               </p>
             </div>
 
@@ -1110,15 +1149,15 @@ const VeteranBenefitsCompass = () => {
         {/* ============================================================ */}
         {activeTab === 'avenues' && (
           <div className="space-y-6 animate-fade-in">
-            <div className="bg-gradient-to-r from-steel/40 via-steel-dark to-steel-dark border border-gold/40 rounded-3xl p-6 sm:p-8 space-y-3 shadow-2xl">
+            <div className="border border-steel/60 bg-steel-dark/95 rounded-2xl p-6 sm:p-8 space-y-3 relative overflow-hidden shadow-xl">
               <div className="flex items-center gap-2 text-gold font-mono text-xs uppercase tracking-widest font-bold">
-                <Compass size={14} /> Tactical Post-Military Routes
+                <Compass size={14} /> Post-Military Career Paths & Contracting
               </div>
-              <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-sand">
-                Avenues <span className="text-gold">Playbooks & Master Blueprints</span>
+              <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-sand">
+                Federal GS Careers, <span className="text-gold">FERS Buyback & Contracting</span>
               </h2>
               <p className="text-sand/70 text-sm leading-relaxed font-sans max-w-3xl">
-                Comprehensive step-by-step roadmaps for Education Stacking, Federal GS Careers, $47B SDVOSB Set-Asides, Remote Tech, and Pure Expat Freedom.
+                Comprehensive step-by-step roadmaps for Federal GS employment (Schedule A / 30% CPS direct hire), buying back military service for FERS retirement, and SDVOSB set-aside contracting.
               </p>
             </div>
 
@@ -1189,15 +1228,15 @@ const VeteranBenefitsCompass = () => {
         {/* ============================================================ */}
         {activeTab === 'scanner' && (
           <div className="space-y-6 animate-fade-in">
-            <div className="bg-gradient-to-r from-steel/40 via-steel-dark to-steel-dark border border-gold/40 rounded-3xl p-6 sm:p-8 space-y-3 shadow-2xl">
+            <div className="border border-steel/60 bg-steel-dark/95 rounded-2xl p-6 sm:p-8 space-y-3 relative overflow-hidden shadow-xl">
               <div className="flex items-center gap-2 text-gold font-mono text-xs uppercase tracking-widest font-bold">
                 <Cpu size={14} /> 100% In-Browser Privacy Scanner
               </div>
-              <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-sand">
-                Military Medical <span className="text-gold">Record Scanner</span>
+              <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-sand">
+                Military Medical <span className="text-gold">Record Diagnostic Scanner</span>
               </h2>
               <p className="text-sand/70 text-sm leading-relaxed font-sans max-w-3xl">
-                Paste your Service Treatment Records (STR) notes, AHLTA summaries, or civilian diagnoses. Our client-side regex engine maps your symptoms to VA Diagnostic Codes with <strong>zero data leaving your device</strong>.
+                Paste your Service Treatment Records (STR) clinic notes, AHLTA summaries, or civilian diagnoses. Our client-side matching engine identifies corresponding VA Diagnostic Codes with <strong>zero data leaving your device</strong>.
               </p>
             </div>
 
@@ -1299,15 +1338,15 @@ const VeteranBenefitsCompass = () => {
         {/* ============================================================ */}
         {activeTab === 'perks' && (
           <div className="space-y-6 animate-fade-in">
-            <div className="bg-gradient-to-r from-steel/40 via-steel-dark to-steel-dark border border-gold/40 rounded-3xl p-6 sm:p-8 space-y-3 shadow-2xl">
+            <div className="border border-steel/60 bg-steel-dark/95 rounded-2xl p-6 sm:p-8 space-y-3 relative overflow-hidden shadow-xl">
               <div className="flex items-center gap-2 text-gold font-mono text-xs uppercase tracking-widest font-bold">
-                <Sparkles size={14} /> Sovereign Military Entitlements
+                <Sparkles size={14} /> Specialized Veteran Grants & Entitlements
               </div>
-              <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-sand">
-                High-Value <span className="text-gold">Special Perks & Grants</span>
+              <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-sand">
+                High-Value <span className="text-gold">Special Perks & Housing Grants</span>
               </h2>
               <p className="text-sand/70 text-sm leading-relaxed font-sans max-w-3xl">
-                Space-A Free Flights (Category VI), $117k Adapted Housing Grants, Free National Parks Lifetime Passes, and the 5 Pathways to 100% Free Comprehensive VA Dental Care.
+                Space-A Free Military Flights (Category VI), $117k Adapted Housing (SAH) Grants, Lifetime National Parks Access, and Comprehensive Free VA Dental Care pathways.
               </p>
             </div>
 
@@ -1415,15 +1454,15 @@ const VeteranBenefitsCompass = () => {
         {/* ============================================================ */}
         {activeTab === 'directory' && (
           <div className="space-y-6 animate-fade-in">
-            <div className="bg-gradient-to-r from-steel/40 via-steel-dark to-steel-dark border border-gold/40 rounded-3xl p-6 sm:p-8 space-y-3 shadow-2xl">
+            <div className="border border-steel/60 bg-steel-dark/95 rounded-2xl p-6 sm:p-8 space-y-3 relative overflow-hidden shadow-xl">
               <div className="flex items-center gap-2 text-gold font-mono text-xs uppercase tracking-widest font-bold">
-                <Phone size={14} /> Emergency & Accredited VSO Resources
+                <Phone size={14} /> 24/7 Crisis Response & Accredited Representation
               </div>
-              <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-sand">
-                Crisis Hotlines & <span className="text-gold">Accredited VSO Locator</span>
+              <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-sand">
+                Accredited VSO Locator & <span className="text-gold">Crisis Directory</span>
               </h2>
               <p className="text-sand/70 text-sm leading-relaxed font-sans max-w-3xl">
-                Direct emergency hotlines, free accredited Veteran Service Organizations (DAV, VFW, American Legion), and essential federal forms.
+                Connect with free accredited representatives (DAV, VFW, American Legion, state VSOs) and access confidential 24/7 emergency support.
               </p>
             </div>
 
@@ -1512,6 +1551,19 @@ const VeteranBenefitsCompass = () => {
 
             <div className="space-y-4 text-xs font-mono">
               <div>
+                <label className="block uppercase text-gold font-bold mb-1">Service Profile / Tenure</label>
+                <select
+                  value={serviceCategory}
+                  onChange={(e) => setServiceCategory(e.target.value)}
+                  className="w-full bg-steel/30 border border-steel/60 rounded-xl px-3 py-2 text-sand text-sm focus:outline-none focus:border-gold"
+                >
+                  {SERVICE_PERSONAS.map(p => (
+                    <option key={p.id} value={p.id}>{p.title} ({p.badge})</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
                 <label className="block uppercase text-gold font-bold mb-1">Your Name / Callsign</label>
                 <input
                   type="text"
@@ -1586,7 +1638,7 @@ const VeteranBenefitsCompass = () => {
             <div className="pt-2">
               <button
                 onClick={() => {
-                  saveState({ userName, branch, selectedState, currentRating, hasDependents });
+                  saveState({ serviceCategory, userName, branch, selectedState, currentRating, hasDependents });
                   setShowSettingsModal(false);
                 }}
                 className="w-full py-3 rounded-xl bg-gold hover:bg-yellow-600 text-steel-dark font-black font-mono text-xs uppercase tracking-wider shadow-lg transition-all"

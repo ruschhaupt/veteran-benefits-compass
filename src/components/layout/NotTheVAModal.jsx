@@ -29,14 +29,14 @@ export const NotTheVAModal = () => {
       aria-modal="true"
       aria-labelledby="disclaimer-modal-title"
     >
-      <div className="bg-steel-dark border border-gold/40 rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl animate-fade-in relative">
+      <div className="bg-steel-dark border border-steel/60 rounded-2xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl animate-fade-in relative">
         <div className="flex items-center gap-3 border-b border-steel/50 pb-4">
-          <div className="w-10 h-10 rounded-2xl bg-gold/10 border border-gold/40 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-gold/10 border border-gold/40 flex items-center justify-center flex-shrink-0">
             <Shield className="text-gold" size={22} />
           </div>
           <div>
             <span className="text-[10px] font-mono uppercase tracking-widest text-gold font-bold">
-              Battle Buddy Transparency Disclosure
+              Veteran Transparency Disclosure
             </span>
             <h2 id="disclaimer-modal-title" className="text-xl font-black uppercase tracking-tight text-sand">
               We Are Not The VA.
@@ -46,22 +46,22 @@ export const NotTheVAModal = () => {
 
         <div className="text-sm text-sand/80 leading-relaxed space-y-3 font-sans">
           <p>
-            <strong>Plain Language:</strong> We are not the Department of Veterans Affairs. We are not a law firm. We are not unaccredited claim agents.
+            <strong>Clear Terms:</strong> This is a 100% free educational platform built by veterans. We are not the U.S. Department of Veterans Affairs, we are not a law firm, and we are not paid claim agents.
           </p>
           <p>
-            We are veterans who built a <strong>100% free, private educational calculator</strong> so you don't have to navigate 38 CFR alone. Every calculation is cited directly to federal statutes.
+            Our objective is simple: to help you understand your statutory rights under Title 38 of the Code of Federal Regulations (38 CFR) and state laws so you are thoroughly prepared when meeting with an accredited Veteran Service Officer (VSO).
           </p>
-          <p className="bg-steel/30 border border-steel/60 rounded-xl p-3 text-xs text-sand/70">
-            💡 <strong>Our Mission:</strong> To give you the exact numbers and statutory references so you become the most prepared client your accredited Veteran Service Officer (VSO) has ever seen.
-          </p>
+          <div className="bg-steel/30 border border-steel/50 rounded-xl p-3 text-xs text-sand/70">
+            💡 <strong>Privacy Guarantee:</strong> All calculations run directly in your browser. We do not require accounts, we do not store your medical data, and we do not sell your information.
+          </div>
         </div>
 
         <div className="pt-2 flex flex-col sm:flex-row gap-3">
           <button
             onClick={handleDismiss}
-            className="flex-1 py-3 px-5 rounded-xl bg-gold hover:bg-yellow-600 text-steel-dark font-black font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg"
+            className="flex-1 py-3 px-5 rounded-xl bg-gold hover:bg-yellow-600 text-steel-dark font-black font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md"
           >
-            <Check size={16} /> Understood — Let's Roll
+            <Check size={16} /> Understood — Continue
           </button>
           <a
             href="https://www.va.gov/ogc/apps/accreditation/index.asp"
