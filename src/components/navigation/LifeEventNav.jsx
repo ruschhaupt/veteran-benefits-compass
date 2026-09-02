@@ -1,11 +1,12 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
-  Calendar, Award, Calculator, Home, DollarSign,
-  Phone, Cpu, Sparkles, Shield, Activity, Flag, Compass,
-  GraduationCap, Briefcase, ChevronLeft, ChevronRight, LayoutGrid, X, Check,
-  Heart
+  Home, Award, Calculator, DollarSign,
+  Phone, Cpu, Shield, Activity, Flag, Compass,
+  GraduationCap, Briefcase, ChevronDown,
+  Heart, Calendar, Sparkles, LayoutGrid, X, Check
 } from 'lucide-react';
 
+// All 19 modules — unchanged data, just organized into groups
 export const LIFE_EVENT_PILLARS = [
   {
     id: 'summary',
@@ -49,7 +50,7 @@ export const LIFE_EVENT_PILLARS = [
   },
   {
     id: 'tracker',
-    category: 'transition',
+    category: 'help',
     icon: <Calendar size={14} />,
     label: 'Mission Timeline',
     sublabel: 'Statutory Countdown Clocks',
@@ -143,13 +144,48 @@ export const LIFE_EVENT_PILLARS = [
   },
   {
     id: 'directory',
-    category: 'crisis',
+    category: 'help',
     icon: <Phone size={14} />,
     label: 'VSOs & Crisis Hotlines',
     sublabel: 'Accredited VSOs & Emergency'
   }
 ];
 
+// Navigation section groups
+const NAV_SECTIONS = [
+  {
+    id: 'home',
+    label: 'Dashboard',
+    icon: <Home size={15} />,
+    tabs: ['summary']
+  },
+  {
+    id: 'claims',
+    label: 'Claims & Ratings',
+    icon: <Award size={15} />,
+    tabs: ['grader', 'vamath', 'pact', 'claims', 'scanner']
+  },
+  {
+    id: 'transition',
+    label: 'Transition & Career',
+    icon: <Briefcase size={15} />,
+    tabs: ['transition', 'guardreserve', 'education', 'vocrehab', 'avenues']
+  },
+  {
+    id: 'wealth',
+    label: 'Money & Housing',
+    icon: <DollarSign size={15} />,
+    tabs: ['househack', 'statematrix', 'retireecrdp', 'scorecard', 'familybenefits', 'perks']
+  },
+  {
+    id: 'help',
+    label: 'Help & Resources',
+    icon: <Phone size={15} />,
+    tabs: ['tracker', 'directory']
+  }
+];
+
+// Keep the old CATEGORIES export for backward compatibility
 export const CATEGORIES = [
   { id: 'all', label: 'All Modules (19)' },
   { id: 'claims', label: 'Claims & Ratings' },
@@ -158,145 +194,139 @@ export const CATEGORIES = [
   { id: 'crisis', label: 'VSO Directory & Crisis' }
 ];
 
+// Lookup helpers
+const tabMap = Object.fromEntries(LIFE_EVENT_PILLARS.map(t => [t.id, t]));
+const getSection = (tabId) => NAV_SECTIONS.find(s => s.tabs.includes(tabId)) || NAV_SECTIONS[0];
+
 export const LifeEventNav = ({ activeTab, onSelectTab }) => {
-  const scrollRef = useRef(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [openSection, setOpenSection] = useState(null);
   const [showAllDrawer, setShowAllDrawer] = useState(false);
+  const navRef = useRef(null);
 
-  const checkScroll = () => {
-    if (scrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-      setCanScrollLeft(scrollLeft > 10);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-    }
-  };
-
+  // Close dropdown on outside click
   useEffect(() => {
-    checkScroll();
-    window.addEventListener('resize', checkScroll);
-    return () => window.removeEventListener('resize', checkScroll);
+    const handleClickOutside = (e) => {
+      if (navRef.current && !navRef.current.contains(e.target)) {
+        setOpenSection(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleScroll = (direction) => {
-    if (scrollRef.current) {
-      const offset = direction === 'left' ? -280 : 280;
-      scrollRef.current.scrollBy({ left: offset, behavior: 'smooth' });
-      setTimeout(checkScroll, 300);
+  const activeSection = getSection(activeTab);
+
+  const handleSectionClick = (sectionId) => {
+    const section = NAV_SECTIONS.find(s => s.id === sectionId);
+    // Dashboard has only one tab — go directly
+    if (section && section.tabs.length === 1) {
+      onSelectTab(section.tabs[0]);
+      setOpenSection(null);
+      return;
     }
+    setOpenSection(openSection === sectionId ? null : sectionId);
   };
 
-  const filteredTabs = selectedCategory === 'all'
-    ? LIFE_EVENT_PILLARS
-    : LIFE_EVENT_PILLARS.filter(t => t.category === selectedCategory || t.id === 'summary');
+  const handleTabSelect = (tabId) => {
+    onSelectTab(tabId);
+    setOpenSection(null);
+    setShowAllDrawer(false);
+  };
 
   return (
-    <nav aria-label="Main navigation" className="bg-steel-dark/95 border-b border-steel/60 sticky top-0 z-30 backdrop-blur-md shadow-md">
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 space-y-1.5 py-2">
-        {/* Top Control Bar: Category Filters & "View All Modules" Grid Trigger */}
-        <div className="flex items-center justify-between gap-2 overflow-x-auto scrollbar-none pb-1 text-xs font-mono">
-          <div className="flex items-center gap-1.5 flex-nowrap">
-            {CATEGORIES.map(cat => {
-              const isCatActive = selectedCategory === cat.id;
-              return (
+    <nav ref={navRef} aria-label="Main navigation" className="bg-steel-dark/95 border-b border-steel/60 sticky top-0 z-30 backdrop-blur-md shadow-md">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 py-2">
+        {/* Desktop: Section buttons in a row */}
+        <div className="flex items-center gap-1.5">
+          {NAV_SECTIONS.map(section => {
+            const isSectionActive = activeSection.id === section.id;
+            const isOpen = openSection === section.id;
+            const hasSubs = section.tabs.length > 1;
+
+            return (
+              <div key={section.id} className="relative">
                 <button
-                  key={cat.id}
-                  onClick={() => {
-                    setSelectedCategory(cat.id);
-                    if (scrollRef.current) scrollRef.current.scrollLeft = 0;
-                  }}
-                  className={`px-3 py-1 rounded-lg transition-all whitespace-nowrap font-bold select-none ${
-                    isCatActive
-                      ? 'bg-gold/20 text-gold border border-gold/50 shadow-sm'
-                      : 'bg-steel/30 text-sand/60 hover:text-sand hover:bg-steel/50 border border-steel/40'
+                  onClick={() => handleSectionClick(section.id)}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all border select-none ${
+                    isSectionActive
+                      ? 'bg-gold/15 border-gold/50 text-gold shadow-sm'
+                      : 'bg-steel/20 border-steel/50 text-sand/70 hover:text-sand hover:border-gold/40 hover:bg-steel/40'
                   }`}
+                  aria-expanded={isOpen}
                 >
-                  {cat.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* View All Drawer Trigger */}
-          <button
-            onClick={() => setShowAllDrawer(!showAllDrawer)}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-steel/50 hover:bg-steel border border-steel/60 text-sand/80 hover:text-gold font-bold whitespace-nowrap flex-shrink-0 transition-all text-xs"
-          >
-            <LayoutGrid size={13} />
-            <span>{showAllDrawer ? 'Close Grid' : 'All Modules'}</span>
-          </button>
-        </div>
-
-        {/* Horizontal Scrollable Tabs Row with Smooth Nav Controls */}
-        <div className="relative flex items-center group">
-          {/* Scroll Left Button */}
-          {canScrollLeft && (
-            <button
-              onClick={() => handleScroll('left')}
-              className="absolute left-0 z-20 h-full px-2 bg-gradient-to-r from-steel-dark via-steel-dark/90 to-transparent flex items-center text-gold hover:text-sand transition-all"
-              aria-label="Scroll left"
-            >
-              <div className="w-6 h-6 rounded-full bg-steel border border-steel/60 flex items-center justify-center shadow-md">
-                <ChevronLeft size={14} />
-              </div>
-            </button>
-          )}
-
-          {/* Main Scrollable Track */}
-          <div
-            ref={scrollRef}
-            onScroll={checkScroll}
-            className="flex items-center gap-2 overflow-x-auto py-1 scrollbar-none no-scrollbar w-full scroll-smooth"
-          >
-            {filteredTabs.map((tab) => {
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => onSelectTab(tab.id)}
-                  className={`flex-shrink-0 px-3.5 py-2 rounded-xl text-xs font-mono transition-all flex items-center gap-2 border select-none ${
-                    isActive
-                      ? 'bg-gold text-steel-dark border-gold font-black shadow-md'
-                      : 'bg-steel/30 border-steel/60 text-sand/80 hover:text-sand hover:border-gold/40 hover:bg-steel/50 font-bold'
-                  }`}
-                >
-                  <span className={isActive ? 'text-steel-dark' : 'text-gold'}>{tab.icon}</span>
-                  <span className="whitespace-nowrap">{tab.label}</span>
-                  {tab.badge && (
-                    <span className={`text-[9px] px-1.5 py-0.2 rounded font-bold uppercase ${
-                      isActive ? 'bg-steel-dark text-gold' : 'bg-gold/20 text-gold border border-gold/40'
-                    }`}>
-                      {tab.badge}
-                    </span>
+                  <span className={isSectionActive ? 'text-gold' : 'text-sand/50'}>{section.icon}</span>
+                  <span className="hidden sm:inline">{section.label}</span>
+                  {hasSubs && (
+                    <ChevronDown size={11} className={`transition-transform ${isOpen ? 'rotate-180' : ''} ${isSectionActive ? 'text-gold/60' : 'text-sand/40'}`} />
                   )}
                 </button>
-              );
-            })}
-          </div>
 
-          {/* Scroll Right Button */}
-          {canScrollRight && (
-            <button
-              onClick={() => handleScroll('right')}
-              className="absolute right-0 z-20 h-full px-2 bg-gradient-to-l from-steel-dark via-steel-dark/90 to-transparent flex items-center text-gold hover:text-sand transition-all"
-              aria-label="Scroll right"
-            >
-              <div className="w-6 h-6 rounded-full bg-steel border border-steel/60 flex items-center justify-center shadow-md">
-                <ChevronRight size={14} />
+                {/* Dropdown Panel */}
+                {isOpen && hasSubs && (
+                  <div className="absolute top-full left-0 mt-1 w-72 bg-steel-dark border border-steel/60 rounded-xl shadow-2xl overflow-hidden animate-fade-in z-50">
+                    <div className="p-1.5 space-y-0.5">
+                      {section.tabs.map(tabId => {
+                        const tab = tabMap[tabId];
+                        if (!tab) return null;
+                        const isActive = activeTab === tabId;
+                        return (
+                          <button
+                            key={tabId}
+                            onClick={() => handleTabSelect(tabId)}
+                            className={`w-full text-left p-2.5 rounded-lg transition-all flex items-start gap-2.5 ${
+                              isActive
+                                ? 'bg-gold/15 border border-gold/40'
+                                : 'hover:bg-steel/40 border border-transparent'
+                            }`}
+                          >
+                            <span className={`mt-0.5 flex-shrink-0 ${isActive ? 'text-gold' : 'text-sand/50'}`}>{tab.icon}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className={`text-xs font-mono font-bold truncate ${isActive ? 'text-sand' : 'text-sand/80'}`}>
+                                  {tab.label}
+                                </span>
+                                {tab.badge && (
+                                  <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold flex-shrink-0 ${
+                                    isActive ? 'bg-gold text-steel-dark' : 'bg-steel/40 text-sand/50'
+                                  }`}>
+                                    {tab.badge}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-[10px] text-sand/50 mt-0.5 leading-tight">{tab.sublabel}</p>
+                            </div>
+                            {isActive && <Check size={13} className="text-gold mt-0.5 flex-shrink-0" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
-            </button>
-          )}
+            );
+          })}
+
+          {/* Spacer */}
+          <div className="flex-1" />
+
+          {/* All Modules Grid Button */}
+          <button
+            onClick={() => { setShowAllDrawer(!showAllDrawer); setOpenSection(null); }}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-steel/30 hover:bg-steel/50 border border-steel/50 text-sand/60 hover:text-gold font-mono text-xs font-bold transition-all select-none flex-shrink-0"
+          >
+            <LayoutGrid size={13} />
+            <span className="hidden sm:inline">{showAllDrawer ? 'Close' : 'All 19'}</span>
+          </button>
         </div>
       </div>
 
-      {/* "All Modules" Grid Modal Overlay */}
+      {/* "All Modules" Full Grid Overlay */}
       {showAllDrawer && (
         <div className="border-t border-steel/60 bg-steel-dark/95 backdrop-blur-xl p-4 sm:p-6 shadow-2xl animate-fade-in">
           <div className="max-w-7xl mx-auto space-y-4">
             <div className="flex items-center justify-between border-b border-steel/50 pb-2">
               <div className="flex items-center gap-2 text-gold font-mono font-bold text-xs uppercase">
-                <LayoutGrid size={15} /> Complete Command Module Grid (19 Applications)
+                <LayoutGrid size={15} /> All 19 Modules
               </div>
               <button
                 onClick={() => setShowAllDrawer(false)}
@@ -306,34 +336,42 @@ export const LifeEventNav = ({ activeTab, onSelectTab }) => {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
-              {LIFE_EVENT_PILLARS.map(tab => {
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => {
-                      onSelectTab(tab.id);
-                      setShowAllDrawer(false);
-                    }}
-                    className={`p-3 rounded-xl border text-left transition-all space-y-1 select-none flex flex-col justify-between ${
-                      isActive
-                        ? 'bg-gold/15 border-gold shadow-md text-sand'
-                        : 'bg-steel/30 border-steel/60 hover:border-gold/50 text-sand/80 hover:bg-steel/50'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-gold font-bold font-mono text-xs">
-                        <span>{tab.icon}</span>
-                        <span className="text-sand">{tab.label}</span>
-                      </div>
-                      {isActive && <Check size={14} className="text-gold" />}
-                    </div>
-                    <p className="text-[10px] text-sand/60 leading-tight font-sans">{tab.sublabel}</p>
-                  </button>
-                );
-              })}
-            </div>
+            {/* Render by section group */}
+            {NAV_SECTIONS.filter(s => s.tabs.length > 0).map(section => (
+              <div key={section.id} className="space-y-2">
+                <div className="flex items-center gap-2 text-[11px] font-mono uppercase text-sand/50 font-bold">
+                  {section.icon}
+                  <span>{section.label}</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                  {section.tabs.map(tabId => {
+                    const tab = tabMap[tabId];
+                    if (!tab) return null;
+                    const isActive = activeTab === tabId;
+                    return (
+                      <button
+                        key={tabId}
+                        onClick={() => handleTabSelect(tabId)}
+                        className={`p-3 rounded-xl border text-left transition-all space-y-1 select-none flex flex-col justify-between ${
+                          isActive
+                            ? 'bg-gold/15 border-gold shadow-md text-sand'
+                            : 'bg-steel/30 border-steel/60 hover:border-gold/50 text-sand/80 hover:bg-steel/50'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 text-gold font-bold font-mono text-xs">
+                            <span>{tab.icon}</span>
+                            <span className="text-sand">{tab.label}</span>
+                          </div>
+                          {isActive && <Check size={14} className="text-gold" />}
+                        </div>
+                        <p className="text-[10px] text-sand/60 leading-tight font-sans">{tab.sublabel}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}

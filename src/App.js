@@ -5,7 +5,7 @@ import {
   Phone, Cpu, ExternalLink, X, Activity, Flag,
   Home, ShieldAlert, Sparkles, Copy,
   Sliders, Printer, Share2, Check,
-  Calculator, ChevronDown, ChevronUp,
+  Calculator, ChevronDown, ChevronUp, ChevronRight,
   ArrowRight, RefreshCw, Zap
 } from 'lucide-react';
 
@@ -28,18 +28,17 @@ import { loadProfileFromStorage, saveProfileToStorage } from './utils/storage';
 import { calculateVeteranWealth } from './utils/wealthCalculator';
 
 // Component imports
-import ZeroCatchBanner from './components/layout/ZeroCatchBanner';
-import AccessibilityBar from './components/layout/AccessibilityBar';
-import CrisisQuickBar from './components/navigation/CrisisQuickBar';
+import UtilityStrip from './components/layout/UtilityStrip';
 import NotTheVAModal from './components/layout/NotTheVAModal';
 import Footer from './components/layout/Footer';
 import HeroSection from './components/home/HeroSection';
+import QuickAccessFab from './components/navigation/QuickAccessFab';
 import BenefitFinderWizard from './components/home/BenefitFinderWizard';
 import MissionTimelineGenerator from './components/timeline/MissionTimelineGenerator';
 import ClaimStrengthGrader from './components/claims/ClaimStrengthGrader';
 import SidecarCredibilityPanel from './components/claims/SidecarCredibilityPanel';
 import VeteranWealthScorecard from './components/scorecard/VeteranWealthScorecard';
-import LifeEventNav from './components/navigation/LifeEventNav';
+import LifeEventNav, { LIFE_EVENT_PILLARS } from './components/navigation/LifeEventNav';
 import VsoLocator from './components/directory/VsoLocator';
 import EducationMaximizer from './components/education/EducationMaximizer';
 import VaLoanAnalyzer from './components/housing/VaLoanAnalyzer';
@@ -74,6 +73,13 @@ const VeteranBenefitsCompass = () => {
 
   // ---- Navigation State ----
   const [activeTab, setActiveTab] = useState('summary');
+
+  // Scroll to top whenever the active tab changes
+  useEffect(() => {
+    if (typeof window.scrollTo === 'function') {
+      try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { /* jsdom */ }
+    }
+  }, [activeTab]);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showDossierModal, setShowDossierModal] = useState(false);
   const [showFinderWizard, setShowFinderWizard] = useState(false);
@@ -300,38 +306,43 @@ const VeteranBenefitsCompass = () => {
     reader.readAsText(file);
   };
 
+  // Breadcrumb derivation
+  const activeTabData = LIFE_EVENT_PILLARS.find(t => t.id === activeTab);
+  const SECTION_LABELS = {
+    home: 'Dashboard',
+    claims: 'Claims & Ratings',
+    transition: 'Transition & Career',
+    wealth: 'Money & Housing',
+    help: 'Help & Resources',
+    crisis: 'Help & Resources'
+  };
+  const breadcrumbSection = activeTabData ? (SECTION_LABELS[activeTabData.category] || 'Dashboard') : 'Dashboard';
+  const breadcrumbPage = activeTabData ? activeTabData.label : 'Dashboard';
+
   return (
     <div className="min-h-screen bg-steel-dark text-sand flex flex-col relative overflow-hidden font-sans">
       {/* Background Tactical Grid */}
       <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-20 pointer-events-none" />
 
-      {/* 1. "0 Catch" Guarantee Persistent Banner */}
-      <ZeroCatchBanner />
+      {/* 1. Unified Utility Strip (Crisis + Trust + Accessibility) */}
+      <UtilityStrip />
 
-      {/* 2. Neuro-Accessibility Suite Controls (Reader Mode, Calm Mode, Font Size) */}
-      <AccessibilityBar />
-
-      {/* 3. 24/7 Crisis Response Quick Bar */}
-      <CrisisQuickBar />
-
-      {/* 4. "Not The VA" First-Visit Battle Buddy Disclosure Modal */}
+      {/* 2. "Not The VA" First-Visit Disclosure Modal */}
       <NotTheVAModal />
 
-      {/* 4. Copy Notification Toast */}
+      {/* Notification Toasts */}
       {copiedNotification && (
-        <div className="fixed bottom-6 right-6 z-50 bg-gold text-steel-dark px-4 py-2.5 rounded-xl font-mono text-xs font-black shadow-2xl flex items-center gap-2 animate-fade-in">
+        <div className="fixed bottom-20 right-6 z-50 bg-gold text-steel-dark px-4 py-2.5 rounded-xl font-mono text-xs font-black shadow-2xl flex items-center gap-2 animate-fade-in">
           <Check size={14} /> Copied to clipboard!
         </div>
       )}
-
-      {/* 4b. Claimed Benefit Win Toast */}
       {claimedNotification && (
-        <div className="fixed bottom-6 left-6 z-50 bg-emerald-500 text-steel-dark px-4 py-2.5 rounded-xl font-mono text-xs font-black shadow-2xl flex items-center gap-2 animate-fade-in border border-emerald-400">
+        <div className="fixed bottom-20 left-6 z-50 bg-emerald-500 text-steel-dark px-4 py-2.5 rounded-xl font-mono text-xs font-black shadow-2xl flex items-center gap-2 animate-fade-in border border-emerald-400">
           <Sparkles size={14} /> {claimedNotification}
         </div>
       )}
 
-      {/* 5. Main Tactical Navigation Header */}
+      {/* 3. Main Header */}
       <header className="border-b border-steel/50 bg-steel-dark/90 px-4 py-3 flex items-center justify-between flex-wrap gap-3 z-20">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-gold to-yellow-600 flex items-center justify-center text-steel-dark font-black shadow-lg shadow-gold/10">
@@ -352,7 +363,6 @@ const VeteranBenefitsCompass = () => {
           </div>
         </div>
 
-        {/* Header Action Buttons */}
         <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => setShowSettingsModal(true)}
@@ -372,8 +382,24 @@ const VeteranBenefitsCompass = () => {
         </div>
       </header>
 
-      {/* 6. Main Sticky Life-Event Navigation Tabs */}
+      {/* 4. Grouped Navigation */}
       <LifeEventNav activeTab={activeTab} onSelectTab={(tabId) => setActiveTab(tabId)} />
+
+      {/* 5. Breadcrumb Context Bar */}
+      {activeTab !== 'summary' && (
+        <div className="bg-steel-dark/80 border-b border-steel/40 px-4 py-1.5 z-10">
+          <div className="max-w-7xl mx-auto flex items-center gap-1.5 text-[11px] font-mono text-sand/50">
+            <button onClick={() => setActiveTab('summary')} className="hover:text-gold transition-colors">Dashboard</button>
+            <ChevronRight size={10} className="text-sand/30" />
+            <span className="text-sand/60">{breadcrumbSection}</span>
+            <ChevronRight size={10} className="text-sand/30" />
+            <span className="text-gold font-bold">{breadcrumbPage}</span>
+          </div>
+        </div>
+      )}
+
+      {/* 6. Mobile Quick-Access FAB */}
+      <QuickAccessFab onSelectTab={(tabId) => setActiveTab(tabId)} />
 
       {/* 7. Main Content Viewport */}
       <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8 z-10">
