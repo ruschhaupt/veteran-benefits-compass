@@ -33,6 +33,7 @@ import NotTheVAModal from './components/layout/NotTheVAModal';
 import Footer from './components/layout/Footer';
 import HeroSection from './components/home/HeroSection';
 import QuickAccessFab from './components/navigation/QuickAccessFab';
+import CommandPaletteModal from './components/navigation/CommandPaletteModal';
 import BenefitFinderWizard from './components/home/BenefitFinderWizard';
 import MissionTimelineGenerator from './components/timeline/MissionTimelineGenerator';
 import ClaimStrengthGrader from './components/claims/ClaimStrengthGrader';
@@ -73,6 +74,48 @@ const VeteranBenefitsCompass = () => {
 
   // ---- Navigation State ----
   const [activeTab, setActiveTab] = useState('summary');
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+
+  // Tab selection with URL hash synchronization
+  const handleTabSelect = useCallback((tabId) => {
+    setActiveTab(tabId);
+    if (typeof window !== 'undefined' && window.location.hash !== `#${tabId}`) {
+      window.history.pushState(null, '', `#${tabId}`);
+    }
+  }, []);
+
+  // Listen for hash changes (browser back/forward) and initialize from hash
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const initialHash = window.location.hash.replace(/^#/, '');
+    if (initialHash && LIFE_EVENT_PILLARS.some(p => p.id === initialHash)) {
+      setActiveTab(initialHash);
+    }
+
+    const handleHashChange = () => {
+      const currentHash = window.location.hash.replace(/^#/, '');
+      if (currentHash && LIFE_EVENT_PILLARS.some(p => p.id === currentHash)) {
+        setActiveTab(currentHash);
+      } else if (!currentHash || currentHash === 'main-content') {
+        setActiveTab('summary');
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  // Global Cmd+K / Ctrl+K keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowCommandPalette(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Scroll to top whenever the active tab changes
   useEffect(() => {
@@ -363,7 +406,28 @@ const VeteranBenefitsCompass = () => {
           </div>
         </div>
 
+        {/* Header Center: Command Palette / Search Trigger */}
+        <button
+          onClick={() => setShowCommandPalette(true)}
+          className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-steel/30 hover:bg-steel/60 border border-steel/60 hover:border-gold text-sand/70 hover:text-sand font-mono text-xs transition-all"
+          title="Search all benefits, conditions, and statutes (Cmd+K)"
+        >
+          <Search size={13} className="text-gold" />
+          <span className="hidden lg:inline">Search Benefits & Laws...</span>
+          <span className="inline lg:hidden">Search</span>
+          <kbd className="text-[10px] bg-steel/60 px-1.5 py-0.5 rounded border border-steel/80 text-sand/50">⌘K</kbd>
+        </button>
+
         <div className="flex items-center gap-2 flex-wrap">
+          {/* Mobile Search Button */}
+          <button
+            onClick={() => setShowCommandPalette(true)}
+            className="sm:hidden p-2 rounded-xl bg-steel/30 hover:bg-steel/60 border border-steel/60 text-gold"
+            aria-label="Search Benefits"
+          >
+            <Search size={15} />
+          </button>
+
           <button
             onClick={() => setShowSettingsModal(true)}
             className="px-3 py-1.5 rounded-xl bg-steel/30 hover:bg-steel/60 border border-steel/60 hover:border-gold text-sand font-mono text-xs font-bold flex items-center gap-1.5 transition-all"
@@ -383,23 +447,42 @@ const VeteranBenefitsCompass = () => {
       </header>
 
       {/* 4. Grouped Navigation */}
-      <LifeEventNav activeTab={activeTab} onSelectTab={(tabId) => setActiveTab(tabId)} />
+      <LifeEventNav
+        activeTab={activeTab}
+        onSelectTab={handleTabSelect}
+        onOpenSearch={() => setShowCommandPalette(true)}
+      />
 
       {/* 5. Breadcrumb Context Bar */}
       {activeTab !== 'summary' && (
         <div className="bg-steel-dark/80 border-b border-steel/40 px-4 py-1.5 z-10">
-          <div className="max-w-7xl mx-auto flex items-center gap-1.5 text-[11px] font-mono text-sand/50">
-            <button onClick={() => setActiveTab('summary')} className="hover:text-gold transition-colors">Dashboard</button>
-            <ChevronRight size={10} className="text-sand/30" />
-            <span className="text-sand/60">{breadcrumbSection}</span>
-            <ChevronRight size={10} className="text-sand/30" />
-            <span className="text-gold font-bold">{breadcrumbPage}</span>
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 text-[11px] font-mono text-sand/50">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <button onClick={() => handleTabSelect('summary')} className="hover:text-gold transition-colors font-bold">
+                Dashboard
+              </button>
+              <ChevronRight size={10} className="text-sand/30" />
+              <span className="text-sand/60">{breadcrumbSection}</span>
+              <ChevronRight size={10} className="text-sand/30" />
+              <span className="text-gold font-bold">{breadcrumbPage}</span>
+            </div>
+
+            <button
+              onClick={() => setShowCommandPalette(true)}
+              className="hidden sm:flex items-center gap-1 text-sand/40 hover:text-gold transition-colors"
+            >
+              <Search size={11} />
+              <span>Quick Jump (⌘K)</span>
+            </button>
           </div>
         </div>
       )}
 
       {/* 6. Mobile Quick-Access FAB */}
-      <QuickAccessFab onSelectTab={(tabId) => setActiveTab(tabId)} />
+      <QuickAccessFab
+        onSelectTab={handleTabSelect}
+        onOpenSearch={() => setShowCommandPalette(true)}
+      />
 
       {/* 7. Main Content Viewport */}
       <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8 z-10">
@@ -416,8 +499,8 @@ const VeteranBenefitsCompass = () => {
                 setCurrentRating(r);
                 saveState({ currentRating: r });
               }}
-              onLaunchTimeline={() => setActiveTab('tracker')}
-              onLaunchCalculator={() => setActiveTab('vamath')}
+              onLaunchTimeline={() => handleTabSelect('tracker')}
+              onLaunchCalculator={() => handleTabSelect('vamath')}
               selectedServicePersona={serviceCategory}
               onSelectServicePersona={(p) => {
                 setServiceCategory(p);
@@ -513,47 +596,195 @@ const VeteranBenefitsCompass = () => {
               </div>
             )}
 
-            {/* Quick Action Matrix */}
-            <div className="bg-steel/20 border border-steel/50 rounded-3xl p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-black uppercase text-sand">Next Recommended Tactical Moves</h3>
-                  <p className="text-xs text-sand/60">Ranked by immediate dollar impact and urgency.</p>
-                </div>
-                <button
-                  onClick={() => setActiveTab('scorecard')}
-                  className="px-3.5 py-1.5 rounded-xl bg-gold/10 hover:bg-gold/20 text-gold border border-gold/30 font-mono text-xs font-bold transition-all flex items-center gap-1"
-                >
-                  <Share2 size={12} /> View Shareable Debrief
-                </button>
-              </div>
+            {/* Persona-Adaptive Tactical Next Moves */}
+            {(() => {
+              const currentPersona = SERVICE_PERSONAS.find(p => p.id === serviceCategory) || SERVICE_PERSONAS[0];
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div
-                  onClick={() => setActiveTab('tracker')}
-                  className="p-4 rounded-2xl bg-steel-dark/60 border border-steel/60 hover:border-gold/60 cursor-pointer transition-all space-y-2 group"
-                >
-                  <div className="flex items-center justify-between text-xs font-mono text-gold font-bold">
-                    <span>🗓️ Mission Timeline Clocks</span>
-                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                  </div>
-                  <div className="font-bold text-sm text-sand">Check Statutory Deadlines & Windows</div>
-                  <p className="text-xs text-sand/60">Never miss the BDD, 180-day dental, or GI Bill expiration clocks.</p>
-                </div>
+              // Generate prioritized recommendations based on service tenure & rating
+              let moves = [];
+              if (currentRating >= 100) {
+                moves.push({
+                  tabId: 'familybenefits',
+                  icon: '🛡️',
+                  badge: '100% P&T Family Shield',
+                  title: 'CHAMPVA Healthcare, Chapter 35 DEA & TPD Discharge',
+                  desc: 'Unlock $1,536/mo DEA college stipends per dependent, zero-premium family healthcare, and 100% federal student loan forgiveness.'
+                });
+              }
 
-                <div
-                  onClick={() => setActiveTab('grader')}
-                  className="p-4 rounded-2xl bg-steel-dark/60 border border-steel/60 hover:border-gold/60 cursor-pointer transition-all space-y-2 group"
-                >
-                  <div className="flex items-center justify-between text-xs font-mono text-gold font-bold">
-                    <span>🎯 Claim Strength Grader</span>
-                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+              if (serviceCategory === 'guard_reserve') {
+                moves.push(
+                  {
+                    tabId: 'guardreserve',
+                    icon: '⚖️',
+                    badge: 'Guard/Res Essential',
+                    title: 'Drill Pay vs VA Disability Offset Calculator',
+                    desc: 'Calculate whether to waive drill pay or VA comp (VA Form 21-8951-2) to prevent devastating DFAS debt audits.'
+                  },
+                  {
+                    tabId: 'tracker',
+                    icon: '🗓️',
+                    badge: 'Title 10/32 Orders',
+                    title: 'Mobilization Timeline & Statutory Clocks',
+                    desc: 'Track 90-day active duty aggregate windows for 0% down VA loans and transition healthcare.'
+                  },
+                  {
+                    tabId: 'statematrix',
+                    icon: '🏛️',
+                    badge: 'Guard State Shields',
+                    title: '50-State Guard Tuition & Property Tax Matrix',
+                    desc: 'Discover state-funded 100% tuition waivers for Guard members and disabled veteran exemptions.'
+                  },
+                  {
+                    tabId: 'vamath',
+                    icon: '📐',
+                    badge: 'Training Injuries',
+                    title: '38 CFR § 4.25 Combinator for Line of Duty Conditions',
+                    desc: 'Stack documented drill weekend and annual training injuries toward a sovereign disability rating.'
+                  }
+                );
+              } else if (serviceCategory === 'retiree_20yr') {
+                moves.push(
+                  {
+                    tabId: 'retireecrdp',
+                    icon: '🎖️',
+                    badge: '20-Year Full Value',
+                    title: 'CRDP vs CRSC Dual-Receipt Combinator',
+                    desc: 'Calculate your combined DoD retirement pension plus 100% tax-free VA compensation without DFAS clawbacks.'
+                  },
+                  {
+                    tabId: 'statematrix',
+                    icon: '🏛️',
+                    badge: 'Pension Tax Relief',
+                    title: '50-State Military Pension Income Tax Exemption',
+                    desc: 'Find the 36+ states that 100% exempt military retirement pay from state income taxes.'
+                  },
+                  {
+                    tabId: 'perks',
+                    icon: '✈️',
+                    badge: 'Retiree Privileges',
+                    title: 'Space-A Category VI Travel & TRICARE For Life',
+                    desc: 'Coordinate worldwide military air transport, commissary access, and Medicare Part B + TRICARE overlap.'
+                  },
+                  {
+                    tabId: 'avenues',
+                    icon: '💼',
+                    badge: 'Federal Fast-Track',
+                    title: 'FERS Military Buyback & Federal GS Preference',
+                    desc: 'Roll your 20 years into federal civil service seniority while retaining your military retirement rights.'
+                  }
+                );
+              } else if (serviceCategory === 'nco_combat') {
+                moves.push(
+                  {
+                    tabId: 'pact',
+                    icon: '🔥',
+                    badge: 'Toxic Presumptions',
+                    title: 'Burn Pit & Toxic Exposure Presumptive Screener',
+                    desc: 'Verify statutory presumptive conditions for SWA, Iraq, Afghanistan, and CENTCOM deployments with zero nexus required.'
+                  },
+                  {
+                    tabId: 'vamath',
+                    icon: '📐',
+                    badge: 'Combat Stacking',
+                    title: 'Secondary Claim Combinator (Sleep Apnea, Radiculopathy)',
+                    desc: 'Calculate the mathematical impact of bilateral knee/hip strain, PTSD-linked sleep apnea, and migraine secondaries.'
+                  },
+                  {
+                    tabId: 'grader',
+                    icon: '🎯',
+                    badge: 'Caluza Rubric',
+                    title: 'Claim Strength Grader & DBQ Prep Sheet',
+                    desc: 'Ensure your C&P exam evidence passes the 3 Caluza elements before submitting to prevent 8-month denials.'
+                  },
+                  {
+                    tabId: 'househack',
+                    icon: '🏡',
+                    badge: 'Sovereign Housing',
+                    title: 'VA Loan House Hacker (0% Down 2–4 Units)',
+                    desc: 'Use your tax-free disability cash flow to purchase a multi-unit property and live 100% mortgage-free.'
+                  }
+                );
+              } else {
+                // Default: enlisted_4yr (1 Enlistment)
+                moves.push(
+                  {
+                    tabId: 'transition',
+                    icon: '🚪',
+                    badge: '180-Day BDD Window',
+                    title: 'Separation & ETS Command Center',
+                    desc: 'File Benefits Delivery at Discharge (BDD) between 180 and 90 days prior to ETS for instant rating on Day 1.'
+                  },
+                  {
+                    tabId: 'education',
+                    icon: '🎓',
+                    badge: 'Maximum Education',
+                    title: 'GI Bill & VR&E Chapter 31 Stacking Engine',
+                    desc: 'Stack up to 48 months of total education benefits: use VR&E first to preserve your Post-9/11 GI Bill.'
+                  },
+                  {
+                    tabId: 'grader',
+                    icon: '🎯',
+                    badge: 'Evidence Rubric',
+                    title: 'Claim Strength Grader (Caluza Elements)',
+                    desc: 'Get every sick call visit and medical diagnosis into your Service Treatment Records before your final outprocessing.'
+                  },
+                  {
+                    tabId: 'tracker',
+                    icon: '🗓️',
+                    badge: 'Countdown Clocks',
+                    title: 'Mission Timeline & Statutory Windows',
+                    desc: 'Track your 180-day dental window, VA life insurance deadlines, and civilian healthcare bridge.'
+                  }
+                );
+              }
+
+              const displayMoves = moves.slice(0, 4);
+
+              return (
+                <div className="bg-steel/20 border border-steel/50 rounded-3xl p-6 space-y-4">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-black uppercase text-sand">Recommended Tactical Moves</h3>
+                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-gold/15 text-gold border border-gold/30">
+                          {currentPersona.badge}
+                        </span>
+                      </div>
+                      <p className="text-xs text-sand/60 mt-0.5">
+                        Tailored for {currentPersona.title} ({currentRating}% disability status).
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleTabSelect('scorecard')}
+                      className="px-3.5 py-1.5 rounded-xl bg-gold/10 hover:bg-gold/20 text-gold border border-gold/30 font-mono text-xs font-bold transition-all flex items-center gap-1"
+                    >
+                      <Share2 size={12} /> View Shareable Debrief
+                    </button>
                   </div>
-                  <div className="font-bold text-sm text-sand">Grade Your Evidence (A+ to D) Before Filing</div>
-                  <p className="text-xs text-sand/60">Avoid 8-month denials by checking the Caluza element rubric first.</p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {displayMoves.map((move, idx) => (
+                      <div
+                        key={`${move.tabId}-${idx}`}
+                        onClick={() => handleTabSelect(move.tabId)}
+                        className="p-4 rounded-2xl bg-steel-dark/60 border border-steel/60 hover:border-gold/60 cursor-pointer transition-all space-y-2 group"
+                      >
+                        <div className="flex items-center justify-between text-xs font-mono text-gold font-bold">
+                          <span className="flex items-center gap-1.5">
+                            <span>{move.icon}</span>
+                            <span>{move.badge}</span>
+                          </span>
+                          <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                        </div>
+                        <div className="font-bold text-sm text-sand leading-snug">{move.title}</div>
+                        <p className="text-xs text-sand/60 font-sans leading-relaxed">{move.desc}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </div>
+              );
+            })()}
           </div>
         )}
 
@@ -1509,7 +1740,14 @@ const VeteranBenefitsCompass = () => {
 
       </main>
 
-      {/* 8. VSO Claim Dossier Modal */}
+      {/* 8. Command Palette Search Modal */}
+      <CommandPaletteModal
+        isOpen={showCommandPalette}
+        onClose={() => setShowCommandPalette(false)}
+        onSelectTab={handleTabSelect}
+      />
+
+      {/* 9. VSO Claim Dossier Modal */}
       {showDossierModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-steel-dark border border-gold/40 rounded-3xl max-w-3xl w-full p-6 sm:p-8 space-y-5 shadow-2xl">
